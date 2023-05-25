@@ -5,6 +5,8 @@ import {fromZodError} from 'zod-validation-error';
 const unsetMarker = Symbol('unsetMarker');
 type UnsetMarker = typeof unsetMarker;
 
+type OptionalizeUndefined<T> = undefined extends T ? [param?: T] : [param: T];
+
 type InferParserType<TParser, TType extends 'in' | 'out'> = TParser extends UnsetMarker
   ? undefined
   : TParser extends z.ZodType
@@ -19,7 +21,7 @@ type ActionBuilder<TParams extends ActionParams> = {
   input: <TParser extends z.ZodType>(input: TParser) => ActionBuilder<{_input: TParser}>;
   action: <TOutput>(
     action: (params: {input: InferParserType<TParams['_input'], 'out'>}) => Promise<TOutput>,
-  ) => (input: InferParserType<TParams['_input'], 'in'>) => Promise<TOutput>;
+  ) => (...[input]: OptionalizeUndefined<InferParserType<TParams['_input'], 'in'>>) => Promise<TOutput>;
 };
 type AnyActionBuilder = ActionBuilder<any>;
 
