@@ -1,0 +1,11 @@
+{
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "extends": [
+    "whiteroom"
+  ],
+  "ignorePatterns": [
+    "dist/**"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "server-act",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^1.9.7"
+  },
+  "packageManager": "pnpm@8.0.0"
+}
