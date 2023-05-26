@@ -1,6 +1,6 @@
 {
   "name": "server-act",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "homepage": "https://github.com/chungweileong94/server-act#readme",
   "repository": {
     "type": "git",
@@ -25,8 +25,18 @@
     "test": "vitest run",
     "lint": "eslint src --ext .ts"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "next",
+    "nextjs",
+    "react",
+    "react server component",
+    "react server action",
+    "rsc",
+    "server component",
+    "server action",
+    "action"
+  ],
+  "author": "chungweileong94",
   "license": "MIT",
   "devDependencies": {
     "eslint": "^8.39.0",
