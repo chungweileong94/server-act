@@ -45,6 +45,9 @@ jobs:
       - name: Build
         run: pnpm turbo --filter "./packages/*" build
 
+      - name: Copy README.md
+        run: cp README.md ./packages/server-act/README.md
+
       - name: Create Release
         id: changeset
         uses: changesets/action@v1.4.1
