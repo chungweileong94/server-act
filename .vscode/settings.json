@@ -1,5 +1,10 @@
 {
   "eslint.workingDirectories": [
-    "packages/server-act"
+    {
+      "pattern": "examples/**"
+    },
+    {
+      "pattern": "packages/**"
+    }
   ]
 }
