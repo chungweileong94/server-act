@@ -1,6 +1,21 @@
 # Server-Act
 
-A React server action builder
+![npm](https://img.shields.io/npm/v/server-act)
+
+A simple React server action builder that provides input validation with zod.
+
+## Installation
+
+```bash
+# npm
+npm install server-act zod
+
+# yarn
+yarn add server-act zod
+
+# pnpm
+pnpm add server-act zod
+```
 
 ## Usage
 
