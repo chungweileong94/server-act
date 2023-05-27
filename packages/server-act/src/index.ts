@@ -13,20 +13,39 @@ type InferParserType<TParser, TType extends 'in' | 'out'> = TParser extends Unse
   ? TParser[TType extends 'in' ? '_input' : '_output']
   : never;
 
-type ActionParams<TInput = unknown> = {
+type InferContextType<T> = T extends UnsetMarker ? undefined : T;
+
+type ActionParams<TInput = unknown, TContext = unknown> = {
   _input: TInput;
+  _context: TContext;
 };
 
 type ActionBuilder<TParams extends ActionParams> = {
-  input: <TParser extends z.ZodType>(input: TParser) => ActionBuilder<{_input: TParser}>;
+  /**
+   * Middleware allows you to run code before the action, and return context to the action.
+   */
+  middleware: <TContext>(
+    middleware: () => Promise<TContext> | TContext,
+  ) => ActionBuilder<{_input: TParams['_input']; _context: TContext}>;
+  /**
+   * Input validation for the action.
+   */
+  input: <TParser extends z.ZodType>(input: TParser) => ActionBuilder<{_input: TParser; _context: TParams['_context']}>;
+  /**
+   * Create an action.
+   */
   action: <TOutput>(
-    action: (params: {input: InferParserType<TParams['_input'], 'out'>}) => Promise<TOutput>,
+    action: (params: {
+      ctx: InferContextType<TParams['_context']>;
+      input: InferParserType<TParams['_input'], 'out'>;
+    }) => Promise<TOutput>,
   ) => (...[input]: OptionalizeUndefined<InferParserType<TParams['_input'], 'in'>>) => Promise<TOutput>;
 };
 type AnyActionBuilder = ActionBuilder<any>;
 
 type ActionBuilderDef<TParams extends ActionParams<any>> = {
   input: TParams['_input'];
+  middleware: (() => Promise<TParams['_context']> | TParams['_context']) | undefined;
 };
 type AnyActionBuilderDef = ActionBuilderDef<any>;
 
@@ -38,22 +57,26 @@ const createServerActionBuilder = (
   initDef: Partial<AnyActionBuilderDef> = {},
 ): ActionBuilder<{
   _input: UnsetMarker;
+  _context: UnsetMarker;
 }> => {
-  const _def: ActionBuilderDef<{_input: z.ZodType | undefined}> = {
+  const _def: ActionBuilderDef<{_input: z.ZodType | undefined; _context: undefined}> = {
     input: undefined,
+    middleware: undefined,
     ...initDef,
   };
   return {
+    middleware: (middleware) => createServerActionBuilder({..._def, middleware}) as AnyActionBuilder,
     input: (input) => createNewServerActionBuilder({..._def, input}) as AnyActionBuilder,
     action: (action) => {
       return async (input) => {
+        const ctx = await _def.middleware?.();
         if (_def.input) {
           const result = _def.input.safeParse(input);
           if (!result.success) {
             throw fromZodError(result.error);
           }
         }
-        return await action({input});
+        return await action({ctx, input});
       };
     },
   };
