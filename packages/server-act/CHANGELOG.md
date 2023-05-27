@@ -1,5 +1,11 @@
 # server-act
 
+## 0.0.5
+
+### Patch Changes
+
+- 7e5d9c9: Support middleware
+
 ## 0.0.1
 
 ### Patch Changes
