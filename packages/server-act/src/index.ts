@@ -22,7 +22,7 @@ type ActionParams<TInput = unknown, TContext = unknown> = {
 
 type ActionBuilder<TParams extends ActionParams> = {
   /**
-   * Middleware allows you to run code before the action, and return context to the action.
+   * Middleware allows you to run code before the action, its return value will pass as context to the action.
    */
   middleware: <TContext>(
     middleware: () => Promise<TContext> | TContext,
