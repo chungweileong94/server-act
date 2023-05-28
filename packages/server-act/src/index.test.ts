@@ -47,7 +47,7 @@ describe('middleware should be called once', () => {
     expect(middlewareSpy).toBeCalledTimes(1);
   });
 
-  test('without input', async () => {
+  test('with input', async () => {
     const actionWithInput = serverAct
       .middleware(middlewareSpy)
       .input(z.string())
