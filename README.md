@@ -31,8 +31,8 @@ const sayHelloAction = serverAct
       name: z.string(),
     })
   )
-  .action(async ({ name }) => {
-    return `Hello, ${name}`;
+  .action(async ({ input }) => {
+    return `Hello, ${input.name}`;
   });
 ```
 
@@ -54,4 +54,28 @@ export const ClientComponent = () => {
     </div>
   );
 };
+```
+
+### With Middleware
+
+```ts
+// action.ts
+"use server";
+
+import { serverAct } from "server-act";
+
+const sayHelloAction = serverAct
+  .middleware(() => {
+    const userId = "...";
+    return { userId };
+  })
+  .input(
+    z.object({
+      name: z.string(),
+    })
+  )
+  .action(async ({ ctx, input }) => {
+    console.log("User ID", ctx.userId);
+    return `Hello, ${input.name}`;
+  });
 ```
