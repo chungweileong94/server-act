@@ -25,7 +25,7 @@ pnpm add server-act zod
 
 import { serverAct } from "server-act";
 
-const sayHelloAction = serverAct
+export const sayHelloAction = serverAct
   .input(
     z.object({
       name: z.string(),
@@ -64,7 +64,7 @@ export const ClientComponent = () => {
 
 import { serverAct } from "server-act";
 
-const sayHelloAction = serverAct
+export const sayHelloAction = serverAct
   .middleware(() => {
     const userId = "...";
     return { userId };
