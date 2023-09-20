@@ -6,7 +6,8 @@
     "lib": [
       "ES2020"
     ],
-    "moduleResolution": "nodenext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "./dist",
     "strict": true,
     "allowUnusedLabels": false,
