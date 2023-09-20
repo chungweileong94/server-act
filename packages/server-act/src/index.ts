@@ -40,6 +40,21 @@ type ActionBuilder<TParams extends ActionParams> = {
       input: InferParserType<TParams['_input'], 'out'>;
     }) => Promise<TOutput>,
   ) => (...[input]: OptionalizeUndefined<InferParserType<TParams['_input'], 'in'>>) => Promise<TOutput>;
+  /**
+   * ***Experimental*** - Create an action for React `useFormState`
+   */
+  experimental_formAction: <
+    TOutput,
+    TFormErrors extends z.ZodError<InferParserType<TParams['_input'], 'in'>>['formErrors'],
+  >(
+    action: (params: {
+      ctx: InferContextType<TParams['_context']>;
+      input: InferParserType<TParams['_input'], 'out'>;
+    }) => Promise<TOutput>,
+  ) => (
+    prevState: TOutput,
+    formData: FormData,
+  ) => Promise<{output: TOutput; formErrors?: never} | {output?: never; formErrors: TFormErrors}>;
 };
 type AnyActionBuilder = ActionBuilder<any>;
 
@@ -77,6 +92,21 @@ const createServerActionBuilder = (
           }
         }
         return await action({ctx, input});
+      };
+    },
+    experimental_formAction: (action) => {
+      return async (_, formData) => {
+        const ctx = await _def.middleware?.();
+        if (_def.input) {
+          const result = _def.input.safeParse(Object.fromEntries(formData.entries()));
+          if (!result.success) {
+            return {formErrors: result.error.formErrors.fieldErrors as any};
+          }
+          const output = await action({ctx, input: result.data});
+          return {output};
+        }
+        const output = await action({ctx, input: undefined});
+        return {output};
       };
     },
   };
