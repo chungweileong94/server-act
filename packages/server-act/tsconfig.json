@@ -4,7 +4,9 @@
   "_version": "2.0.0",
   "compilerOptions": {
     "lib": [
-      "ES2020"
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
     ],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
