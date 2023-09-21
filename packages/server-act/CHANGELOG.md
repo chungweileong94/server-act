@@ -1,5 +1,11 @@
 # server-act
 
+## 0.0.7
+
+### Patch Changes
+
+- 50e2853: New experimental form action
+
 ## 0.0.6
 
 ### Patch Changes
