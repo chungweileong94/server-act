@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {type z} from 'zod';
 import {fromZodError} from 'zod-validation-error';
@@ -15,12 +16,12 @@ type InferParserType<TParser, TType extends 'in' | 'out'> = TParser extends Unse
 
 type InferContextType<T> = T extends UnsetMarker ? undefined : T;
 
-type ActionParams<TInput = unknown, TContext = unknown> = {
+interface ActionParams<TInput = unknown, TContext = unknown> {
   _input: TInput;
   _context: TContext;
-};
+}
 
-type ActionBuilder<TParams extends ActionParams> = {
+interface ActionBuilder<TParams extends ActionParams> {
   /**
    * Middleware allows you to run code before the action, its return value will pass as context to the action.
    */
@@ -55,13 +56,13 @@ type ActionBuilder<TParams extends ActionParams> = {
     prevState: TOutput,
     formData: FormData,
   ) => Promise<{output: TOutput; formErrors?: never} | {output?: never; formErrors: TFormErrors}>;
-};
+}
 type AnyActionBuilder = ActionBuilder<any>;
 
-type ActionBuilderDef<TParams extends ActionParams<any>> = {
+interface ActionBuilderDef<TParams extends ActionParams<any>> {
   input: TParams['_input'];
   middleware: (() => Promise<TParams['_context']> | TParams['_context']) | undefined;
-};
+}
 type AnyActionBuilderDef = ActionBuilderDef<any>;
 
 const createNewServerActionBuilder = (def: Partial<AnyActionBuilderDef>) => {
