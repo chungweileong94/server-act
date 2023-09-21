@@ -1,6 +1,6 @@
 'use client';
 
-import {experimental_useFormStatus, experimental_useFormState as useFormState} from 'react-dom';
+import {experimental_useFormStatus as useFormStatus, experimental_useFormState as useFormState} from 'react-dom';
 
 import {sayHelloAction} from './actions';
 
@@ -14,7 +14,7 @@ declare module 'react-dom' {
 }
 
 function SubmitButton() {
-  const status = experimental_useFormStatus();
+  const status = useFormStatus();
   return (
     <button type="submit" className=" rounded-md border-2 border-black bg-red-100 px-4 py-2" disabled={status.pending}>
       {status.pending ? 'Loading...' : 'Say hello to the server'}
