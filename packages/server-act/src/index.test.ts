@@ -68,12 +68,10 @@ describe.concurrent('experimental_formAction', () => {
 
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
-    expectTypeOf(action).returns.resolves.toMatchTypeOf<
-      {output?: never; formErrors: NonNullable<unknown>} | {output: string; formErrors?: never}
-    >();
+    expectTypeOf(action).returns.resolves.toBeString();
 
     const formData = new FormData();
-    await expect(action('foo', formData)).resolves.toMatchObject({output: 'bar'});
+    await expect(action('foo', formData)).resolves.toMatchObject('bar');
   });
 
   test('should able to create form action with input', async () => {
@@ -83,25 +81,28 @@ describe.concurrent('experimental_formAction', () => {
 
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
-    expectTypeOf(action).returns.resolves.toMatchTypeOf<
-      {output?: never; formErrors: NonNullable<unknown>} | {output: string; formErrors?: never}
-    >();
+    expectTypeOf(action).returns.resolves.toBeString();
 
     const formData = new FormData();
     formData.append('foo', 'bar');
-    await expect(action('foo', formData)).resolves.toMatchObject({output: 'bar'});
+    await expect(action('foo', formData)).resolves.toMatchObject('bar');
   });
 
   test('should return form errors if the input is invalid', async () => {
     const action = serverAct
       .input(z.object({foo: z.string({required_error: 'Required'})}))
-      .experimental_formAction(async () => Promise.resolve('bar'));
+      .experimental_formAction(async ({formErrors}) => {
+        if (formErrors) {
+          return formErrors;
+        }
+        return Promise.resolve('bar');
+      });
 
-    expectTypeOf(action).parameter(0).toBeString();
+    expectTypeOf(action).parameter(0).toMatchTypeOf<string | {foo?: string[]}>();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
 
     const formData = new FormData();
     formData.append('bar', 'foo');
-    await expect(action('foo', formData)).resolves.toMatchObject({formErrors: {foo: ['Required']}});
+    await expect(action('foo', formData)).resolves.toMatchObject({foo: ['Required']});
   });
 });

@@ -44,18 +44,20 @@ interface ActionBuilder<TParams extends ActionParams> {
   /**
    * ***Experimental*** - Create an action for React `useFormState`
    */
-  experimental_formAction: <
-    TOutput,
-    TFormErrors extends z.ZodError<InferParserType<TParams['_input'], 'in'>>['formErrors']['fieldErrors'],
-  >(
-    action: (params: {
-      ctx: InferContextType<TParams['_context']>;
-      input: InferParserType<TParams['_input'], 'out'>;
-    }) => Promise<TOutput>,
-  ) => (
-    prevState: {output: TOutput; formErrors?: never} | {output?: never; formErrors: TFormErrors},
-    formData: FormData,
-  ) => Promise<{output: TOutput; formErrors?: never} | {output?: never; formErrors: TFormErrors}>;
+  experimental_formAction: <TState>(
+    action: (
+      params: {
+        ctx: InferContextType<TParams['_context']>;
+        prevState: any; // FIXME: This supposes to be `TState`, but we can't, as it will break the type.
+      } & (
+        | {input: InferParserType<TParams['_input'], 'out'>; formErrors?: undefined}
+        | {
+            input?: undefined;
+            formErrors: z.ZodError<InferParserType<TParams['_input'], 'in'>>['formErrors']['fieldErrors'];
+          }
+      ),
+    ) => Promise<TState>,
+  ) => (prevState: TState, formData: FormData) => Promise<TState>;
 }
 type AnyActionBuilder = ActionBuilder<any>;
 
@@ -96,18 +98,16 @@ const createServerActionBuilder = (
       };
     },
     experimental_formAction: (action) => {
-      return async (_, formData) => {
+      return async (prevState, formData) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
           const result = _def.input.safeParse(Object.fromEntries(formData.entries()));
           if (!result.success) {
-            return {formErrors: result.error.formErrors.fieldErrors as any};
+            return await action({ctx, prevState, formErrors: result.error.formErrors.fieldErrors});
           }
-          const output = await action({ctx, input: result.data});
-          return {output};
+          return await action({ctx, prevState, input: result.data});
         }
-        const output = await action({ctx, input: undefined});
-        return {output};
+        return await action({ctx, prevState, input: undefined});
       };
     },
   };
