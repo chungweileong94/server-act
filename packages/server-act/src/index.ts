@@ -46,14 +46,14 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   experimental_formAction: <
     TOutput,
-    TFormErrors extends z.ZodError<InferParserType<TParams['_input'], 'in'>>['formErrors'],
+    TFormErrors extends z.ZodError<InferParserType<TParams['_input'], 'in'>>['formErrors']['fieldErrors'],
   >(
     action: (params: {
       ctx: InferContextType<TParams['_context']>;
       input: InferParserType<TParams['_input'], 'out'>;
     }) => Promise<TOutput>,
   ) => (
-    prevState: TOutput,
+    prevState: {output: TOutput; formErrors?: never} | {output?: never; formErrors: TFormErrors},
     formData: FormData,
   ) => Promise<{output: TOutput; formErrors?: never} | {output?: never; formErrors: TFormErrors}>;
 }
