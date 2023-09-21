@@ -3,7 +3,7 @@
     "project": "./tsconfig.json"
   },
   "extends": [
-    "whiteroom",
-    "next/core-web-vitals"
+    "next/core-web-vitals",
+    "whiteroom"
   ]
 }

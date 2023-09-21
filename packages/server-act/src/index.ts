@@ -15,12 +15,12 @@ type InferParserType<TParser, TType extends 'in' | 'out'> = TParser extends Unse
 
 type InferContextType<T> = T extends UnsetMarker ? undefined : T;
 
-type ActionParams<TInput = unknown, TContext = unknown> = {
+interface ActionParams<TInput = unknown, TContext = unknown> {
   _input: TInput;
   _context: TContext;
-};
+}
 
-type ActionBuilder<TParams extends ActionParams> = {
+interface ActionBuilder<TParams extends ActionParams> {
   /**
    * Middleware allows you to run code before the action, its return value will pass as context to the action.
    */
@@ -40,13 +40,13 @@ type ActionBuilder<TParams extends ActionParams> = {
       input: InferParserType<TParams['_input'], 'out'>;
     }) => Promise<TOutput>,
   ) => (...[input]: OptionalizeUndefined<InferParserType<TParams['_input'], 'in'>>) => Promise<TOutput>;
-};
+}
 type AnyActionBuilder = ActionBuilder<any>;
 
-type ActionBuilderDef<TParams extends ActionParams<any>> = {
+interface ActionBuilderDef<TParams extends ActionParams<any>> {
   input: TParams['_input'];
   middleware: (() => Promise<TParams['_context']> | TParams['_context']) | undefined;
-};
+}
 type AnyActionBuilderDef = ActionBuilderDef<any>;
 
 const createNewServerActionBuilder = (def: Partial<AnyActionBuilderDef>) => {
