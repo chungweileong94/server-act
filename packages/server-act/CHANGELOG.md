@@ -1,5 +1,12 @@
 # server-act
 
+## 0.0.8
+
+### Patch Changes
+
+- 566261e: Change form action error to ZodError
+- ead7149: Prettify form action params type
+
 ## 0.0.7
 
 ### Patch Changes
