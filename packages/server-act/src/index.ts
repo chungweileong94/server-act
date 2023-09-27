@@ -53,7 +53,7 @@ interface ActionBuilder<TParams extends ActionParams> {
         | {input: InferParserType<TParams['_input'], 'out'>; formErrors?: undefined}
         | {
             input?: undefined;
-            formErrors: z.ZodError<InferParserType<TParams['_input'], 'in'>>['formErrors']['fieldErrors'];
+            formErrors: z.ZodError<InferParserType<TParams['_input'], 'in'>>;
           }
       ),
     ) => Promise<TState>,
@@ -103,7 +103,7 @@ const createServerActionBuilder = (
         if (_def.input) {
           const result = _def.input.safeParse(Object.fromEntries(formData.entries()));
           if (!result.success) {
-            return await action({ctx, prevState, formErrors: result.error.formErrors.fieldErrors});
+            return await action({ctx, prevState, formErrors: result.error});
           }
           return await action({ctx, prevState, input: result.data});
         }

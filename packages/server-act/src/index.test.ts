@@ -98,11 +98,14 @@ describe.concurrent('experimental_formAction', () => {
         return Promise.resolve('bar');
       });
 
-    expectTypeOf(action).parameter(0).toMatchTypeOf<string | {foo?: string[]}>();
+    expectTypeOf(action).parameter(0).toMatchTypeOf<string | z.ZodError<{foo: string}>>();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
 
     const formData = new FormData();
     formData.append('bar', 'foo');
-    await expect(action('foo', formData)).resolves.toMatchObject({foo: ['Required']});
+
+    const result = await action('foo', formData);
+    expect(result).toBeInstanceOf(z.ZodError);
+    expect(result).toHaveProperty('formErrors.fieldErrors', {foo: ['Required']});
   });
 });
