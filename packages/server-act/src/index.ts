@@ -3,6 +3,11 @@
 import {type z} from 'zod';
 import {fromZodError} from 'zod-validation-error';
 
+type Prettify<T> = {
+  [P in keyof T]: T[P];
+  // eslint-disable-next-line @typescript-eslint/ban-types
+} & {};
+
 const unsetMarker = Symbol('unsetMarker');
 type UnsetMarker = typeof unsetMarker;
 
@@ -46,16 +51,15 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   experimental_formAction: <TState>(
     action: (
-      params: {
-        ctx: InferContextType<TParams['_context']>;
-        prevState: any; // FIXME: This supposes to be `TState`, but we can't, as it will break the type.
-      } & (
-        | {input: InferParserType<TParams['_input'], 'out'>; formErrors?: undefined}
-        | {
-            input?: undefined;
-            formErrors: z.ZodError<InferParserType<TParams['_input'], 'in'>>;
-          }
-      ),
+      params: Prettify<
+        {
+          ctx: InferContextType<TParams['_context']>;
+          prevState: any; // FIXME: This supposes to be `TState`, but we can't, as it will break the type.
+        } & (
+          | {input: InferParserType<TParams['_input'], 'out'>; formErrors?: undefined}
+          | {input?: undefined; formErrors: z.ZodError<InferParserType<TParams['_input'], 'in'>>}
+        )
+      >,
     ) => Promise<TState>,
   ) => (prevState: TState, formData: FormData) => Promise<TState>;
 }
