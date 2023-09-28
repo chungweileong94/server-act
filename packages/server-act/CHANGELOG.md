@@ -1,5 +1,11 @@
 # server-act
 
+## 0.0.9
+
+### Patch Changes
+
+- d8682f2: Documentation for experimental form action
+
 ## 0.0.8
 
 ### Patch Changes
