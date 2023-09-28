@@ -79,3 +79,58 @@ export const sayHelloAction = serverAct
     return `Hello, ${input.name}`;
   });
 ```
+
+### _(Experimental)_ `useFormState` Support
+
+> `useFormState` Documentation: https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations#error-handling
+
+```ts
+// action.ts;
+"use server";
+
+import { serverAct } from "server-act";
+
+export const sayHelloAction = serverAct
+  .middleware(requestTimeMiddleware)
+  .input(
+    z.object({
+      name: z
+        .string({ required_error: `You haven't told me your name` })
+        .nonempty({ message: "You need to tell me your name!" }),
+    })
+  )
+  .experimental_formAction(async ({ input, formErrors, ctx }) => {
+    if (formErrors) {
+      return {
+        success: false as const,
+        formErrors: formErrors.formErrors.fieldErrors,
+      };
+    }
+    return {
+      success: true as const,
+      message: `Hello, ${input.name}!`,
+    };
+  });
+```
+
+```tsx
+// client-component.tsx
+"use client";
+
+import { sayHelloAction } from "./action";
+
+export const ClientComponent = () => {
+  const [state, dispatch] = useFormState(sayHelloAction);
+
+  return (
+    <form action={dispatch}>
+      <input name="name" required />
+      {state?.formErrors?.name?.map((error) => <p key={error}>{error}</p>)}
+
+      <button type="submit">Submit</button>
+
+      {!!state?.success && <p>{state.message}</p>}
+    </form>
+  );
+};
+```
