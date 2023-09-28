@@ -1,6 +1,6 @@
 # Server-Act
 
-![npm](https://img.shields.io/npm/v/server-act)
+[![npm version](https://badge.fury.io/js/server-act.svg)](https://badge.fury.io/js/server-act)
 
 A simple React server action builder that provides input validation with zod.
 
