@@ -1,5 +1,11 @@
 # server-act
 
+## 0.0.10
+
+### Patch Changes
+
+- a2ab457: Fixed form action doc
+
 ## 0.0.9
 
 ### Patch Changes
