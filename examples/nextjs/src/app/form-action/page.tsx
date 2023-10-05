@@ -4,15 +4,6 @@ import {experimental_useFormStatus as useFormStatus, experimental_useFormState a
 
 import {sayHelloAction} from './actions';
 
-// FIXME: Remove this once the official types release
-declare module 'react-dom' {
-  function experimental_useFormState<S, P>(
-    action: (state: S, payload: P) => Promise<S>,
-    initialState?: S,
-    url?: string,
-  ): [S | undefined, (payload: P) => Promise<void>];
-}
-
 function SubmitButton() {
   const status = useFormStatus();
   return (
@@ -23,7 +14,7 @@ function SubmitButton() {
 }
 
 export default function FormAction() {
-  const [state, dispatch] = useFormState(sayHelloAction);
+  const [state, dispatch] = useFormState(sayHelloAction, {formErrors: {}});
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
@@ -31,13 +22,12 @@ export default function FormAction() {
         <label htmlFor="name">Please tell us your name</label>
         <input id="name" name="name" className="rounded-md border-2 border-black px-4 py-2" />
         <SubmitButton />
-        {!!state?.success && <p className="text-gray-500">{state.message}</p>}
-        {!state?.success &&
-          state?.formErrors?.name?.map((error) => (
-            <p key={error} className="text-red-500">
-              {error}
-            </p>
-          ))}
+        {state.message && <p className="text-gray-500">{state.message}</p>}
+        {state.formErrors?.name?.map((error) => (
+          <p key={error} className="text-red-500">
+            {error}
+          </p>
+        ))}
       </form>
     </main>
   );

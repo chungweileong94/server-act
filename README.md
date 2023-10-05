@@ -101,15 +101,9 @@ export const sayHelloAction = serverAct
   )
   .experimental_formAction(async ({ input, formErrors, ctx }) => {
     if (formErrors) {
-      return {
-        success: false as const,
-        formErrors: formErrors.formErrors.fieldErrors,
-      };
+      return { formErrors: formErrors.formErrors.fieldErrors };
     }
-    return {
-      success: true as const,
-      message: `Hello, ${input.name}!`,
-    };
+    return { message: `Hello, ${input.name}!` };
   });
 ```
 
@@ -120,16 +114,16 @@ export const sayHelloAction = serverAct
 import { sayHelloAction } from "./action";
 
 export const ClientComponent = () => {
-  const [state, dispatch] = useFormState(sayHelloAction);
+  const [state, dispatch] = useFormState(sayHelloAction, { formErrors: {} });
 
   return (
     <form action={dispatch}>
       <input name="name" required />
-      {state?.formErrors?.name?.map((error) => <p key={error}>{error}</p>)}
+      {state.formErrors?.name?.map((error) => <p key={error}>{error}</p>)}
 
       <button type="submit">Submit</button>
 
-      {!!state?.success && <p>{state.message}</p>}
+      {!!state.message && <p>{state.message}</p>}
     </form>
   );
 };

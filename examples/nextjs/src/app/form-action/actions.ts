@@ -19,8 +19,12 @@ export const sayHelloAction = serverAct
     }),
   )
   .experimental_formAction(async ({input, formErrors, ctx}) => {
-    if (formErrors) return {success: false as const, formErrors: formErrors.formErrors.fieldErrors};
+    if (formErrors) {
+      return {formErrors: formErrors.formErrors.fieldErrors};
+    }
+
     console.log(`Someone say hi from the client at ${ctx.requestTime.toTimeString()}!`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    return {success: true as const, message: `Hello, ${input.name}!`};
+
+    return {message: `Hello, ${input.name}!`};
   });
