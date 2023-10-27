@@ -62,7 +62,7 @@ describe.concurrent('action', () => {
   });
 });
 
-describe.concurrent('experimental_formAction', () => {
+describe.concurrent('formAction', () => {
   test('should able to create form action without input', async () => {
     const action = serverAct.formAction(async () => Promise.resolve('bar'));
 
