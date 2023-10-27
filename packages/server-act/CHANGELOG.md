@@ -1,5 +1,11 @@
 # server-act
 
+## 1.0.0
+
+### Major Changes
+
+- b4318a8: Get `formAction` out of experimental!
+
 ## 0.0.10
 
 ### Patch Changes
