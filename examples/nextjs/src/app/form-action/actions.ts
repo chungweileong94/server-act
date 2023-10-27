@@ -18,7 +18,7 @@ export const sayHelloAction = serverAct
         .nonempty({message: 'You need to tell me your name!'}),
     }),
   )
-  .experimental_formAction(async ({input, formErrors, ctx}) => {
+  .formAction(async ({input, formErrors, ctx}) => {
     if (formErrors) {
       return {formErrors: formErrors.formErrors.fieldErrors};
     }

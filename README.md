@@ -80,9 +80,12 @@ export const sayHelloAction = serverAct
   });
 ```
 
-### _(Experimental)_ `useFormState` Support
+### `useFormState` Support
 
-> `useFormState` Documentation: https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations#error-handling
+> `useFormState` Documentation:
+>
+> - https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations#error-handling
+> - https://react.dev/reference/react-dom/hooks/useFormState
 
 ```ts
 // action.ts;
@@ -99,7 +102,7 @@ export const sayHelloAction = serverAct
         .nonempty({ message: "You need to tell me your name!" }),
     })
   )
-  .experimental_formAction(async ({ input, formErrors, ctx }) => {
+  .formAction(async ({ input, formErrors, ctx }) => {
     if (formErrors) {
       return { formErrors: formErrors.formErrors.fieldErrors };
     }

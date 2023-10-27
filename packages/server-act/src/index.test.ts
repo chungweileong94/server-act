@@ -64,7 +64,7 @@ describe.concurrent('action', () => {
 
 describe.concurrent('experimental_formAction', () => {
   test('should able to create form action without input', async () => {
-    const action = serverAct.experimental_formAction(async () => Promise.resolve('bar'));
+    const action = serverAct.formAction(async () => Promise.resolve('bar'));
 
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
@@ -75,9 +75,7 @@ describe.concurrent('experimental_formAction', () => {
   });
 
   test('should able to create form action with input', async () => {
-    const action = serverAct
-      .input(z.object({foo: z.string()}))
-      .experimental_formAction(async () => Promise.resolve('bar'));
+    const action = serverAct.input(z.object({foo: z.string()})).formAction(async () => Promise.resolve('bar'));
 
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
@@ -91,7 +89,7 @@ describe.concurrent('experimental_formAction', () => {
   test('should return form errors if the input is invalid', async () => {
     const action = serverAct
       .input(z.object({foo: z.string({required_error: 'Required'})}))
-      .experimental_formAction(async ({formErrors}) => {
+      .formAction(async ({formErrors}) => {
         if (formErrors) {
           return formErrors;
         }

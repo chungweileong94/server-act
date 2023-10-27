@@ -47,9 +47,9 @@ interface ActionBuilder<TParams extends ActionParams> {
     }) => Promise<TOutput>,
   ) => (...[input]: OptionalizeUndefined<InferParserType<TParams['_input'], 'in'>>) => Promise<TOutput>;
   /**
-   * ***Experimental*** - Create an action for React `useFormState`
+   * Create an action for React `useFormState`
    */
-  experimental_formAction: <TState>(
+  formAction: <TState>(
     action: (
       params: Prettify<
         {
@@ -101,7 +101,7 @@ const createServerActionBuilder = (
         return await action({ctx, input});
       };
     },
-    experimental_formAction: (action) => {
+    formAction: (action) => {
       return async (prevState, formData) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
