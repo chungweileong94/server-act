@@ -1,5 +1,11 @@
 # server-act
 
+## 1.1.1
+
+### Patch Changes
+
+- 8d5b6e5: Fixed zod error type in `formAction` when using FormData
+
 ## 1.1.0
 
 ### Minor Changes
