@@ -97,7 +97,7 @@ describe.concurrent('formAction', () => {
         return Promise.resolve('bar');
       });
 
-    expectTypeOf(action).parameter(0).toMatchTypeOf<string | z.ZodError<FormData>>();
+    expectTypeOf(action).parameter(0).toMatchTypeOf<string | z.ZodError<{foo: string}>>();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
 
     const formData = new FormData();

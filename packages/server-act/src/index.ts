@@ -57,7 +57,15 @@ interface ActionBuilder<TParams extends ActionParams> {
           prevState: any; // FIXME: This supposes to be `TState`, but we can't, as it will break the type.
         } & (
           | {input: InferParserType<TParams['_input'], 'out'>; formErrors?: undefined}
-          | {input?: undefined; formErrors: z.ZodError<InferParserType<TParams['_input'], 'in'>>}
+          | {
+              input?: undefined;
+              formErrors: z.ZodError<
+                // Infer the input out-type if the in-type is formData, else the zod error type is incorrect
+                FormData extends InferParserType<TParams['_input'], 'in'>
+                  ? InferParserType<TParams['_input'], 'out'>
+                  : InferParserType<TParams['_input'], 'in'>
+              >;
+            }
         )
       >,
     ) => Promise<TState>,
