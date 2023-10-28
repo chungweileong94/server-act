@@ -1,5 +1,11 @@
 # server-act
 
+## 1.1.0
+
+### Minor Changes
+
+- 48b9164: Remove formData parsing for `formAction`
+
 ## 1.0.0
 
 ### Major Changes
