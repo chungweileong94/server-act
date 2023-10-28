@@ -24,6 +24,7 @@ pnpm add server-act zod
 "use server";
 
 import { serverAct } from "server-act";
+import { z } from "zod";
 
 export const sayHelloAction = serverAct
   .input(
@@ -63,6 +64,7 @@ export const ClientComponent = () => {
 "use server";
 
 import { serverAct } from "server-act";
+import { z } from "zod";
 
 export const sayHelloAction = serverAct
   .middleware(() => {
@@ -87,19 +89,25 @@ export const sayHelloAction = serverAct
 > - https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations#error-handling
 > - https://react.dev/reference/react-dom/hooks/useFormState
 
+We recommend using [zod-form-data](https://www.npmjs.com/package/zod-form-data) for input validation.
+
 ```ts
 // action.ts;
 "use server";
 
 import { serverAct } from "server-act";
+import { z } from "zod";
+import { zfd } from "zod-form-data";
 
 export const sayHelloAction = serverAct
   .middleware(requestTimeMiddleware)
   .input(
-    z.object({
-      name: z
-        .string({ required_error: `You haven't told me your name` })
-        .nonempty({ message: "You need to tell me your name!" }),
+    zfd.formData({
+      name: zfd.text(
+        z
+          .string({ required_error: `You haven't told me your name` })
+          .nonempty({ message: "You need to tell me your name!" })
+      ),
     })
   )
   .formAction(async ({ input, formErrors, ctx }) => {

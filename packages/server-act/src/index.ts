@@ -105,7 +105,7 @@ const createServerActionBuilder = (
       return async (prevState, formData) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
-          const result = _def.input.safeParse(Object.fromEntries(formData.entries()));
+          const result = _def.input.safeParse(formData);
           if (!result.success) {
             return await action({ctx, prevState, formErrors: result.error});
           }

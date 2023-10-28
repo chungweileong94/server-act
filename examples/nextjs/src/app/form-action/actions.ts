@@ -1,6 +1,7 @@
 'use server';
 
 import {serverAct} from 'server-act';
+import {zfd} from 'zod-form-data';
 import {z} from 'zod';
 
 const requestTimeMiddleware = () => {
@@ -12,10 +13,12 @@ const requestTimeMiddleware = () => {
 export const sayHelloAction = serverAct
   .middleware(requestTimeMiddleware)
   .input(
-    z.object({
-      name: z
-        .string({required_error: `You haven't told me your name`})
-        .nonempty({message: 'You need to tell me your name!'}),
+    zfd.formData({
+      name: zfd.text(
+        z
+          .string({required_error: `You haven't told me your name`})
+          .nonempty({message: 'You need to tell me your name!'}),
+      ),
     }),
   )
   .formAction(async ({input, formErrors, ctx}) => {
