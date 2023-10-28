@@ -1,5 +1,6 @@
 import {test, expect, expectTypeOf, vi, beforeEach, describe} from 'vitest';
-import z from 'zod';
+import {z} from 'zod';
+import {zfd} from 'zod-form-data';
 
 import {serverAct} from '.';
 
@@ -75,7 +76,7 @@ describe.concurrent('formAction', () => {
   });
 
   test('should able to create form action with input', async () => {
-    const action = serverAct.input(z.object({foo: z.string()})).formAction(async () => Promise.resolve('bar'));
+    const action = serverAct.input(zfd.formData({foo: zfd.text()})).formAction(async () => Promise.resolve('bar'));
 
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
@@ -88,7 +89,7 @@ describe.concurrent('formAction', () => {
 
   test('should return form errors if the input is invalid', async () => {
     const action = serverAct
-      .input(z.object({foo: z.string({required_error: 'Required'})}))
+      .input(zfd.formData({foo: zfd.text(z.string({required_error: 'Required'}))}))
       .formAction(async ({formErrors}) => {
         if (formErrors) {
           return formErrors;
@@ -96,7 +97,7 @@ describe.concurrent('formAction', () => {
         return Promise.resolve('bar');
       });
 
-    expectTypeOf(action).parameter(0).toMatchTypeOf<string | z.ZodError<{foo: string}>>();
+    expectTypeOf(action).parameter(0).toMatchTypeOf<string | z.ZodError<FormData>>();
     expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
 
     const formData = new FormData();
