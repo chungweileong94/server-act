@@ -1,5 +1,11 @@
 # server-act
 
+## 1.1.2
+
+### Patch Changes
+
+- a832b11: Improve form errors type infer
+
 ## 1.1.1
 
 ### Patch Changes
