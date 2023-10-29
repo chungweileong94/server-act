@@ -60,9 +60,8 @@ interface ActionBuilder<TParams extends ActionParams> {
           | {
               input?: undefined;
               formErrors: z.ZodError<
-                // Infer the input out-type if the in-type is formData, else the zod error type is incorrect
-                FormData extends InferParserType<TParams['_input'], 'in'>
-                  ? InferParserType<TParams['_input'], 'out'>
+                TParams['_input'] extends z.ZodEffects<infer T, unknown, unknown>
+                  ? InferParserType<T, 'in'>
                   : InferParserType<TParams['_input'], 'in'>
               >;
             }
