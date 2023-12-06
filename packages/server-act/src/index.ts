@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {type z} from 'zod';
-import {fromZodError} from 'zod-validation-error';
 
 type Prettify<T> = {
   [P in keyof T]: T[P];
@@ -102,7 +101,8 @@ const createServerActionBuilder = (
         if (_def.input) {
           const result = _def.input.safeParse(input);
           if (!result.success) {
-            throw fromZodError(result.error);
+            console.error('❌ Input validation error:', result.error.errors);
+            throw new Error('Input validation error');
           }
         }
         return await action({ctx, input});
