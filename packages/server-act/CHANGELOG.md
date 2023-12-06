@@ -1,5 +1,11 @@
 # server-act
 
+## 1.1.3
+
+### Patch Changes
+
+- [#14](https://github.com/chungweileong94/server-act/pull/14) [`8bb348e`](https://github.com/chungweileong94/server-act/commit/8bb348ee0ed7a60a2498a37cab86c7271c205752) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Remove `zod-validation-error` dependency
+
 ## 1.1.2
 
 ### Patch Changes
