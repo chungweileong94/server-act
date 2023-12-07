@@ -100,7 +100,6 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 
 export const sayHelloAction = serverAct
-  .middleware(requestTimeMiddleware)
   .input(
     zfd.formData({
       name: zfd.text(
