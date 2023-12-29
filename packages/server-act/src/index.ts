@@ -2,21 +2,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {type z} from 'zod';
 
+const unsetMarker = Symbol('unsetMarker');
+type UnsetMarker = typeof unsetMarker;
+
 type Prettify<T> = {
   [P in keyof T]: T[P];
   // eslint-disable-next-line @typescript-eslint/ban-types
 } & {};
 
-const unsetMarker = Symbol('unsetMarker');
-type UnsetMarker = typeof unsetMarker;
-
 type OptionalizeUndefined<T> = undefined extends T ? [param?: T] : [param: T];
 
-type InferParserType<TParser, TType extends 'in' | 'out'> = TParser extends UnsetMarker
-  ? undefined
-  : TParser extends z.ZodType
-  ? TParser[TType extends 'in' ? '_input' : '_output']
+type InferParserType<T, TType extends 'in' | 'out'> = T extends z.ZodEffects<infer I, any, any>
+  ? I[TType extends 'in' ? '_input' : '_output']
+  : T extends z.ZodType
+  ? T[TType extends 'in' ? '_input' : '_output']
   : never;
+
+type InferInputType<T, TType extends 'in' | 'out'> = T extends UnsetMarker ? undefined : InferParserType<T, TType>;
 
 type InferContextType<T> = T extends UnsetMarker ? undefined : T;
 
@@ -42,9 +44,9 @@ interface ActionBuilder<TParams extends ActionParams> {
   action: <TOutput>(
     action: (params: {
       ctx: InferContextType<TParams['_context']>;
-      input: InferParserType<TParams['_input'], 'out'>;
+      input: InferInputType<TParams['_input'], 'out'>;
     }) => Promise<TOutput>,
-  ) => (...[input]: OptionalizeUndefined<InferParserType<TParams['_input'], 'in'>>) => Promise<TOutput>;
+  ) => (...[input]: OptionalizeUndefined<InferInputType<TParams['_input'], 'in'>>) => Promise<TOutput>;
   /**
    * Create an action for React `useFormState`
    */
@@ -55,14 +57,10 @@ interface ActionBuilder<TParams extends ActionParams> {
           ctx: InferContextType<TParams['_context']>;
           prevState: any; // FIXME: This supposes to be `TState`, but we can't, as it will break the type.
         } & (
-          | {input: InferParserType<TParams['_input'], 'out'>; formErrors?: undefined}
+          | {input: InferInputType<TParams['_input'], 'out'>; formErrors?: undefined}
           | {
               input?: undefined;
-              formErrors: z.ZodError<
-                TParams['_input'] extends z.ZodEffects<infer T, unknown, unknown>
-                  ? InferParserType<T, 'in'>
-                  : InferParserType<TParams['_input'], 'in'>
-              >;
+              formErrors: z.ZodError<InferInputType<TParams['_input'], 'in'>>;
             }
         )
       >,
@@ -93,7 +91,7 @@ const createServerActionBuilder = (
     ...initDef,
   };
   return {
-    middleware: (middleware) => createServerActionBuilder({..._def, middleware}) as AnyActionBuilder,
+    middleware: (middleware) => createNewServerActionBuilder({..._def, middleware}) as AnyActionBuilder,
     input: (input) => createNewServerActionBuilder({..._def, input}) as AnyActionBuilder,
     action: (action) => {
       return async (input) => {
