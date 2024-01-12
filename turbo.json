@@ -11,11 +11,7 @@
         "dist/**"
       ]
     },
-    "test": {
-      "dependsOn": [
-        "build"
-      ]
-    },
+    "test": {},
     "lint": {
       "dependsOn": [
         "build"

@@ -4,7 +4,7 @@ import {zfd} from 'zod-form-data';
 
 import {serverAct} from '.';
 
-describe.concurrent('action', () => {
+describe('action', () => {
   test('should able to create action without input', async () => {
     const action = serverAct.action(async () => Promise.resolve('bar'));
 
