@@ -1,5 +1,1 @@
 dist/
-
-# Will we copy the README from root in during release,
-# and we don't want changesets action to commit README.md to here.
-README.md 
