@@ -1,5 +1,11 @@
 # server-act
 
+## 1.1.5
+
+### Patch Changes
+
+- [`0782a06`](https://github.com/chungweileong94/server-act/commit/0782a0626045823344048fbc00652144f6f14eca) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Fixed README
+
 ## 1.1.4
 
 ### Patch Changes
