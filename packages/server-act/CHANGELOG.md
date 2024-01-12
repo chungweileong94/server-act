@@ -1,5 +1,11 @@
 # server-act
 
+## 1.1.4
+
+### Patch Changes
+
+- [`4201412`](https://github.com/chungweileong94/server-act/commit/4201412c2d22afb69f9c640d23bad76102ae8285) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Refactor types
+
 ## 1.1.3
 
 ### Patch Changes
