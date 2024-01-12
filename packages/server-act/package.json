@@ -2,6 +2,8 @@
   "name": "server-act",
   "version": "1.1.4",
   "homepage": "https://github.com/chungweileong94/server-act#readme",
+  "author": "chungweileong94",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chungweileong94/server-act.git"
@@ -47,8 +49,6 @@
     "server action",
     "action"
   ],
-  "author": "chungweileong94",
-  "license": "MIT",
   "devDependencies": {
     "bunchee": "^4.3.3",
     "eslint": "^8.49.0",
