@@ -1,16 +1,12 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Strictest",
-  "_version": "2.0.0",
   "compilerOptions": {
     "lib": [
       "ES2020",
       "DOM",
       "DOM.Iterable"
     ],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "outDir": "./dist",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "strict": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
