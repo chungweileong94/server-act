@@ -1,5 +1,11 @@
 # server-act
 
+## 1.1.6
+
+### Patch Changes
+
+- [#18](https://github.com/chungweileong94/server-act/pull/18) [`b1cbc4a`](https://github.com/chungweileong94/server-act/commit/b1cbc4a3ba62d3613d8ada41794c900676e9636b) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Improve action optional param type
+
 ## 1.1.5
 
 ### Patch Changes
