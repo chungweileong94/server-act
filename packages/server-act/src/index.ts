@@ -5,12 +5,20 @@ import {type z} from 'zod';
 const unsetMarker = Symbol('unsetMarker');
 type UnsetMarker = typeof unsetMarker;
 
+type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false;
+
 type Prettify<T> = {
   [P in keyof T]: T[P];
   // eslint-disable-next-line @typescript-eslint/ban-types
 } & {};
 
-type OptionalizeUndefined<T> = undefined extends T ? [param?: T] : [param: T];
+type SanitizeFunctionParam<T extends (param: any) => any> = T extends (param: infer P) => infer R
+  ? Equals<P, undefined> extends true
+    ? () => R
+    : Equals<P, P | undefined> extends true
+    ? (param?: P) => R
+    : (param: P) => R
+  : never;
 
 type InferParserType<T, TType extends 'in' | 'out'> = T extends z.ZodEffects<infer I, any, any>
   ? I[TType extends 'in' ? '_input' : '_output']
@@ -46,7 +54,7 @@ interface ActionBuilder<TParams extends ActionParams> {
       ctx: InferContextType<TParams['_context']>;
       input: InferInputType<TParams['_input'], 'out'>;
     }) => Promise<TOutput>,
-  ) => (...[input]: OptionalizeUndefined<InferInputType<TParams['_input'], 'in'>>) => Promise<TOutput>;
+  ) => SanitizeFunctionParam<(input: InferInputType<TParams['_input'], 'in'>) => Promise<TOutput>>;
   /**
    * Create an action for React `useFormState`
    */
@@ -94,7 +102,7 @@ const createServerActionBuilder = (
     middleware: (middleware) => createNewServerActionBuilder({..._def, middleware}) as AnyActionBuilder,
     input: (input) => createNewServerActionBuilder({..._def, input}) as AnyActionBuilder,
     action: (action) => {
-      return async (input) => {
+      return async (input?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
           const result = _def.input.safeParse(input);
