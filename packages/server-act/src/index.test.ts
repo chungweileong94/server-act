@@ -8,6 +8,7 @@ describe('action', () => {
   test('should able to create action without input', async () => {
     const action = serverAct.action(async () => Promise.resolve('bar'));
 
+    expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeUndefined();
     expectTypeOf(action).returns.resolves.toBeString();
     await expect(action()).resolves.toBe('bar');
@@ -16,14 +17,26 @@ describe('action', () => {
   test('should able to create action with input', async () => {
     const action = serverAct.input(z.string()).action(async () => Promise.resolve('bar'));
 
+    expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).returns.resolves.toBeString();
     await expect(action('foo')).resolves.toBe('bar');
   });
 
+  test('should able to create action with optional input', async () => {
+    const action = serverAct.input(z.string().optional()).action(async ({input}) => Promise.resolve(input ?? 'bar'));
+
+    expectTypeOf(action).toEqualTypeOf<(input?: string) => Promise<string>>();
+    expectTypeOf(action).parameter(0).toBeNullable();
+    expectTypeOf(action).returns.resolves.toBeString();
+    await expect(action('foo')).resolves.toBe('foo');
+    await expect(action()).resolves.toBe('bar');
+  });
+
   test('should throw error if the input is invalid', async () => {
     const action = serverAct.input(z.string()).action(async () => Promise.resolve('bar'));
 
+    expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).returns.resolves.toBeString();
 
@@ -44,31 +57,37 @@ describe('action', () => {
     test('without input', async () => {
       const action = serverAct.middleware(middlewareSpy).action(async ({ctx}) => Promise.resolve(`${ctx.prefix}-bar`));
 
+      expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
       expectTypeOf(action).returns.resolves.toBeString();
       await expect(action()).resolves.toBe('best-bar');
       expect(middlewareSpy).toBeCalledTimes(1);
     });
 
     test('with input', async () => {
-      const actionWithInput = serverAct
+      const action = serverAct
         .middleware(middlewareSpy)
         .input(z.string())
         .action(async ({ctx, input}) => Promise.resolve(`${ctx.prefix}-${input}-bar`));
 
-      expectTypeOf(actionWithInput).parameter(0).toBeString();
-      expectTypeOf(actionWithInput).returns.resolves.toBeString();
-      await expect(actionWithInput('foo')).resolves.toBe('best-foo-bar');
+      expectTypeOf(action).toEqualTypeOf<(param: string) => Promise<string>>();
+      expectTypeOf(action).parameter(0).toBeString();
+      expectTypeOf(action).returns.resolves.toBeString();
+      await expect(action('foo')).resolves.toBe('best-foo-bar');
       expect(middlewareSpy).toBeCalledTimes(1);
     });
   });
 });
 
-describe.concurrent('formAction', () => {
+describe('formAction', () => {
   test('should able to create form action without input', async () => {
     const action = serverAct.formAction(async () => Promise.resolve('bar'));
 
+    expectTypeOf(action).toEqualTypeOf<(prevState: string, formData: FormData) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeString();
-    expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
+    expectTypeOf(action).parameter(1).toHaveProperty('append');
+    expectTypeOf(action).parameter(1).toHaveProperty('delete');
+    expectTypeOf(action).parameter(1).toHaveProperty('get');
+    expectTypeOf(action).parameter(1).toHaveProperty('entries');
     expectTypeOf(action).returns.resolves.toBeString();
 
     const formData = new FormData();
@@ -78,8 +97,12 @@ describe.concurrent('formAction', () => {
   test('should able to create form action with input', async () => {
     const action = serverAct.input(zfd.formData({foo: zfd.text()})).formAction(async () => Promise.resolve('bar'));
 
+    expectTypeOf(action).toEqualTypeOf<(prevState: string, formData: FormData) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeString();
-    expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
+    expectTypeOf(action).parameter(1).toHaveProperty('append');
+    expectTypeOf(action).parameter(1).toHaveProperty('delete');
+    expectTypeOf(action).parameter(1).toHaveProperty('get');
+    expectTypeOf(action).parameter(1).toHaveProperty('entries');
     expectTypeOf(action).returns.resolves.toBeString();
 
     const formData = new FormData();
@@ -97,8 +120,12 @@ describe.concurrent('formAction', () => {
         return Promise.resolve('bar');
       });
 
-    expectTypeOf(action).parameter(0).toMatchTypeOf<string | z.ZodError<{foo: string}>>();
-    expectTypeOf(action).parameter(1).toEqualTypeOf<FormData>();
+    type State = string | z.ZodError<{foo: string}>;
+    expectTypeOf(action).toEqualTypeOf<(prevState: State, formData: FormData) => Promise<State>>();
+    expectTypeOf(action).parameter(1).toHaveProperty('append');
+    expectTypeOf(action).parameter(1).toHaveProperty('delete');
+    expectTypeOf(action).parameter(1).toHaveProperty('get');
+    expectTypeOf(action).parameter(1).toHaveProperty('entries');
 
     const formData = new FormData();
     formData.append('bar', 'foo');
