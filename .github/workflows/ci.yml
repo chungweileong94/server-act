@@ -43,5 +43,11 @@ jobs:
       - name: Install deps
         run: pnpm install
 
-      - name: Test, lint, and build
-        run: pnpm turbo test lint build
+      - name: Build
+        run: pnpm turbo build
+
+      - name: Lint
+        run: pnpm lint
+      
+      - name: Test
+        run: pnpm turbo test
