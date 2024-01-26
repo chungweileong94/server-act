@@ -1,9 +1,0 @@
-{
-  "parserOptions": {
-    "project": "./tsconfig.json"
-  },
-  "extends": [
-    "next/core-web-vitals",
-    "whiteroom"
-  ]
-}

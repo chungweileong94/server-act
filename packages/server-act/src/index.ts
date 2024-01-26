@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {type z} from 'zod';
+import type {z} from 'zod';
 
 const unsetMarker = Symbol('unsetMarker');
 type UnsetMarker = typeof unsetMarker;
@@ -9,22 +7,23 @@ type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y 
 
 type Prettify<T> = {
   [P in keyof T]: T[P];
-  // eslint-disable-next-line @typescript-eslint/ban-types
 } & {};
 
+// biome-ignore lint/suspicious/noExplicitAny: Intended
 type SanitizeFunctionParam<T extends (param: any) => any> = T extends (param: infer P) => infer R
   ? Equals<P, undefined> extends true
     ? () => R
     : Equals<P, P | undefined> extends true
-    ? (param?: P) => R
-    : (param: P) => R
+      ? (param?: P) => R
+      : (param: P) => R
   : never;
 
+// biome-ignore lint/suspicious/noExplicitAny: Intended
 type InferParserType<T, TType extends 'in' | 'out'> = T extends z.ZodEffects<infer I, any, any>
   ? I[TType extends 'in' ? '_input' : '_output']
   : T extends z.ZodType
-  ? T[TType extends 'in' ? '_input' : '_output']
-  : never;
+    ? T[TType extends 'in' ? '_input' : '_output']
+    : never;
 
 type InferInputType<T, TType extends 'in' | 'out'> = T extends UnsetMarker ? undefined : InferParserType<T, TType>;
 
@@ -63,6 +62,7 @@ interface ActionBuilder<TParams extends ActionParams> {
       params: Prettify<
         {
           ctx: InferContextType<TParams['_context']>;
+          // biome-ignore lint/suspicious/noExplicitAny: Intended
           prevState: any; // FIXME: This supposes to be `TState`, but we can't, as it will break the type.
         } & (
           | {input: InferInputType<TParams['_input'], 'out'>; formErrors?: undefined}
@@ -75,12 +75,15 @@ interface ActionBuilder<TParams extends ActionParams> {
     ) => Promise<TState>,
   ) => (prevState: TState, formData: FormData) => Promise<TState>;
 }
+// biome-ignore lint/suspicious/noExplicitAny: Intended
 type AnyActionBuilder = ActionBuilder<any>;
 
+// biome-ignore lint/suspicious/noExplicitAny: Intended
 interface ActionBuilderDef<TParams extends ActionParams<any>> {
   input: TParams['_input'];
   middleware: (() => Promise<TParams['_context']> | TParams['_context']) | undefined;
 }
+// biome-ignore lint/suspicious/noExplicitAny: Intended
 type AnyActionBuilderDef = ActionBuilderDef<any>;
 
 const createNewServerActionBuilder = (def: Partial<AnyActionBuilderDef>) => {
@@ -102,6 +105,7 @@ const createServerActionBuilder = (
     middleware: (middleware) => createNewServerActionBuilder({..._def, middleware}) as AnyActionBuilder,
     input: (input) => createNewServerActionBuilder({..._def, input}) as AnyActionBuilder,
     action: (action) => {
+      // biome-ignore lint/suspicious/noExplicitAny: Intended
       return async (input?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {

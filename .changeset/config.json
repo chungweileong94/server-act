@@ -12,7 +12,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@examples/nextjs"
-  ]
+  "ignore": ["@examples/nextjs"]
 }

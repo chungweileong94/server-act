@@ -1,6 +1,6 @@
 'use client';
 
-import {useFormStatus, useFormState} from 'react-dom';
+import {useFormState, useFormStatus} from 'react-dom';
 
 import {sayHelloAction} from './actions';
 

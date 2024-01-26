@@ -26,17 +26,11 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "package.json",
-    "LICENSE",
-    "README.md"
-  ],
+  "files": ["dist", "package.json", "LICENSE", "README.md"],
   "scripts": {
     "build": "bunchee",
     "dev": "bunchee -w",
-    "test": "vitest run",
-    "lint": "eslint src --ext .ts"
+    "test": "vitest run"
   },
   "keywords": [
     "next",
@@ -51,9 +45,6 @@
   ],
   "devDependencies": {
     "bunchee": "^4.3.3",
-    "eslint": "^8.49.0",
-    "eslint-config-whiteroom": "^3.3.0",
-    "prettier": "^3.0.3",
     "typescript": "^5.2.2",
     "zod": "^3.22.2",
     "zod-form-data": "^2.0.2"

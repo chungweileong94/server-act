@@ -1,4 +1,4 @@
-import {test, expect, expectTypeOf, vi, beforeEach, describe} from 'vitest';
+import {beforeEach, describe, expect, expectTypeOf, test, vi} from 'vitest';
 import {z} from 'zod';
 import {zfd} from 'zod-form-data';
 
