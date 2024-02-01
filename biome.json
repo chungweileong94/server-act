@@ -7,6 +7,15 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "warn"
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
+      "a11y": {
+        "useButtonType": "off"
+      },
       "nursery": {
         "useImportType": "warn",
         "useExportType": "warn",
