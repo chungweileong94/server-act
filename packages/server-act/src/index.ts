@@ -86,16 +86,14 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
 // biome-ignore lint/suspicious/noExplicitAny: Intended
 type AnyActionBuilderDef = ActionBuilderDef<any>;
 
-const createNewServerActionBuilder = (def: Partial<AnyActionBuilderDef>) => {
+function createNewServerActionBuilder(def: Partial<AnyActionBuilderDef>) {
   return createServerActionBuilder(def);
-};
+}
 
-const createServerActionBuilder = (
-  initDef: Partial<AnyActionBuilderDef> = {},
-): ActionBuilder<{
+function createServerActionBuilder(initDef: Partial<AnyActionBuilderDef> = {}): ActionBuilder<{
   _input: UnsetMarker;
   _context: UnsetMarker;
-}> => {
+}> {
   const _def: ActionBuilderDef<{_input: z.ZodType | undefined; _context: undefined}> = {
     input: undefined,
     middleware: undefined,
@@ -132,7 +130,7 @@ const createServerActionBuilder = (
       };
     },
   };
-};
+}
 
 /**
  * Server action builder
