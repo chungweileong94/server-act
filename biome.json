@@ -23,6 +23,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "include": ["packages/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "error"
+          }
+        }
+      }
+    }
+  ],
   "formatter": {
     "indentStyle": "space",
     "indentWidth": 2,
