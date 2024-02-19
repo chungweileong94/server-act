@@ -30,6 +30,7 @@
   "scripts": {
     "build": "bunchee",
     "dev": "bunchee -w",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "keywords": [

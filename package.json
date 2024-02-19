@@ -4,7 +4,8 @@
     "build": "turbo run build --filter server-act",
     "dev": "turbo run dev",
     "test": "turbo run test",
-    "lint": "biome check ."
+    "lint": "biome check .",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
