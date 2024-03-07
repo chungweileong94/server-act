@@ -11,6 +11,8 @@ describe('action', () => {
     expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeUndefined();
     expectTypeOf(action).returns.resolves.toBeString();
+
+    expect(action.constructor.name).toBe('AsyncFunction');
     await expect(action()).resolves.toBe('bar');
   });
 
@@ -20,6 +22,8 @@ describe('action', () => {
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).returns.resolves.toBeString();
+
+    expect(action.constructor.name).toBe('AsyncFunction');
     await expect(action('foo')).resolves.toBe('bar');
   });
 
@@ -29,6 +33,8 @@ describe('action', () => {
     expectTypeOf(action).toEqualTypeOf<(input?: string) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeNullable();
     expectTypeOf(action).returns.resolves.toBeString();
+
+    expect(action.constructor.name).toBe('AsyncFunction');
     await expect(action('foo')).resolves.toBe('foo');
     await expect(action()).resolves.toBe('bar');
   });
@@ -40,7 +46,7 @@ describe('action', () => {
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).returns.resolves.toBeString();
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    expect(action.constructor.name).toBe('AsyncFunction');
     // @ts-ignore
     await expect(action(1)).rejects.toThrowError();
   });
@@ -59,6 +65,8 @@ describe('action', () => {
 
       expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
       expectTypeOf(action).returns.resolves.toBeString();
+
+      expect(action.constructor.name).toBe('AsyncFunction');
       await expect(action()).resolves.toBe('best-bar');
       expect(middlewareSpy).toBeCalledTimes(1);
     });
@@ -72,6 +80,8 @@ describe('action', () => {
       expectTypeOf(action).toEqualTypeOf<(param: string) => Promise<string>>();
       expectTypeOf(action).parameter(0).toBeString();
       expectTypeOf(action).returns.resolves.toBeString();
+
+      expect(action.constructor.name).toBe('AsyncFunction');
       await expect(action('foo')).resolves.toBe('best-foo-bar');
       expect(middlewareSpy).toBeCalledTimes(1);
     });
@@ -90,6 +100,8 @@ describe('formAction', () => {
     expectTypeOf(action).parameter(1).toHaveProperty('entries');
     expectTypeOf(action).returns.resolves.toBeString();
 
+    expect(action.constructor.name).toBe('AsyncFunction');
+
     const formData = new FormData();
     await expect(action('foo', formData)).resolves.toMatchObject('bar');
   });
@@ -104,6 +116,8 @@ describe('formAction', () => {
     expectTypeOf(action).parameter(1).toHaveProperty('get');
     expectTypeOf(action).parameter(1).toHaveProperty('entries');
     expectTypeOf(action).returns.resolves.toBeString();
+
+    expect(action.constructor.name).toBe('AsyncFunction');
 
     const formData = new FormData();
     formData.append('foo', 'bar');
@@ -126,6 +140,8 @@ describe('formAction', () => {
     expectTypeOf(action).parameter(1).toHaveProperty('delete');
     expectTypeOf(action).parameter(1).toHaveProperty('get');
     expectTypeOf(action).parameter(1).toHaveProperty('entries');
+
+    expect(action.constructor.name).toBe('AsyncFunction');
 
     const formData = new FormData();
     formData.append('bar', 'foo');
