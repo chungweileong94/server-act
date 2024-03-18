@@ -1,5 +1,11 @@
 # server-act
 
+## 1.1.7
+
+### Patch Changes
+
+- [#20](https://github.com/chungweileong94/server-act/pull/20) [`7f92a29`](https://github.com/chungweileong94/server-act/commit/7f92a29a19f308f174b405365fd2633c06c9b686) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Support async validation
+
 ## 1.1.6
 
 ### Patch Changes
