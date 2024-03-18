@@ -120,7 +120,7 @@ function createServerActionBuilder(initDef: Partial<AnyActionBuilderDef> = {}): 
       return async (prevState, formData) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
-          const result = _def.input.safeParse(formData);
+          const result = await _def.input.safeParseAsync(formData);
           if (!result.success) {
             return await action({ctx, prevState, formErrors: result.error});
           }
