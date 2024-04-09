@@ -26,7 +26,12 @@
       }
     }
   },
-  "files": ["dist", "package.json", "LICENSE", "README.md"],
+  "files": [
+    "dist",
+    "package.json",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "bunchee",
     "dev": "bunchee -w",
@@ -45,7 +50,7 @@
     "action"
   ],
   "devDependencies": {
-    "bunchee": "^4.3.3",
+    "bunchee": "^5.1.2",
     "typescript": "^5.2.2",
     "zod": "^3.22.2",
     "zod-form-data": "^2.0.2"
