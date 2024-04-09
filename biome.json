@@ -8,7 +8,8 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "noUnusedVariables": "warn"
+        "noUnusedVariables": "warn",
+        "noUnusedImports": "warn"
       },
       "complexity": {
         "useLiteralKeys": "off"
@@ -16,10 +17,9 @@
       "a11y": {
         "useButtonType": "off"
       },
-      "nursery": {
+      "style": {
         "useImportType": "warn",
-        "useExportType": "warn",
-        "noUnusedImports": "warn"
+        "useExportType": "warn"
       }
     }
   },
