@@ -21,10 +21,21 @@ export default function Action() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <form onSubmit={onSubmit} className="flex w-full flex-col items-stretch justify-stretch gap-2 md:w-80">
+      <form
+        onSubmit={onSubmit}
+        className="flex w-full flex-col items-stretch justify-stretch gap-2 md:w-80"
+      >
         <label htmlFor="name">Please tell us your name</label>
-        <input id="name" name="name" className="rounded-md border-2 border-black px-4 py-2" />
-        <button type="submit" className=" rounded-md border-2 border-black bg-red-100 px-4 py-2" disabled={pending}>
+        <input
+          id="name"
+          name="name"
+          className="rounded-md border-2 border-black px-4 py-2"
+        />
+        <button
+          type="submit"
+          className=" rounded-md border-2 border-black bg-red-100 px-4 py-2"
+          disabled={pending}
+        >
           {pending ? 'Loading...' : 'Say hello to the server'}
         </button>
         {!!message && <p className="text-gray-500">{message}</p>}

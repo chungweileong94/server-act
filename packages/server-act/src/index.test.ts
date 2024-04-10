@@ -17,7 +17,9 @@ describe('action', () => {
   });
 
   test('should able to create action with input', async () => {
-    const action = serverAct.input(z.string()).action(async () => Promise.resolve('bar'));
+    const action = serverAct
+      .input(z.string())
+      .action(async () => Promise.resolve('bar'));
 
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeString();
@@ -28,7 +30,9 @@ describe('action', () => {
   });
 
   test('should able to create action with optional input', async () => {
-    const action = serverAct.input(z.string().optional()).action(async ({input}) => Promise.resolve(input ?? 'bar'));
+    const action = serverAct
+      .input(z.string().optional())
+      .action(async ({input}) => Promise.resolve(input ?? 'bar'));
 
     expectTypeOf(action).toEqualTypeOf<(input?: string) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeNullable();
@@ -40,7 +44,9 @@ describe('action', () => {
   });
 
   test('should throw error if the input is invalid', async () => {
-    const action = serverAct.input(z.string()).action(async () => Promise.resolve('bar'));
+    const action = serverAct
+      .input(z.string())
+      .action(async () => Promise.resolve('bar'));
 
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
     expectTypeOf(action).parameter(0).toBeString();
@@ -61,7 +67,9 @@ describe('action', () => {
     });
 
     test('without input', async () => {
-      const action = serverAct.middleware(middlewareSpy).action(async ({ctx}) => Promise.resolve(`${ctx.prefix}-bar`));
+      const action = serverAct
+        .middleware(middlewareSpy)
+        .action(async ({ctx}) => Promise.resolve(`${ctx.prefix}-bar`));
 
       expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
       expectTypeOf(action).returns.resolves.toBeString();
@@ -75,7 +83,9 @@ describe('action', () => {
       const action = serverAct
         .middleware(middlewareSpy)
         .input(z.string())
-        .action(async ({ctx, input}) => Promise.resolve(`${ctx.prefix}-${input}-bar`));
+        .action(async ({ctx, input}) =>
+          Promise.resolve(`${ctx.prefix}-${input}-bar`),
+        );
 
       expectTypeOf(action).toEqualTypeOf<(param: string) => Promise<string>>();
       expectTypeOf(action).parameter(0).toBeString();
@@ -92,7 +102,9 @@ describe('formAction', () => {
   test('should able to create form action without input', async () => {
     const action = serverAct.formAction(async () => Promise.resolve('bar'));
 
-    expectTypeOf(action).toEqualTypeOf<(prevState: string, formData: FormData) => Promise<string>>();
+    expectTypeOf(action).toEqualTypeOf<
+      (prevState: string, formData: FormData) => Promise<string>
+    >();
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).parameter(1).toHaveProperty('append');
     expectTypeOf(action).parameter(1).toHaveProperty('delete');
@@ -107,9 +119,13 @@ describe('formAction', () => {
   });
 
   test('should able to create form action with input', async () => {
-    const action = serverAct.input(zfd.formData({foo: zfd.text()})).formAction(async () => Promise.resolve('bar'));
+    const action = serverAct
+      .input(zfd.formData({foo: zfd.text()}))
+      .formAction(async () => Promise.resolve('bar'));
 
-    expectTypeOf(action).toEqualTypeOf<(prevState: string, formData: FormData) => Promise<string>>();
+    expectTypeOf(action).toEqualTypeOf<
+      (prevState: string, formData: FormData) => Promise<string>
+    >();
     expectTypeOf(action).parameter(0).toBeString();
     expectTypeOf(action).parameter(1).toHaveProperty('append');
     expectTypeOf(action).parameter(1).toHaveProperty('delete');
@@ -126,7 +142,9 @@ describe('formAction', () => {
 
   test('should return form errors if the input is invalid', async () => {
     const action = serverAct
-      .input(zfd.formData({foo: zfd.text(z.string({required_error: 'Required'}))}))
+      .input(
+        zfd.formData({foo: zfd.text(z.string({required_error: 'Required'}))}),
+      )
       .formAction(async ({formErrors}) => {
         if (formErrors) {
           return formErrors;
@@ -135,7 +153,9 @@ describe('formAction', () => {
       });
 
     type State = string | z.ZodError<{foo: string}>;
-    expectTypeOf(action).toEqualTypeOf<(prevState: State, formData: FormData) => Promise<State>>();
+    expectTypeOf(action).toEqualTypeOf<
+      (prevState: State, formData: FormData) => Promise<State>
+    >();
     expectTypeOf(action).parameter(1).toHaveProperty('append');
     expectTypeOf(action).parameter(1).toHaveProperty('delete');
     expectTypeOf(action).parameter(1).toHaveProperty('get');
@@ -148,6 +168,8 @@ describe('formAction', () => {
 
     const result = await action('foo', formData);
     expect(result).toBeInstanceOf(z.ZodError);
-    expect(result).toHaveProperty('formErrors.fieldErrors', {foo: ['Required']});
+    expect(result).toHaveProperty('formErrors.fieldErrors', {
+      foo: ['Required'],
+    });
   });
 });
