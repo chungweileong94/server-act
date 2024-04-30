@@ -1,4 +1,5 @@
 {
+  "language_servers": ["biome", "!eslint", "..."],
   "code_actions_on_format": {
     "source.organizeImports.biome": true
   },
