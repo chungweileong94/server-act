@@ -1,5 +1,6 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
+  "biome.enabled": true,
   "editor.defaultFormatter": "biomejs.biome",
   "[json]": {
     "editor.defaultFormatter": "biomejs.biome"
