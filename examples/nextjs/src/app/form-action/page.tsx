@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import {useFormState, useFormStatus} from 'react-dom';
+import { useFormState, useFormStatus } from "react-dom";
 
-import {sayHelloAction} from './actions';
+import { sayHelloAction } from "./actions";
 
 function SubmitButton() {
   const status = useFormStatus();
@@ -12,13 +12,13 @@ function SubmitButton() {
       className=" rounded-md border-2 border-black bg-red-100 px-4 py-2"
       disabled={status.pending}
     >
-      {status.pending ? 'Loading...' : 'Say hello to the server'}
+      {status.pending ? "Loading..." : "Say hello to the server"}
     </button>
   );
 }
 
 export default function FormAction() {
-  const [state, dispatch] = useFormState(sayHelloAction, {formErrors: {}});
+  const [state, dispatch] = useFormState(sayHelloAction, { formErrors: {} });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">

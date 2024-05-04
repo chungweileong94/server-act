@@ -21,10 +21,10 @@ pnpm add server-act zod
 
 ```ts
 // action.ts
-'use server';
+"use server";
 
-import {serverAct} from 'server-act';
-import {z} from 'zod';
+import { serverAct } from "server-act";
+import { z } from "zod";
 
 export const sayHelloAction = serverAct
   .input(
@@ -32,20 +32,20 @@ export const sayHelloAction = serverAct
       name: z.string(),
     }),
   )
-  .action(async ({input}) => {
+  .action(async ({ input }) => {
     return `Hello, ${input.name}`;
   });
 ```
 
 ```tsx
 // client-component.tsx
-'use client';
+"use client";
 
-import {sayHelloAction} from './action';
+import { sayHelloAction } from "./action";
 
 export const ClientComponent = () => {
   const onClick = () => {
-    const message = await sayHelloAction({name: 'John'});
+    const message = await sayHelloAction({ name: "John" });
     console.log(message); // Hello, John
   };
 
@@ -61,23 +61,23 @@ export const ClientComponent = () => {
 
 ```ts
 // action.ts
-'use server';
+"use server";
 
-import {serverAct} from 'server-act';
-import {z} from 'zod';
+import { serverAct } from "server-act";
+import { z } from "zod";
 
 export const sayHelloAction = serverAct
   .middleware(() => {
-    const userId = '...';
-    return {userId};
+    const userId = "...";
+    return { userId };
   })
   .input(
     z.object({
       name: z.string(),
     }),
   )
-  .action(async ({ctx, input}) => {
-    console.log('User ID', ctx.userId);
+  .action(async ({ ctx, input }) => {
+    console.log("User ID", ctx.userId);
     return `Hello, ${input.name}`;
   });
 ```
@@ -93,38 +93,38 @@ We recommend using [zod-form-data](https://www.npmjs.com/package/zod-form-data) 
 
 ```ts
 // action.ts;
-'use server';
+"use server";
 
-import {serverAct} from 'server-act';
-import {z} from 'zod';
-import {zfd} from 'zod-form-data';
+import { serverAct } from "server-act";
+import { z } from "zod";
+import { zfd } from "zod-form-data";
 
 export const sayHelloAction = serverAct
   .input(
     zfd.formData({
       name: zfd.text(
         z
-          .string({required_error: `You haven't told me your name`})
-          .nonempty({message: 'You need to tell me your name!'}),
+          .string({ required_error: `You haven't told me your name` })
+          .nonempty({ message: 'You need to tell me your name!' }),
       ),
     }),
   )
-  .formAction(async ({input, formErrors, ctx}) => {
+  .formAction(async ({ input, formErrors, ctx }) => {
     if (formErrors) {
-      return {formErrors: formErrors.formErrors.fieldErrors};
+      return { formErrors: formErrors.formErrors.fieldErrors };
     }
-    return {message: `Hello, ${input.name}!`};
+    return { message: `Hello, ${input.name}!` };
   });
 ```
 
 ```tsx
 // client-component.tsx
-'use client';
+"use client";
 
-import {sayHelloAction} from './action';
+import { sayHelloAction } from "./action";
 
 export const ClientComponent = () => {
-  const [state, dispatch] = useFormState(sayHelloAction, {formErrors: {}});
+  const [state, dispatch] = useFormState(sayHelloAction, { formErrors: {} });
 
   return (
     <form action={dispatch}>

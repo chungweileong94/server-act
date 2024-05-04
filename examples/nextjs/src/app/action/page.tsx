@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import {useState, useTransition} from 'react';
+import { useState, useTransition } from "react";
 
-import {sayHelloAction} from './actions';
+import { sayHelloAction } from "./actions";
 
 export default function Action() {
   const [pending, startTransition] = useTransition();
@@ -13,7 +13,7 @@ export default function Action() {
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
       const msg = await sayHelloAction({
-        name: formData.get('name')?.toString(),
+        name: formData.get("name")?.toString(),
       });
       setMessage(msg);
     });
@@ -36,7 +36,7 @@ export default function Action() {
           className=" rounded-md border-2 border-black bg-red-100 px-4 py-2"
           disabled={pending}
         >
-          {pending ? 'Loading...' : 'Say hello to the server'}
+          {pending ? "Loading..." : "Say hello to the server"}
         </button>
         {!!message && <p className="text-gray-500">{message}</p>}
       </form>

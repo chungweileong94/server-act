@@ -41,18 +41,6 @@
     "lineEnding": "lf",
     "lineWidth": 80
   },
-  "javascript": {
-    "formatter": {
-      "arrowParentheses": "always",
-      "bracketSpacing": false,
-      "bracketSameLine": false,
-      "jsxQuoteStyle": "double",
-      "quoteProperties": "asNeeded",
-      "quoteStyle": "single",
-      "trailingComma": "all",
-      "semicolons": "always"
-    }
-  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",

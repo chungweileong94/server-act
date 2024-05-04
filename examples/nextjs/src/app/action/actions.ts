@@ -1,7 +1,7 @@
-'use server';
+"use server";
 
-import {serverAct} from 'server-act';
-import {z} from 'zod';
+import { serverAct } from "server-act";
+import { z } from "zod";
 
 const requestTimeMiddleware = () => {
   return {
@@ -16,12 +16,12 @@ export const sayHelloAction = serverAct
       name: z.string().optional(),
     }),
   )
-  .action(async ({input, ctx}) => {
+  .action(async ({ input, ctx }) => {
     console.log(
       `Someone say hi from the client at ${ctx.requestTime.toTimeString()}!`,
     );
     await new Promise((resolve) => setTimeout(resolve, 1000));
     return input.name
       ? `Hello, ${input.name}!`
-      : 'You need to tell me your name!';
+      : "You need to tell me your name!";
   });

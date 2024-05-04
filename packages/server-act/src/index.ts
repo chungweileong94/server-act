@@ -1,6 +1,6 @@
-import type {z} from 'zod';
+import type { z } from "zod";
 
-const unsetMarker = Symbol('unsetMarker');
+const unsetMarker = Symbol("unsetMarker");
 type UnsetMarker = typeof unsetMarker;
 
 type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y
@@ -24,19 +24,19 @@ type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
       : (param: P) => R
   : never;
 
-type InferParserType<T, TType extends 'in' | 'out'> = T extends z.ZodEffects<
+type InferParserType<T, TType extends "in" | "out"> = T extends z.ZodEffects<
   infer I,
   // biome-ignore lint/suspicious/noExplicitAny: Intended
   any,
   // biome-ignore lint/suspicious/noExplicitAny: Intended
   any
 >
-  ? I[TType extends 'in' ? '_input' : '_output']
+  ? I[TType extends "in" ? "_input" : "_output"]
   : T extends z.ZodType
-    ? T[TType extends 'in' ? '_input' : '_output']
+    ? T[TType extends "in" ? "_input" : "_output"]
     : never;
 
-type InferInputType<T, TType extends 'in' | 'out'> = T extends UnsetMarker
+type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
   : InferParserType<T, TType>;
 
@@ -53,23 +53,23 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   middleware: <TContext>(
     middleware: () => Promise<TContext> | TContext,
-  ) => ActionBuilder<{_input: TParams['_input']; _context: TContext}>;
+  ) => ActionBuilder<{ _input: TParams["_input"]; _context: TContext }>;
   /**
    * Input validation for the action.
    */
   input: <TParser extends z.ZodType>(
     input: TParser,
-  ) => ActionBuilder<{_input: TParser; _context: TParams['_context']}>;
+  ) => ActionBuilder<{ _input: TParser; _context: TParams["_context"] }>;
   /**
    * Create an action.
    */
   action: <TOutput>(
     action: (params: {
-      ctx: InferContextType<TParams['_context']>;
-      input: InferInputType<TParams['_input'], 'out'>;
+      ctx: InferContextType<TParams["_context"]>;
+      input: InferInputType<TParams["_input"], "out">;
     }) => Promise<TOutput>,
   ) => SanitizeFunctionParam<
-    (input: InferInputType<TParams['_input'], 'in'>) => Promise<TOutput>
+    (input: InferInputType<TParams["_input"], "in">) => Promise<TOutput>
   >;
   /**
    * Create an action for React `useFormState`
@@ -78,17 +78,17 @@ interface ActionBuilder<TParams extends ActionParams> {
     action: (
       params: Prettify<
         {
-          ctx: InferContextType<TParams['_context']>;
+          ctx: InferContextType<TParams["_context"]>;
           // biome-ignore lint/suspicious/noExplicitAny: Intended
           prevState: any; // FIXME: This supposes to be `TState`, but we can't, as it will break the type.
         } & (
           | {
-              input: InferInputType<TParams['_input'], 'out'>;
+              input: InferInputType<TParams["_input"], "out">;
               formErrors?: undefined;
             }
           | {
               input?: undefined;
-              formErrors: z.ZodError<InferInputType<TParams['_input'], 'in'>>;
+              formErrors: z.ZodError<InferInputType<TParams["_input"], "in">>;
             }
         )
       >,
@@ -100,9 +100,9 @@ type AnyActionBuilder = ActionBuilder<any>;
 
 // biome-ignore lint/suspicious/noExplicitAny: Intended
 interface ActionBuilderDef<TParams extends ActionParams<any>> {
-  input: TParams['_input'];
+  input: TParams["_input"];
   middleware:
-    | (() => Promise<TParams['_context']> | TParams['_context'])
+    | (() => Promise<TParams["_context"]> | TParams["_context"])
     | undefined;
 }
 // biome-ignore lint/suspicious/noExplicitAny: Intended
@@ -128,9 +128,9 @@ function createServerActionBuilder(
   };
   return {
     middleware: (middleware) =>
-      createNewServerActionBuilder({..._def, middleware}) as AnyActionBuilder,
+      createNewServerActionBuilder({ ..._def, middleware }) as AnyActionBuilder,
     input: (input) =>
-      createNewServerActionBuilder({..._def, input}) as AnyActionBuilder,
+      createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,
     action: (action) => {
       // biome-ignore lint/suspicious/noExplicitAny: Intended
       return async (input?: any) => {
@@ -138,11 +138,11 @@ function createServerActionBuilder(
         if (_def.input) {
           const result = _def.input.safeParse(input);
           if (!result.success) {
-            console.error('❌ Input validation error:', result.error.errors);
-            throw new Error('Input validation error');
+            console.error("❌ Input validation error:", result.error.errors);
+            throw new Error("Input validation error");
           }
         }
-        return await action({ctx, input});
+        return await action({ ctx, input });
       };
     },
     formAction: (action) => {
@@ -151,11 +151,11 @@ function createServerActionBuilder(
         if (_def.input) {
           const result = await _def.input.safeParseAsync(formData);
           if (!result.success) {
-            return await action({ctx, prevState, formErrors: result.error});
+            return await action({ ctx, prevState, formErrors: result.error });
           }
-          return await action({ctx, prevState, input: result.data});
+          return await action({ ctx, prevState, input: result.data });
         }
-        return await action({ctx, prevState, input: undefined});
+        return await action({ ctx, prevState, input: undefined });
       };
     },
   };

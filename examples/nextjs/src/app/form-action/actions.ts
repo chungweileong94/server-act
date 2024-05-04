@@ -1,8 +1,8 @@
-'use server';
+"use server";
 
-import {serverAct} from 'server-act';
-import {z} from 'zod';
-import {zfd} from 'zod-form-data';
+import { serverAct } from "server-act";
+import { z } from "zod";
+import { zfd } from "zod-form-data";
 
 const requestTimeMiddleware = () => {
   return {
@@ -16,14 +16,14 @@ export const sayHelloAction = serverAct
     zfd.formData({
       name: zfd.text(
         z
-          .string({required_error: `You haven't told me your name`})
-          .nonempty({message: 'You need to tell me your name!'}),
+          .string({ required_error: `You haven't told me your name` })
+          .nonempty({ message: "You need to tell me your name!" }),
       ),
     }),
   )
-  .formAction(async ({input, formErrors, ctx}) => {
+  .formAction(async ({ input, formErrors, ctx }) => {
     if (formErrors) {
-      return {formErrors: formErrors.formErrors.fieldErrors};
+      return { formErrors: formErrors.formErrors.fieldErrors };
     }
 
     console.log(
@@ -31,5 +31,5 @@ export const sayHelloAction = serverAct
     );
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    return {message: `Hello, ${input.name}!`};
+    return { message: `Hello, ${input.name}!` };
   });
