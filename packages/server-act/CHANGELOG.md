@@ -1,5 +1,15 @@
 # server-act
 
+## 1.2.0
+
+### Minor Changes
+
+- [#22](https://github.com/chungweileong94/server-act/pull/22) [`a71e8ba`](https://github.com/chungweileong94/server-act/commit/a71e8ba1131b226ad3acc58b8b8f3dc91f759d77) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Better React 19 support
+
+  - Updated `useFormState` example to `useActionState`.
+  - `prevState` from form action is now `undefined` type by default.
+  - You can now access `formData` in form action.
+
 ## 1.1.7
 
 ### Patch Changes
