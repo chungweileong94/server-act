@@ -103,14 +103,17 @@ describe("formAction", () => {
     const action = serverAct.formAction(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<
-      (prevState: string, formData: FormData) => Promise<string>
+      (
+        prevState: string | undefined,
+        formData: FormData,
+      ) => Promise<string | undefined>
     >();
-    expectTypeOf(action).parameter(0).toBeString();
+    expectTypeOf(action).parameter(0).toEqualTypeOf<string | undefined>();
     expectTypeOf(action).parameter(1).toHaveProperty("append");
     expectTypeOf(action).parameter(1).toHaveProperty("delete");
     expectTypeOf(action).parameter(1).toHaveProperty("get");
     expectTypeOf(action).parameter(1).toHaveProperty("entries");
-    expectTypeOf(action).returns.resolves.toBeString();
+    expectTypeOf(action).returns.resolves.toEqualTypeOf<string | undefined>();
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
@@ -124,14 +127,17 @@ describe("formAction", () => {
       .formAction(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<
-      (prevState: string, formData: FormData) => Promise<string>
+      (
+        prevState: string | undefined,
+        formData: FormData,
+      ) => Promise<string | undefined>
     >();
-    expectTypeOf(action).parameter(0).toBeString();
+    expectTypeOf(action).parameter(0).toEqualTypeOf<string | undefined>();
     expectTypeOf(action).parameter(1).toHaveProperty("append");
     expectTypeOf(action).parameter(1).toHaveProperty("delete");
     expectTypeOf(action).parameter(1).toHaveProperty("get");
     expectTypeOf(action).parameter(1).toHaveProperty("entries");
-    expectTypeOf(action).returns.resolves.toBeString();
+    expectTypeOf(action).returns.resolves.toEqualTypeOf<string | undefined>();
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
@@ -156,7 +162,10 @@ describe("formAction", () => {
 
     type State = string | z.ZodError<{ foo: string }>;
     expectTypeOf(action).toEqualTypeOf<
-      (prevState: State, formData: FormData) => Promise<State>
+      (
+        prevState: State | undefined,
+        formData: FormData,
+      ) => Promise<State | undefined>
     >();
     expectTypeOf(action).parameter(1).toHaveProperty("append");
     expectTypeOf(action).parameter(1).toHaveProperty("delete");

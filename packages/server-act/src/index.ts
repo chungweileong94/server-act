@@ -74,13 +74,14 @@ interface ActionBuilder<TParams extends ActionParams> {
   /**
    * Create an action for React `useFormState`
    */
-  formAction: <TState>(
+  formAction: <TState, TPrevState = undefined>(
     action: (
       params: Prettify<
         {
           ctx: InferContextType<TParams["_context"]>;
-          // biome-ignore lint/suspicious/noExplicitAny: Intended
-          prevState: any; // FIXME: This supposes to be `TState`, but we can't, as it will break the type.
+          // biome-ignore lint/suspicious/noExplicitAny: FIXME: This supposes to be `TState`, but we can't, as it will break the type.
+          prevState: any;
+          formData: FormData;
         } & (
           | {
               input: InferInputType<TParams["_input"], "out">;
@@ -93,7 +94,10 @@ interface ActionBuilder<TParams extends ActionParams> {
         )
       >,
     ) => Promise<TState>,
-  ) => (prevState: TState, formData: FormData) => Promise<TState>;
+  ) => (
+    prevState: TState | TPrevState,
+    formData: FormData,
+  ) => Promise<TState | TPrevState>;
 }
 // biome-ignore lint/suspicious/noExplicitAny: Intended
 type AnyActionBuilder = ActionBuilder<any>;
@@ -151,11 +155,16 @@ function createServerActionBuilder(
         if (_def.input) {
           const result = await _def.input.safeParseAsync(formData);
           if (!result.success) {
-            return await action({ ctx, prevState, formErrors: result.error });
+            return await action({
+              ctx,
+              prevState,
+              formData,
+              formErrors: result.error,
+            });
           }
-          return await action({ ctx, prevState, input: result.data });
+          return await action({ ctx, prevState, formData, input: result.data });
         }
-        return await action({ ctx, prevState, input: undefined });
+        return await action({ ctx, prevState, formData, input: undefined });
       };
     },
   };

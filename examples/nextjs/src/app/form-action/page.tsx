@@ -1,7 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
-
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { sayHelloAction } from "./actions";
 
 function SubmitButton() {
@@ -18,7 +18,7 @@ function SubmitButton() {
 }
 
 export default function FormAction() {
-  const [state, dispatch] = useFormState(sayHelloAction, { formErrors: {} });
+  const [state, dispatch] = useActionState(sayHelloAction, undefined);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
@@ -31,10 +31,11 @@ export default function FormAction() {
           id="name"
           name="name"
           className="rounded-md border-2 border-black px-4 py-2"
+          defaultValue={state?.formData?.get("name")?.toString()}
         />
         <SubmitButton />
-        {state.message && <p className="text-gray-500">{state.message}</p>}
-        {state.formErrors?.name?.map((error) => (
+        {state?.message && <p className="text-gray-500">{state.message}</p>}
+        {state?.formErrors?.name?.map((error) => (
           <p key={error} className="text-red-500">
             {error}
           </p>

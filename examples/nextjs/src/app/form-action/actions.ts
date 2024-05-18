@@ -17,13 +17,13 @@ export const sayHelloAction = serverAct
       name: zfd.text(
         z
           .string({ required_error: `You haven't told me your name` })
-          .nonempty({ message: "You need to tell me your name!" }),
+          .max(20, { message: "Any shorter name? You name is too long 😬" }),
       ),
     }),
   )
-  .formAction(async ({ input, formErrors, ctx }) => {
+  .formAction(async ({ formData, input, formErrors, ctx }) => {
     if (formErrors) {
-      return { formErrors: formErrors.formErrors.fieldErrors };
+      return { formData, formErrors: formErrors.formErrors.fieldErrors };
     }
 
     console.log(
