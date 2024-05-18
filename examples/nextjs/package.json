@@ -9,20 +9,20 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "14.2.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "next": "14.3.0-canary.70",
+    "react": "19.0.0-beta-04b058868c-20240508",
+    "react-dom": "19.0.0-beta-04b058868c-20240508",
     "server-act": "workspace:*",
     "zod": "^3.22.2",
     "zod-form-data": "^2.0.2"
   },
   "devDependencies": {
-    "@types/node": "20.6.3",
-    "@types/react": "18.2.33",
-    "@types/react-dom": "18.2.14",
+    "@types/node": "^20",
+    "@types/react": "^18.3.2",
+    "@types/react-dom": "^18.3.0",
     "autoprefixer": "10.4.15",
     "postcss": "8.4.30",
     "tailwindcss": "3.3.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.4.5"
   }
 }

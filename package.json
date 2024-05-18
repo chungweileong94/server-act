@@ -12,7 +12,7 @@
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
     "turbo": "^1.13.2",
-    "typescript": "^5.2.2",
+    "typescript": "^5.4.5",
     "vitest": "^1.2.0"
   },
   "packageManager": "pnpm@8.15.7"

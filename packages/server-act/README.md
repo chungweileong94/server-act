@@ -82,12 +82,11 @@ export const sayHelloAction = serverAct
   });
 ```
 
-### `useFormState` Support
+### `useActionState` Support
 
-> `useFormState` Documentation:
+> `useActionState` Documentation:
 >
-> - https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations#error-handling
-> - https://react.dev/reference/react-dom/hooks/useFormState
+> - https://react.dev/reference/react/useActionState
 
 We recommend using [zod-form-data](https://www.npmjs.com/package/zod-form-data) for input validation.
 
@@ -105,13 +104,13 @@ export const sayHelloAction = serverAct
       name: zfd.text(
         z
           .string({ required_error: `You haven't told me your name` })
-          .nonempty({ message: 'You need to tell me your name!' }),
+          .max(20, { message: "Any shorter name? You name is too long 😬" }),
       ),
     }),
   )
-  .formAction(async ({ input, formErrors, ctx }) => {
+  .formAction(async ({ formData, input, formErrors, ctx }) => {
     if (formErrors) {
-      return { formErrors: formErrors.formErrors.fieldErrors };
+      return { formData, formErrors: formErrors.formErrors.fieldErrors };
     }
     return { message: `Hello, ${input.name}!` };
   });
@@ -121,19 +120,24 @@ export const sayHelloAction = serverAct
 // client-component.tsx
 "use client";
 
+import { useActionState } from "react";
 import { sayHelloAction } from "./action";
 
 export const ClientComponent = () => {
-  const [state, dispatch] = useFormState(sayHelloAction, { formErrors: {} });
+  const [state, dispatch] = useFormState(sayHelloAction, undefined);
 
   return (
     <form action={dispatch}>
-      <input name="name" required />
-      {state.formErrors?.name?.map((error) => <p key={error}>{error}</p>)}
+      <input
+        name="name"
+        required
+        defaultValue={state?.formData?.get("name")?.toString()}
+      />
+      {state?.formErrors?.name?.map((error) => <p key={error}>{error}</p>)}
 
       <button type="submit">Submit</button>
 
-      {!!state.message && <p>{state.message}</p>}
+      {!!state?.message && <p>{state.message}</p>}
     </form>
   );
 };
