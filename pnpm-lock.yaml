@@ -31,13 +31,13 @@ importers:
     dependencies:
       next:
         specifier: 15.0.0-rc.0
-        version: 15.0.0-rc.0(react-dom@19.0.0-rc-4c2e457c7c-20240522)(react@19.0.0-rc-4c2e457c7c-20240522)
+        version: 15.0.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522)
       react:
-        specifier: 19.0.0-rc-4c2e457c7c-20240522
-        version: 19.0.0-rc-4c2e457c7c-20240522
+        specifier: 19.0.0-rc-f994737d14-20240522
+        version: 19.0.0-rc-f994737d14-20240522
       react-dom:
-        specifier: 19.0.0-rc-4c2e457c7c-20240522
-        version: 19.0.0-rc-4c2e457c7c-20240522(react@19.0.0-rc-4c2e457c7c-20240522)
+        specifier: 19.0.0-rc-f994737d14-20240522
+        version: 19.0.0-rc-f994737d14-20240522(react@19.0.0-rc-f994737d14-20240522)
       server-act:
         specifier: workspace:*
         version: link:../../packages/server-act
@@ -3026,7 +3026,7 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  /next@15.0.0-rc.0(react-dom@19.0.0-rc-4c2e457c7c-20240522)(react@19.0.0-rc-4c2e457c7c-20240522):
+  /next@15.0.0-rc.0(react-dom@19.0.0-rc-f994737d14-20240522)(react@19.0.0-rc-f994737d14-20240522):
     resolution: {integrity: sha512-IWcCvxUSCAuOK5gig4+9yiyt/dLKpIa+WT01Qcx4CBE4TtwJljyTDnCVVn64jDZ4qmSzsaEYXpb4DTI8qbk03A==}
     engines: {node: '>=18.17.0'}
     hasBin: true
@@ -3053,9 +3053,9 @@ packages:
       caniuse-lite: 1.0.30001621
       graceful-fs: 4.2.11
       postcss: 8.4.31
-      react: 19.0.0-rc-4c2e457c7c-20240522
-      react-dom: 19.0.0-rc-4c2e457c7c-20240522(react@19.0.0-rc-4c2e457c7c-20240522)
-      styled-jsx: 5.1.3(react@19.0.0-rc-4c2e457c7c-20240522)
+      react: 19.0.0-rc-f994737d14-20240522
+      react-dom: 19.0.0-rc-f994737d14-20240522(react@19.0.0-rc-f994737d14-20240522)
+      styled-jsx: 5.1.3(react@19.0.0-rc-f994737d14-20240522)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.0.0-rc.0
       '@next/swc-darwin-x64': 15.0.0-rc.0
@@ -3437,21 +3437,21 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /react-dom@19.0.0-rc-4c2e457c7c-20240522(react@19.0.0-rc-4c2e457c7c-20240522):
-    resolution: {integrity: sha512-HXPEwX9ibB3OSzaU03Bh6uw7QFulRzyLJM3x+3WoF2j++D9tl2PoqiN6+ctH5Nrh6X11+oxH7Eq3RqkQhbQqKw==}
+  /react-dom@19.0.0-rc-f994737d14-20240522(react@19.0.0-rc-f994737d14-20240522):
+    resolution: {integrity: sha512-J4CsfTSptPKkhaPbaR6n/KohQiHZTrRZ8GL4H8rbAqN/Qpy69g2MIoLBr5/PUX21ye6JxC1ZRWJFna7Xdg1pdA==}
     peerDependencies:
-      react: 19.0.0-rc-4c2e457c7c-20240522
+      react: 19.0.0-rc-f994737d14-20240522
     dependencies:
-      react: 19.0.0-rc-4c2e457c7c-20240522
-      scheduler: 0.25.0-rc-4c2e457c7c-20240522
+      react: 19.0.0-rc-f994737d14-20240522
+      scheduler: 0.25.0-rc-f994737d14-20240522
     dev: false
 
   /react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
     dev: true
 
-  /react@19.0.0-rc-4c2e457c7c-20240522:
-    resolution: {integrity: sha512-jA9abMci6Z9xYDh07shOajSM5/wII9/lo8Cshk6zXo2Y6nc4LIvXqhjk0yOfiMlwMGEc+Ee1veGwa4ixjnzBJA==}
+  /react@19.0.0-rc-f994737d14-20240522:
+    resolution: {integrity: sha512-SeU2v5Xy6FotVhKz0pMS2gvYP7HlkF0qgTskj3JzA1vlxcb3dQjxlm9t0ZlJqcgoyI3VFAw7bomuDMdgy1nBuw==}
     engines: {node: '>=0.10.0'}
     dev: false
 
@@ -3673,8 +3673,8 @@ packages:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
     dev: true
 
-  /scheduler@0.25.0-rc-4c2e457c7c-20240522:
-    resolution: {integrity: sha512-Vyzc3lN/cMuxvrMKtToIytTL6P2Xiz0zQlY+0KioteRSSgNORZ5gQX7MYEHpQ0QUm44mcpkZxSdZsI7YYNLpsQ==}
+  /scheduler@0.25.0-rc-f994737d14-20240522:
+    resolution: {integrity: sha512-qS+xGFF7AljP2APO2iJe8zESNsK20k25MACz+WGOXPybUsRdi1ssvaoF93im2nSX2q/XT3wKkjdz6RQfbmaxdw==}
     dev: false
 
   /semver@5.7.2:
@@ -3943,7 +3943,7 @@ packages:
       js-tokens: 9.0.0
     dev: true
 
-  /styled-jsx@5.1.3(react@19.0.0-rc-4c2e457c7c-20240522):
+  /styled-jsx@5.1.3(react@19.0.0-rc-f994737d14-20240522):
     resolution: {integrity: sha512-qLRShOWTE/Mf6Bvl72kFeKBl8N2Eq9WIFfoAuvbtP/6tqlnj1SCjv117n2MIjOPpa1jTorYqLJgsHKy5Y3ziww==}
     engines: {node: '>= 12.0.0'}
     peerDependencies:
@@ -3957,7 +3957,7 @@ packages:
         optional: true
     dependencies:
       client-only: 0.0.1
-      react: 19.0.0-rc-4c2e457c7c-20240522
+      react: 19.0.0-rc-f994737d14-20240522
     dev: false
 
   /sucrase@3.32.0:
