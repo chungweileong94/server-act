@@ -9,7 +9,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className=" rounded-md border-2 border-black bg-red-100 px-4 py-2"
+      className="rounded-md border-2 border-black bg-red-100 px-4 py-2"
       disabled={status.pending}
     >
       {status.pending ? "Loading..." : "Say hello to the server"}
