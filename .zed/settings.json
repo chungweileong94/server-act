@@ -1,12 +1,18 @@
 {
-  "language_servers": ["biome", "!eslint", "..."],
-  "code_actions_on_format": {
-    "source.organizeImports.biome": true
-  },
+  "language_servers": [
+    "typescript-language-server",
+    "!vtsls",
+    "biome",
+    "!eslint",
+    "..."
+  ],
   "formatter": {
     "external": {
       "command": "./node_modules/@biomejs/biome/bin/biome",
       "arguments": ["format", "--write", "--stdin-file-path", "{buffer_path}"]
     }
+  },
+  "code_actions_on_format": {
+    "source.organizeImports.biome": true
   }
 }
