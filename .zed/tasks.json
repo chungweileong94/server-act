@@ -1,0 +1,9 @@
+[
+  {
+    "label": "vitest run $ZED_SYMBOL",
+    "command": "npx vitest run -t",
+    "args": ["\"$ZED_SYMBOL\" $ZED_FILE"],
+    "tags": ["js-test", "ts-test"],
+    "use_new_terminal": false
+  }
+]
