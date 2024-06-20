@@ -1,7 +1,7 @@
 {
   "language_servers": [
-    "typescript-language-server",
-    "!vtsls",
+    "vtsls",
+    "!typescript-language-server",
     "biome",
     "!eslint",
     "..."
