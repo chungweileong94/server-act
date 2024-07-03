@@ -18,10 +18,10 @@ type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
   param: infer P,
 ) => infer R
   ? Equals<P, undefined> extends true
-    ? () => R
-    : Equals<P, P | undefined> extends true
-      ? (param?: P) => R
-      : (param: P) => R
+  ? () => R
+  : Equals<P, P | undefined> extends true
+  ? (param?: P) => R
+  : (param: P) => R
   : never;
 
 type InferParserType<T, TType extends "in" | "out"> = T extends z.ZodEffects<
@@ -33,8 +33,8 @@ type InferParserType<T, TType extends "in" | "out"> = T extends z.ZodEffects<
 >
   ? I[TType extends "in" ? "_input" : "_output"]
   : T extends z.ZodType
-    ? T[TType extends "in" ? "_input" : "_output"]
-    : never;
+  ? T[TType extends "in" ? "_input" : "_output"]
+  : never;
 
 type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
@@ -84,13 +84,13 @@ interface ActionBuilder<TParams extends ActionParams> {
           formData: FormData;
         } & (
           | {
-              input: InferInputType<TParams["_input"], "out">;
-              formErrors?: undefined;
-            }
+            input: InferInputType<TParams["_input"], "out">;
+            formErrors?: undefined;
+          }
           | {
-              input?: undefined;
-              formErrors: z.ZodError<InferInputType<TParams["_input"], "in">>;
-            }
+            input?: undefined;
+            formErrors: z.ZodError<InferInputType<TParams["_input"], "in">>;
+          }
         )
       >,
     ) => Promise<TState>,
@@ -106,8 +106,8 @@ type AnyActionBuilder = ActionBuilder<any>;
 interface ActionBuilderDef<TParams extends ActionParams<any>> {
   input: TParams["_input"];
   middleware:
-    | (() => Promise<TParams["_context"]> | TParams["_context"])
-    | undefined;
+  | (() => Promise<TParams["_context"]> | TParams["_context"])
+  | undefined;
 }
 // biome-ignore lint/suspicious/noExplicitAny: Intended
 type AnyActionBuilderDef = ActionBuilderDef<any>;
@@ -140,7 +140,7 @@ function createServerActionBuilder(
       return async (input?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
-          const result = _def.input.safeParse(input);
+          const result = await _def.input.safeParseAsync(input);
           if (!result.success) {
             console.error("❌ Input validation error:", result.error.errors);
             throw new Error("Input validation error");
