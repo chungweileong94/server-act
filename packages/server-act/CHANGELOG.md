@@ -1,5 +1,11 @@
 # server-act
 
+## 1.2.1
+
+### Patch Changes
+
+- [#24](https://github.com/chungweileong94/server-act/pull/24) [`c9decae`](https://github.com/chungweileong94/server-act/commit/c9decaec540e3824a10738282bb71775d3cfce04) Thanks [@rvndev](https://github.com/rvndev)! - Enables zod refinments in input validation
+
 ## 1.2.0
 
 ### Minor Changes
