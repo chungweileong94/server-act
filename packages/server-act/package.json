@@ -26,12 +26,7 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "package.json",
-    "LICENSE",
-    "README.md"
-  ],
+  "files": ["dist", "package.json", "LICENSE", "README.md"],
   "scripts": {
     "build": "bunchee",
     "dev": "bunchee -w",
