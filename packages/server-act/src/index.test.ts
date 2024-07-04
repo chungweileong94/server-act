@@ -18,7 +18,7 @@ describe("action", () => {
 
   test("should able to create action with input", async () => {
     const action = serverAct
-      .input(z.string())
+      .input(z.string().refine((s) => s.startsWith("f")))
       .action(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();

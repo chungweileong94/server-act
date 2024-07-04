@@ -140,7 +140,7 @@ function createServerActionBuilder(
       return async (input?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
-          const result = _def.input.safeParse(input);
+          const result = await _def.input.safeParseAsync(input);
           if (!result.success) {
             console.error("❌ Input validation error:", result.error.errors);
             throw new Error("Input validation error");
