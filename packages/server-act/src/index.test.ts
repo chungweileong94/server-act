@@ -18,6 +18,19 @@ describe("action", () => {
 
   test("should able to create action with input", async () => {
     const action = serverAct
+      .input(z.string())
+      .action(async () => Promise.resolve("bar"));
+
+    expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
+    expectTypeOf(action).parameter(0).toBeString();
+    expectTypeOf(action).returns.resolves.toBeString();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+    await expect(action("foo")).resolves.toBe("bar");
+  });
+
+  test("should able to create action with input and zod refinement", async () => {
+    const action = serverAct
       .input(z.string().refine((s) => s.startsWith("f")))
       .action(async () => Promise.resolve("bar"));
 
