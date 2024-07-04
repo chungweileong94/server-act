@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
 
       - name: Use PNPM
-        uses: pnpm/action-setup@v2.2.4
+        uses: pnpm/action-setup@v4.0.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -48,6 +48,6 @@ jobs:
 
       - name: Lint
         run: pnpm lint
-      
+
       - name: Test
         run: pnpm turbo test
