@@ -53,13 +53,19 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   middleware: <TContext>(
     middleware: () => Promise<TContext> | TContext,
-  ) => ActionBuilder<{ _input: TParams["_input"]; _context: TContext }>;
+  ) => Omit<
+    ActionBuilder<{ _input: TParams["_input"]; _context: TContext }>,
+    "middleware"
+  >;
   /**
    * Input validation for the action.
    */
   input: <TParser extends z.ZodType>(
     input: TParser,
-  ) => ActionBuilder<{ _input: TParser; _context: TParams["_context"] }>;
+  ) => Omit<
+    ActionBuilder<{ _input: TParser; _context: TParams["_context"] }>,
+    "input"
+  >;
   /**
    * Create an action.
    */
