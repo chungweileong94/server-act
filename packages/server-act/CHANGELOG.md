@@ -1,5 +1,11 @@
 # server-act
 
+## 1.2.2
+
+### Patch Changes
+
+- [#27](https://github.com/chungweileong94/server-act/pull/27) [`2ab472c`](https://github.com/chungweileong94/server-act/commit/2ab472cda8d404406a7ddeec4645e012c81abcd9) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Prevent duplicate chaining methods
+
 ## 1.2.1
 
 ### Patch Changes
