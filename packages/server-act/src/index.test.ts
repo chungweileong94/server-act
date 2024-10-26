@@ -109,6 +109,22 @@ describe("action", () => {
       expect(middlewareSpy).toBeCalledTimes(1);
     });
   });
+
+  test("should able to access middleware context in input", async () => {
+    const action = serverAct
+      .middleware(() => ({ prefix: "best" }))
+      .input(({ ctx }) => z.string().transform((v) => `${ctx.prefix}-${v}`))
+      .action(async ({ ctx, input }) => {
+        return Promise.resolve(`${input}-${ctx.prefix}-bar`);
+      });
+
+    expectTypeOf(action).toEqualTypeOf<(param: string) => Promise<string>>();
+    expectTypeOf(action).parameter(0).toBeString();
+    expectTypeOf(action).returns.resolves.toBeString();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+    await expect(action("foo")).resolves.toBe("best-foo-best-bar");
+  });
 });
 
 describe("formAction", () => {
@@ -195,5 +211,41 @@ describe("formAction", () => {
     expect(result).toHaveProperty("formErrors.fieldErrors", {
       foo: ["Required"],
     });
+  });
+
+  test("should able to access middleware context", async () => {
+    const action = serverAct
+      .middleware(() => ({ prefix: "best" }))
+      .input(({ ctx }) =>
+        zfd.formData({
+          foo: zfd.text(z.string().transform((v) => `${ctx.prefix}-${v}`)),
+        }),
+      )
+      .formAction(async ({ ctx, formErrors, input }) => {
+        if (formErrors) {
+          return formErrors;
+        }
+        return Promise.resolve(`${input.foo}-${ctx.prefix}-bar`);
+      });
+
+    type State = string | z.ZodError<{ foo: string }>;
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: State | undefined,
+        formData: FormData,
+      ) => Promise<State | undefined>
+    >();
+    expectTypeOf(action).parameter(1).toHaveProperty("append");
+    expectTypeOf(action).parameter(1).toHaveProperty("delete");
+    expectTypeOf(action).parameter(1).toHaveProperty("get");
+    expectTypeOf(action).parameter(1).toHaveProperty("entries");
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+
+    const formData = new FormData();
+    formData.append("foo", "bar");
+    await expect(action("foo", formData)).resolves.toMatchObject(
+      "best-bar-best-bar",
+    );
   });
 });
