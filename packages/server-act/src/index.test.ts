@@ -109,6 +109,22 @@ describe("action", () => {
       expect(middlewareSpy).toBeCalledTimes(1);
     });
   });
+
+  test("should able to access middleware context in input", async () => {
+    const action = serverAct
+      .middleware(() => ({ prefix: "best" }))
+      .input(({ ctx }) => z.string().transform((v) => `${ctx.prefix}-${v}`))
+      .action(async ({ ctx, input }) => {
+        return Promise.resolve(`${input}-${ctx.prefix}-bar`);
+      });
+
+    expectTypeOf(action).toEqualTypeOf<(param: string) => Promise<string>>();
+    expectTypeOf(action).parameter(0).toBeString();
+    expectTypeOf(action).returns.resolves.toBeString();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+    await expect(action("foo")).resolves.toBe("best-foo-best-bar");
+  });
 });
 
 describe("formAction", () => {
