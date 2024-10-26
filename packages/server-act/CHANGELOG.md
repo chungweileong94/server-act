@@ -1,5 +1,11 @@
 # server-act
 
+## 1.3.0
+
+### Minor Changes
+
+- [#30](https://github.com/chungweileong94/server-act/pull/30) [`7288143`](https://github.com/chungweileong94/server-act/commit/7288143f7f9a4dff39613569af2fb6c439eea097) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Support middleware ctx access in `.input()`
+
 ## 1.2.2
 
 ### Patch Changes
