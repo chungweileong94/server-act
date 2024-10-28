@@ -1,5 +1,11 @@
 # server-act
 
+## 1.3.1
+
+### Patch Changes
+
+- [`2854c03`](https://github.com/chungweileong94/server-act/commit/2854c0332a752aeea8a958d0fdde0283a22e0c78) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Fixed async context access from `.input()`
+
 ## 1.3.0
 
 ### Minor Changes
