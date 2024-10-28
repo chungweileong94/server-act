@@ -1,6 +1,6 @@
 {
   "name": "server-act",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "homepage": "https://github.com/chungweileong94/server-act#readme",
   "author": "chungweileong94",
   "license": "MIT",
@@ -26,7 +26,12 @@
       }
     }
   },
-  "files": ["dist", "package.json", "LICENSE", "README.md"],
+  "files": [
+    "dist",
+    "package.json",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "bunchee",
     "dev": "bunchee -w",
