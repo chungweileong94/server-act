@@ -62,7 +62,9 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   input: <TParser extends z.ZodType>(
     input:
-      | ((params: { ctx: InferContextType<TParams["_context"]> }) => TParser)
+      | ((params: { ctx: InferContextType<TParams["_context"]> }) =>
+          | Promise<TParser>
+          | TParser)
       | TParser,
   ) => Omit<
     ActionBuilder<{ _input: TParser; _context: TParams["_context"] }>,
@@ -112,7 +114,12 @@ type AnyActionBuilder = ActionBuilder<any>;
 
 // biome-ignore lint/suspicious/noExplicitAny: Intended
 interface ActionBuilderDef<TParams extends ActionParams<any>> {
-  input: TParams["_input"];
+  input:
+    | ((params: { ctx: TParams["_context"] }) =>
+        | Promise<TParams["_input"]>
+        | TParams["_input"])
+    | TParams["_input"]
+    | undefined;
   middleware:
     | (() => Promise<TParams["_context"]> | TParams["_context"])
     | undefined;
@@ -131,8 +138,7 @@ function createServerActionBuilder(
   _context: UnsetMarker;
 }> {
   const _def: ActionBuilderDef<{
-    // biome-ignore lint/suspicious/noExplicitAny: Intended
-    _input: ((params: { ctx: any }) => z.ZodType) | z.ZodType | undefined;
+    _input: z.ZodType;
     _context: undefined;
   }> = {
     input: undefined,
@@ -150,7 +156,9 @@ function createServerActionBuilder(
         const ctx = await _def.middleware?.();
         if (_def.input) {
           const inputSchema =
-            typeof _def.input === "function" ? _def.input({ ctx }) : _def.input;
+            typeof _def.input === "function"
+              ? await _def.input({ ctx })
+              : _def.input;
           const result = await inputSchema.safeParseAsync(input);
           if (!result.success) {
             console.error("❌ Input validation error:", result.error.errors);
@@ -166,7 +174,9 @@ function createServerActionBuilder(
         const ctx = await _def.middleware?.();
         if (_def.input) {
           const inputSchema =
-            typeof _def.input === "function" ? _def.input({ ctx }) : _def.input;
+            typeof _def.input === "function"
+              ? await _def.input({ ctx })
+              : _def.input;
           const result = await inputSchema.safeParseAsync(formData);
           if (!result.success) {
             return await action({
