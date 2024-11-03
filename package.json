@@ -5,7 +5,9 @@
     "dev": "turbo run dev",
     "test": "turbo run test",
     "lint": "biome check .",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "changeset:add": "changeset add",
+    "changeset:publish": "changeset publish && biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "1.7.3",
