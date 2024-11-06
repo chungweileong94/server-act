@@ -1,15 +1,49 @@
 {
-  "language_servers": [
-    "vtsls",
-    "!typescript-language-server",
-    "biome",
-    "!eslint",
-    "..."
-  ],
-  "formatter": {
-    "language_server": { "name": "biome" }
-  },
-  "code_actions_on_format": {
-    "source.organizeImports.biome": true
+  "languages": {
+    "JavaScript": {
+      "language_servers": [
+        "vtsls",
+        "!typescript-language-server",
+        "biome",
+        "!eslint",
+        "..."
+      ],
+      "formatter": {
+        "language_server": { "name": "biome" }
+      },
+      "code_actions_on_format": {
+        "source.organizeImports.biome": true
+      }
+    },
+    "TypeScript": {
+      "language_servers": [
+        "vtsls",
+        "!typescript-language-server",
+        "biome",
+        "!eslint",
+        "..."
+      ],
+      "formatter": {
+        "language_server": { "name": "biome" }
+      },
+      "code_actions_on_format": {
+        "source.organizeImports.biome": true
+      }
+    },
+    "TSX": {
+      "language_servers": [
+        "vtsls",
+        "!typescript-language-server",
+        "biome",
+        "!eslint",
+        "..."
+      ],
+      "formatter": {
+        "language_server": { "name": "biome" }
+      },
+      "code_actions_on_format": {
+        "source.organizeImports.biome": true
+      }
+    }
   }
 }
