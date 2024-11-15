@@ -64,19 +64,32 @@ describe("action", () => {
     await expect(action(1)).rejects.toThrowError();
   });
 
-  test("should able to infer zod effects input type correctly", async () => {
+  test("should able to infer zfd input type correctly", async () => {
     const action = serverAct
       .input(zfd.formData({ foo: zfd.text() }))
       .action(async ({ input }) => Promise.resolve(input.foo));
 
     expectTypeOf(action).toEqualTypeOf<
-      (input: FormData | FormDataLikeInput) => Promise<string>
+      (input: FormData | FormDataLikeInput | { foo: string }) => Promise<string>
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
     const formData = new FormData();
     formData.append("foo", "bar");
     await expect(action(formData)).resolves.toBe("bar");
+  });
+
+  test("should able to pass object type to zfd input type", async () => {
+    const action = serverAct
+      .input(zfd.formData({ foo: zfd.text() }))
+      .action(async ({ input }) => Promise.resolve(input.foo));
+
+    expectTypeOf(action).toEqualTypeOf<
+      (input: FormData | FormDataLikeInput | { foo: string }) => Promise<string>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+    await expect(action({ foo: "bar" })).resolves.toBe("bar");
   });
 
   describe("middleware should be called once", () => {
@@ -156,7 +169,7 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: string | undefined,
-        formData: FormData | FormDataLikeInput,
+        formData: FormData | FormDataLikeInput | { foo: string },
       ) => Promise<string | undefined>
     >();
 
@@ -185,7 +198,7 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData | FormDataLikeInput,
+        formData: FormData | FormDataLikeInput | { foo: string },
       ) => Promise<State | undefined>
     >();
 
@@ -199,6 +212,22 @@ describe("formAction", () => {
     expect(result).toHaveProperty("formErrors.fieldErrors", {
       foo: ["Required"],
     });
+  });
+
+  test("should able to pass object type to zfd input type", async () => {
+    const action = serverAct
+      .input(zfd.formData({ foo: zfd.text() }))
+      .formAction(async () => Promise.resolve("bar"));
+
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: string | undefined,
+        formData: FormData | FormDataLikeInput | { foo: string },
+      ) => Promise<string | undefined>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+    await expect(action("foo", { foo: "bar" })).resolves.toBe("bar");
   });
 
   test("should able to access middleware context", async () => {
@@ -220,7 +249,7 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData | FormDataLikeInput,
+        formData: FormData | FormDataLikeInput | { foo: string },
       ) => Promise<State | undefined>
     >();
 

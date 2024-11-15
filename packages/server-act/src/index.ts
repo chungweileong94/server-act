@@ -85,7 +85,11 @@ interface ActionBuilder<TParams extends ActionParams> {
       input: InferInputType<TParams["_input"], "out">;
     }) => Promise<TOutput>,
   ) => SanitizeFunctionParam<
-    (input: InferInputType<TParams["_input"], "in", false>) => Promise<TOutput>
+    (
+      input:
+        | InferInputType<TParams["_input"], "in">
+        | InferInputType<TParams["_input"], "in", false>,
+    ) => Promise<TOutput>
   >;
   /**
    * Create an action for React `useActionState`
@@ -112,7 +116,9 @@ interface ActionBuilder<TParams extends ActionParams> {
     ) => Promise<TState>,
   ) => (
     prevState: TState | TPrevState,
-    formData: InferInputType<TParams["_input"], "in", false>,
+    formData:
+      | InferInputType<TParams["_input"], "in">
+      | InferInputType<TParams["_input"], "in", false>,
   ) => Promise<TState | TPrevState>;
 }
 // biome-ignore lint/suspicious/noExplicitAny: Intended
