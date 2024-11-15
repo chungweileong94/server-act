@@ -24,21 +24,27 @@ type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
       : (param: P) => R
   : never;
 
-type InferParserType<T, TType extends "in" | "out"> = T extends z.ZodEffects<
-  infer I,
-  // biome-ignore lint/suspicious/noExplicitAny: Intended
-  any,
-  // biome-ignore lint/suspicious/noExplicitAny: Intended
-  any
->
-  ? I[TType extends "in" ? "_input" : "_output"]
+type InferParserType<
+  T,
+  TType extends "in" | "out",
+  TUnwrapEffects extends true | false,
+> = T extends z.ZodEffects<infer InnerType, infer Output, infer Input>
+  ? TUnwrapEffects extends true
+    ? InnerType[TType extends "in" ? "_input" : "_output"]
+    : TType extends "in"
+      ? Input
+      : Output
   : T extends z.ZodType
     ? T[TType extends "in" ? "_input" : "_output"]
     : never;
 
-type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
+type InferInputType<
+  T,
+  TType extends "in" | "out",
+  TUnwrapEffects extends true | false = true,
+> = T extends UnsetMarker
   ? undefined
-  : InferParserType<T, TType>;
+  : InferParserType<T, TType, TUnwrapEffects>;
 
 type InferContextType<T> = T extends UnsetMarker ? undefined : T;
 
@@ -79,7 +85,7 @@ interface ActionBuilder<TParams extends ActionParams> {
       input: InferInputType<TParams["_input"], "out">;
     }) => Promise<TOutput>,
   ) => SanitizeFunctionParam<
-    (input: InferInputType<TParams["_input"], "in">) => Promise<TOutput>
+    (input: InferInputType<TParams["_input"], "in", false>) => Promise<TOutput>
   >;
   /**
    * Create an action for React `useActionState`
@@ -106,7 +112,7 @@ interface ActionBuilder<TParams extends ActionParams> {
     ) => Promise<TState>,
   ) => (
     prevState: TState | TPrevState,
-    formData: FormData,
+    formData: InferInputType<TParams["_input"], "in", false>,
   ) => Promise<TState | TPrevState>;
 }
 // biome-ignore lint/suspicious/noExplicitAny: Intended
@@ -170,7 +176,8 @@ function createServerActionBuilder(
       };
     },
     formAction: (action) => {
-      return async (prevState, formData) => {
+      // biome-ignore lint/suspicious/noExplicitAny: Intended
+      return async (prevState, formData?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
           const inputSchema =

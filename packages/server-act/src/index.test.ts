@@ -1,16 +1,18 @@
 import { beforeEach, describe, expect, expectTypeOf, test, vi } from "vitest";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-
 import { serverAct } from ".";
+
+type FormDataLikeInput = {
+  [Symbol.iterator](): IterableIterator<[string, FormDataEntryValue]>;
+  entries(): IterableIterator<[string, FormDataEntryValue]>;
+};
 
 describe("action", () => {
   test("should able to create action without input", async () => {
     const action = serverAct.action(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
-    expectTypeOf(action).parameter(0).toBeUndefined();
-    expectTypeOf(action).returns.resolves.toBeString();
 
     expect(action.constructor.name).toBe("AsyncFunction");
     await expect(action()).resolves.toBe("bar");
@@ -22,8 +24,6 @@ describe("action", () => {
       .action(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
-    expectTypeOf(action).parameter(0).toBeString();
-    expectTypeOf(action).returns.resolves.toBeString();
 
     expect(action.constructor.name).toBe("AsyncFunction");
     await expect(action("foo")).resolves.toBe("bar");
@@ -35,8 +35,6 @@ describe("action", () => {
       .action(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
-    expectTypeOf(action).parameter(0).toBeString();
-    expectTypeOf(action).returns.resolves.toBeString();
 
     expect(action.constructor.name).toBe("AsyncFunction");
     await expect(action("foo")).resolves.toBe("bar");
@@ -48,8 +46,6 @@ describe("action", () => {
       .action(async ({ input }) => Promise.resolve(input ?? "bar"));
 
     expectTypeOf(action).toEqualTypeOf<(input?: string) => Promise<string>>();
-    expectTypeOf(action).parameter(0).toBeNullable();
-    expectTypeOf(action).returns.resolves.toBeString();
 
     expect(action.constructor.name).toBe("AsyncFunction");
     await expect(action("foo")).resolves.toBe("foo");
@@ -62,12 +58,25 @@ describe("action", () => {
       .action(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
-    expectTypeOf(action).parameter(0).toBeString();
-    expectTypeOf(action).returns.resolves.toBeString();
 
     expect(action.constructor.name).toBe("AsyncFunction");
     // @ts-ignore
     await expect(action(1)).rejects.toThrowError();
+  });
+
+  test("should able to infer zod effects input type correctly", async () => {
+    const action = serverAct
+      .input(zfd.formData({ foo: zfd.text() }))
+      .action(async ({ input }) => Promise.resolve(input.foo));
+
+    expectTypeOf(action).toEqualTypeOf<
+      (input: FormData | FormDataLikeInput) => Promise<string>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+    const formData = new FormData();
+    formData.append("foo", "bar");
+    await expect(action(formData)).resolves.toBe("bar");
   });
 
   describe("middleware should be called once", () => {
@@ -85,7 +94,6 @@ describe("action", () => {
         .action(async ({ ctx }) => Promise.resolve(`${ctx.prefix}-bar`));
 
       expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
-      expectTypeOf(action).returns.resolves.toBeString();
 
       expect(action.constructor.name).toBe("AsyncFunction");
       await expect(action()).resolves.toBe("best-bar");
@@ -101,8 +109,6 @@ describe("action", () => {
         );
 
       expectTypeOf(action).toEqualTypeOf<(param: string) => Promise<string>>();
-      expectTypeOf(action).parameter(0).toBeString();
-      expectTypeOf(action).returns.resolves.toBeString();
 
       expect(action.constructor.name).toBe("AsyncFunction");
       await expect(action("foo")).resolves.toBe("best-foo-bar");
@@ -119,10 +125,9 @@ describe("action", () => {
       });
 
     expectTypeOf(action).toEqualTypeOf<(param: string) => Promise<string>>();
-    expectTypeOf(action).parameter(0).toBeString();
-    expectTypeOf(action).returns.resolves.toBeString();
 
     expect(action.constructor.name).toBe("AsyncFunction");
+
     await expect(action("foo")).resolves.toBe("best-foo-best-bar");
   });
 });
@@ -134,20 +139,13 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: string | undefined,
-        formData: FormData,
+        formData: undefined,
       ) => Promise<string | undefined>
     >();
-    expectTypeOf(action).parameter(0).toEqualTypeOf<string | undefined>();
-    expectTypeOf(action).parameter(1).toHaveProperty("append");
-    expectTypeOf(action).parameter(1).toHaveProperty("delete");
-    expectTypeOf(action).parameter(1).toHaveProperty("get");
-    expectTypeOf(action).parameter(1).toHaveProperty("entries");
-    expectTypeOf(action).returns.resolves.toEqualTypeOf<string | undefined>();
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    const formData = new FormData();
-    await expect(action("foo", formData)).resolves.toMatchObject("bar");
+    await expect(action("foo", undefined)).resolves.toMatchObject("bar");
   });
 
   test("should able to create form action with input", async () => {
@@ -158,15 +156,9 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: string | undefined,
-        formData: FormData,
+        formData: FormData | FormDataLikeInput,
       ) => Promise<string | undefined>
     >();
-    expectTypeOf(action).parameter(0).toEqualTypeOf<string | undefined>();
-    expectTypeOf(action).parameter(1).toHaveProperty("append");
-    expectTypeOf(action).parameter(1).toHaveProperty("delete");
-    expectTypeOf(action).parameter(1).toHaveProperty("get");
-    expectTypeOf(action).parameter(1).toHaveProperty("entries");
-    expectTypeOf(action).returns.resolves.toEqualTypeOf<string | undefined>();
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
@@ -193,13 +185,9 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData,
+        formData: FormData | FormDataLikeInput,
       ) => Promise<State | undefined>
     >();
-    expectTypeOf(action).parameter(1).toHaveProperty("append");
-    expectTypeOf(action).parameter(1).toHaveProperty("delete");
-    expectTypeOf(action).parameter(1).toHaveProperty("get");
-    expectTypeOf(action).parameter(1).toHaveProperty("entries");
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
@@ -232,13 +220,9 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData,
+        formData: FormData | FormDataLikeInput,
       ) => Promise<State | undefined>
     >();
-    expectTypeOf(action).parameter(1).toHaveProperty("append");
-    expectTypeOf(action).parameter(1).toHaveProperty("delete");
-    expectTypeOf(action).parameter(1).toHaveProperty("get");
-    expectTypeOf(action).parameter(1).toHaveProperty("entries");
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
