@@ -1,5 +1,11 @@
 # server-act
 
+## 1.4.0
+
+### Minor Changes
+
+- [#35](https://github.com/chungweileong94/server-act/pull/35) [`113557d`](https://github.com/chungweileong94/server-act/commit/113557dd85e9a92a4d175cd74d87906a17296120) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Improved input type infer
+
 ## 1.3.1
 
 ### Patch Changes
