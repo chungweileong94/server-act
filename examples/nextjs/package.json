@@ -9,20 +9,26 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "15.0.2",
-    "react": "19.0.0-rc-02c0e824-20241028",
-    "react-dom": "19.0.0-rc-02c0e824-20241028",
+    "next": "15.1.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "server-act": "workspace:*",
     "zod": "^3.22.2",
     "zod-form-data": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
     "autoprefixer": "10.4.15",
     "postcss": "8.4.30",
     "tailwindcss": "3.3.3",
     "typescript": "^5.6.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.0.2",
+      "@types/react-dom": "19.0.2"
+    }
   }
 }
