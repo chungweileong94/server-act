@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.node-version'
+          node-version-file: ".node-version"
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -47,7 +47,7 @@ jobs:
 
       - name: Create Release
         id: changeset
-        uses: changesets/action@v1.4.1
+        uses: changesets/action@v1.4.9
         with:
           commit: "chore(release): 📦 version packages"
           title: "chore(release): 📦  version packages"
