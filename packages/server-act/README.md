@@ -2,7 +2,9 @@
 
 [![npm version](https://badge.fury.io/js/server-act.svg)](https://badge.fury.io/js/server-act)
 
-A simple React server action builder that provides input validation with zod.
+A simple React server action builder that provides input validation.
+
+You can use any validation library that supports [Standard Schema](https://standardschema.dev/).
 
 ## Installation
 
