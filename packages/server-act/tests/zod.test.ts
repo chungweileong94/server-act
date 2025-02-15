@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, expectTypeOf, test, vi } from "vitest";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { serverAct } from ".";
+import { serverAct } from "../src";
 
 type FormDataLikeInput = {
   [Symbol.iterator](): IterableIterator<[string, FormDataEntryValue]>;
