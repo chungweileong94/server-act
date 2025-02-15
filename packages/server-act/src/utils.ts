@@ -17,18 +17,16 @@ export async function standardValidate<T extends StandardSchemaV1>(
 export function getFormErrors(issues: ReadonlyArray<StandardSchemaV1.Issue>) {
   const messages: string[] = [];
   const fieldErrors: Record<string, string[]> = {};
-  if (issues) {
-    for (const issue of issues) {
-      const dotPath = getDotPath(issue);
-      if (dotPath) {
-        if (fieldErrors[dotPath]) {
-          fieldErrors[dotPath].push(issue.message);
-        } else {
-          fieldErrors[dotPath] = [issue.message];
-        }
+  for (const issue of issues) {
+    const dotPath = getDotPath(issue);
+    if (dotPath) {
+      if (fieldErrors[dotPath]) {
+        fieldErrors[dotPath].push(issue.message);
       } else {
-        messages.push(issue.message);
+        fieldErrors[dotPath] = [issue.message];
       }
+    } else {
+      messages.push(issue.message);
     }
   }
   return { messages, fieldErrors };
