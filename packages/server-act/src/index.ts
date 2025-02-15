@@ -1,4 +1,6 @@
-import type { z } from "zod";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
+import { SchemaError } from "@standard-schema/utils";
+import { getFormErrors, standardValidate } from "./utils";
 
 const unsetMarker = Symbol("unsetMarker");
 type UnsetMarker = typeof unsetMarker;
@@ -24,27 +26,15 @@ type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
       : (param: P) => R
   : never;
 
-type InferParserType<
-  T,
-  TType extends "in" | "out",
-  TUnwrapEffects extends true | false,
-> = T extends z.ZodEffects<infer InnerType, infer Output, infer Input>
-  ? TUnwrapEffects extends true
-    ? InnerType[TType extends "in" ? "_input" : "_output"]
-    : TType extends "in"
-      ? Input
-      : Output
-  : T extends z.ZodType
-    ? T[TType extends "in" ? "_input" : "_output"]
-    : never;
+type InferParserType<T, TType extends "in" | "out"> = T extends StandardSchemaV1
+  ? TType extends "in"
+    ? StandardSchemaV1.InferInput<T>
+    : StandardSchemaV1.InferOutput<T>
+  : never;
 
-type InferInputType<
-  T,
-  TType extends "in" | "out",
-  TUnwrapEffects extends true | false = true,
-> = T extends UnsetMarker
+type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
-  : InferParserType<T, TType, TUnwrapEffects>;
+  : InferParserType<T, TType>;
 
 type InferContextType<T> = T extends UnsetMarker ? undefined : T;
 
@@ -66,7 +56,7 @@ interface ActionBuilder<TParams extends ActionParams> {
   /**
    * Input validation for the action.
    */
-  input: <TParser extends z.ZodType>(
+  input: <TParser extends StandardSchemaV1>(
     input:
       | ((params: { ctx: InferContextType<TParams["_context"]> }) =>
           | Promise<TParser>
@@ -85,11 +75,7 @@ interface ActionBuilder<TParams extends ActionParams> {
       input: InferInputType<TParams["_input"], "out">;
     }) => Promise<TOutput>,
   ) => SanitizeFunctionParam<
-    (
-      input:
-        | InferInputType<TParams["_input"], "in">
-        | InferInputType<TParams["_input"], "in", false>,
-    ) => Promise<TOutput>
+    (input: InferInputType<TParams["_input"], "in">) => Promise<TOutput>
   >;
   /**
    * Create an action for React `useActionState`
@@ -109,16 +95,14 @@ interface ActionBuilder<TParams extends ActionParams> {
             }
           | {
               input?: undefined;
-              formErrors: z.ZodError<InferInputType<TParams["_input"], "in">>;
+              formErrors: ReturnType<typeof getFormErrors>;
             }
         )
       >,
     ) => Promise<TState>,
   ) => (
     prevState: TState | TPrevState,
-    formData:
-      | InferInputType<TParams["_input"], "in">
-      | InferInputType<TParams["_input"], "in", false>,
+    formData: InferInputType<TParams["_input"], "in">,
   ) => Promise<TState | TPrevState>;
 }
 // biome-ignore lint/suspicious/noExplicitAny: Intended
@@ -150,7 +134,7 @@ function createServerActionBuilder(
   _context: UnsetMarker;
 }> {
   const _def: ActionBuilderDef<{
-    _input: z.ZodType;
+    _input: StandardSchemaV1;
     _context: undefined;
   }> = {
     input: undefined,
@@ -171,12 +155,12 @@ function createServerActionBuilder(
             typeof _def.input === "function"
               ? await _def.input({ ctx })
               : _def.input;
-          const result = await inputSchema.safeParseAsync(input);
-          if (!result.success) {
-            console.error("❌ Input validation error:", result.error.errors);
-            throw new Error("Input validation error");
+          const result = await standardValidate(inputSchema, input);
+          if (result.issues) {
+            throw new SchemaError(result.issues);
           }
-          return await action({ ctx, input: result.data });
+          // biome-ignore lint/suspicious/noExplicitAny: It's fine
+          return await action({ ctx, input: result.value as any });
         }
         return await action({ ctx, input: undefined });
       };
@@ -190,16 +174,22 @@ function createServerActionBuilder(
             typeof _def.input === "function"
               ? await _def.input({ ctx })
               : _def.input;
-          const result = await inputSchema.safeParseAsync(formData);
-          if (!result.success) {
+          const result = await standardValidate(inputSchema, formData);
+          if (result.issues) {
             return await action({
               ctx,
               prevState,
               formData,
-              formErrors: result.error,
+              formErrors: getFormErrors(result.issues),
             });
           }
-          return await action({ ctx, prevState, formData, input: result.data });
+          return await action({
+            ctx,
+            prevState,
+            formData,
+            // biome-ignore lint/suspicious/noExplicitAny: It's fine
+            input: result.value as any,
+          });
         }
         return await action({ ctx, prevState, formData, input: undefined });
       };
