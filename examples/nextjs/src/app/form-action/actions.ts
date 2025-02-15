@@ -23,7 +23,7 @@ export const sayHelloAction = serverAct
   )
   .formAction(async ({ formData, input, formErrors, ctx }) => {
     if (formErrors) {
-      return { formData, formErrors: formErrors.formErrors.fieldErrors };
+      return { formData, formErrors: formErrors.fieldErrors };
     }
 
     console.log(

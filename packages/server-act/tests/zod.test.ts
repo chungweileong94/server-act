@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, expectTypeOf, test, vi } from "vitest";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { serverAct } from ".";
+import { serverAct } from "../src";
 
 type FormDataLikeInput = {
   [Symbol.iterator](): IterableIterator<[string, FormDataEntryValue]>;
@@ -70,26 +70,13 @@ describe("action", () => {
       .action(async ({ input }) => Promise.resolve(input.foo));
 
     expectTypeOf(action).toEqualTypeOf<
-      (input: FormData | FormDataLikeInput | { foo: string }) => Promise<string>
+      (input: FormData | FormDataLikeInput) => Promise<string>
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
     const formData = new FormData();
     formData.append("foo", "bar");
     await expect(action(formData)).resolves.toBe("bar");
-  });
-
-  test("should able to pass object type to zfd input type", async () => {
-    const action = serverAct
-      .input(zfd.formData({ foo: zfd.text() }))
-      .action(async ({ input }) => Promise.resolve(input.foo));
-
-    expectTypeOf(action).toEqualTypeOf<
-      (input: FormData | FormDataLikeInput | { foo: string }) => Promise<string>
-    >();
-
-    expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action({ foo: "bar" })).resolves.toBe("bar");
   });
 
   describe("middleware should be called once", () => {
@@ -169,7 +156,7 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: string | undefined,
-        formData: FormData | FormDataLikeInput | { foo: string },
+        formData: FormData | FormDataLikeInput,
       ) => Promise<string | undefined>
     >();
 
@@ -194,11 +181,13 @@ describe("formAction", () => {
         return Promise.resolve("bar");
       });
 
-    type State = string | z.ZodError<{ foo: string }>;
+    type State =
+      | string
+      | { messages: string[]; fieldErrors: Record<string, string[]> };
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData | FormDataLikeInput | { foo: string },
+        formData: FormData | FormDataLikeInput,
       ) => Promise<State | undefined>
     >();
 
@@ -208,26 +197,7 @@ describe("formAction", () => {
     formData.append("bar", "foo");
 
     const result = await action("foo", formData);
-    expect(result).toBeInstanceOf(z.ZodError);
-    expect(result).toHaveProperty("formErrors.fieldErrors", {
-      foo: ["Required"],
-    });
-  });
-
-  test("should able to pass object type to zfd input type", async () => {
-    const action = serverAct
-      .input(zfd.formData({ foo: zfd.text() }))
-      .formAction(async () => Promise.resolve("bar"));
-
-    expectTypeOf(action).toEqualTypeOf<
-      (
-        prevState: string | undefined,
-        formData: FormData | FormDataLikeInput | { foo: string },
-      ) => Promise<string | undefined>
-    >();
-
-    expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toBe("bar");
+    expect(result).toHaveProperty("fieldErrors.foo", ["Required"]);
   });
 
   test("should able to access middleware context", async () => {
@@ -245,11 +215,13 @@ describe("formAction", () => {
         return Promise.resolve(`${input.foo}-${ctx.prefix}-bar`);
       });
 
-    type State = string | z.ZodError<{ foo: string }>;
+    type State =
+      | string
+      | { messages: string[]; fieldErrors: Record<string, string[]> };
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData | FormDataLikeInput | { foo: string },
+        formData: FormData | FormDataLikeInput,
       ) => Promise<State | undefined>
     >();
 
