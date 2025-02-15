@@ -1,5 +1,19 @@
 # server-act
 
+## 1.5.0
+
+### Minor Changes
+
+- [#37](https://github.com/chungweileong94/server-act/pull/37) [`b4e65ee`](https://github.com/chungweileong94/server-act/commit/b4e65eea8812d6c57a142fd67bbc5d1ec011e892) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Support [Standard Schema](https://standardschema.dev/)!
+
+  You can now use any validation library that supports Standard Schema.
+
+  Breaking changes:
+
+  - Minimum required version of Zod is now `^3.24.0`.
+  - `formErrors` in `formAction` will now return `{ messages: string[]; fieldErrors: Record<string, string[]> }` instead of `ZodError`.
+  - You can no longer use an object as input if you are using `zfd.formData` from `zod-form-data`.
+
 ## 1.4.0
 
 ### Minor Changes
