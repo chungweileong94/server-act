@@ -70,14 +70,14 @@ import { z } from "zod";
 
 export const sayHelloAction = serverAct
   .middleware(() => {
-    const userId = "...";
-    return { userId };
+    const t = i18n();
+    return { t };
   })
-  .input(
-    z.object({
-      name: z.string(),
-    }),
-  )
+  .input((ctx) => {
+    return z.object({
+      name: z.string().min(1, { message: ctx.t("form.name.required") }),
+    });
+  })
   .action(async ({ ctx, input }) => {
     console.log("User ID", ctx.userId);
     return `Hello, ${input.name}`;
