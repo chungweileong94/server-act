@@ -71,7 +71,8 @@ import { z } from "zod";
 export const sayHelloAction = serverAct
   .middleware(() => {
     const t = i18n();
-    return { t };
+    const userId = "..."
+    return { t, userId };
   })
   .input((ctx) => {
     return z.object({
