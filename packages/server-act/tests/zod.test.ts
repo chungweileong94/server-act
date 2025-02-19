@@ -200,6 +200,47 @@ describe("formAction", () => {
     expect(result).toHaveProperty("fieldErrors.foo", ["Required"]);
   });
 
+  test("should return a correct form errors with dotpath", async () => {
+    const action = serverAct
+      .input(
+        zfd.formData({
+          list: zfd.repeatable(
+            z.array(
+              z.object({
+                foo: zfd.text(z.string().min(1, { message: "Required" })),
+              }),
+            ),
+          ),
+        }),
+      )
+      .formAction(async ({ formErrors }) => {
+        if (formErrors) {
+          return formErrors;
+        }
+        return Promise.resolve("bar");
+      });
+
+    type State =
+      | string
+      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: State | undefined,
+        formData: FormData | FormDataLikeInput,
+      ) => Promise<State | undefined>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+
+    const formData = new FormData();
+    formData.append("list.0.foo", "");
+
+    const result = await action(undefined, formData);
+    expect(result).toHaveProperty("fieldErrors", {
+      "list.0.foo": ["Required"],
+    });
+  });
+
   test("should able to access middleware context", async () => {
     const action = serverAct
       .middleware(() => ({ prefix: "best" }))
