@@ -274,4 +274,46 @@ describe("formAction", () => {
       "best-bar-best-bar",
     );
   });
+
+  test("should able to infer the state correctly if `prevState` is being accessed", async () => {
+    const action = serverAct.formAction(async ({ prevState }) => {
+      if (prevState == null) {
+        return Promise.resolve("foo");
+      }
+      return Promise.resolve("bar");
+    });
+
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: string | undefined,
+        formData: undefined,
+      ) => Promise<string | undefined>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+
+    await expect(action(undefined, undefined)).resolves.toMatchObject("foo");
+  });
+
+  test("should able to infer the state correctly if `prevState` is being typed", async () => {
+    const action = serverAct.formAction<string, number>(
+      async ({ prevState }) => {
+        if (typeof prevState === "number") {
+          return Promise.resolve("foo");
+        }
+        return Promise.resolve("bar");
+      },
+    );
+
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: string | number,
+        formData: undefined,
+      ) => Promise<string | number>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+
+    await expect(action(123, undefined)).resolves.toMatchObject("foo");
+  });
 });

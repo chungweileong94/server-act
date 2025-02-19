@@ -5,6 +5,8 @@ import { getFormErrors, standardValidate } from "./utils";
 const unsetMarker = Symbol("unsetMarker");
 type UnsetMarker = typeof unsetMarker;
 
+type RemoveUnsetMarker<T> = T extends UnsetMarker ? undefined : T;
+
 type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y
   ? 1
   : 2
@@ -36,7 +38,7 @@ type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
   : InferParserType<T, TType>;
 
-type InferContextType<T> = T extends UnsetMarker ? undefined : T;
+type InferContextType<T> = RemoveUnsetMarker<T>;
 
 interface ActionParams<TInput = unknown, TContext = unknown> {
   _input: TInput;
@@ -80,13 +82,12 @@ interface ActionBuilder<TParams extends ActionParams> {
   /**
    * Create an action for React `useActionState`
    */
-  formAction: <TState, TPrevState = undefined>(
+  formAction: <TState, TPrevState = UnsetMarker>(
     action: (
       params: Prettify<
         {
           ctx: InferContextType<TParams["_context"]>;
-          // biome-ignore lint/suspicious/noExplicitAny: FIXME: This supposes to be `TState`, but we can't, as it will break the type.
-          prevState: any;
+          prevState: RemoveUnsetMarker<TPrevState>;
           formData: FormData;
         } & (
           | {
@@ -101,9 +102,9 @@ interface ActionBuilder<TParams extends ActionParams> {
       >,
     ) => Promise<TState>,
   ) => (
-    prevState: TState | TPrevState,
+    prevState: TState | RemoveUnsetMarker<TPrevState>,
     formData: InferInputType<TParams["_input"], "in">,
-  ) => Promise<TState | TPrevState>;
+  ) => Promise<TState | RemoveUnsetMarker<TPrevState>>;
 }
 // biome-ignore lint/suspicious/noExplicitAny: Intended
 type AnyActionBuilder = ActionBuilder<any>;
@@ -178,20 +179,28 @@ function createServerActionBuilder(
           if (result.issues) {
             return await action({
               ctx,
-              prevState,
+              // biome-ignore lint/suspicious/noExplicitAny: It's fine
+              prevState: prevState as any,
               formData,
               formErrors: getFormErrors(result.issues),
             });
           }
           return await action({
             ctx,
-            prevState,
+            // biome-ignore lint/suspicious/noExplicitAny: It's fine
+            prevState: prevState as any,
             formData,
             // biome-ignore lint/suspicious/noExplicitAny: It's fine
             input: result.value as any,
           });
         }
-        return await action({ ctx, prevState, formData, input: undefined });
+        return await action({
+          ctx,
+          // biome-ignore lint/suspicious/noExplicitAny: It's fine
+          prevState: prevState as any,
+          formData,
+          input: undefined,
+        });
       };
     },
   };
