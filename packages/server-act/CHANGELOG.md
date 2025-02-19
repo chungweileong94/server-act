@@ -1,5 +1,11 @@
 # server-act
 
+## 1.5.1
+
+### Patch Changes
+
+- [#39](https://github.com/chungweileong94/server-act/pull/39) [`764a047`](https://github.com/chungweileong94/server-act/commit/764a047670daa43d978bcb5d77f0b285c38da25f) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Support `prevState` typing
+
 ## 1.5.0
 
 ### Minor Changes
