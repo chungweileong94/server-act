@@ -48,8 +48,8 @@ importers:
         specifier: ^3.24.2
         version: 3.24.2
       zod-form-data:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.24.2)
+        specifier: ^2.0.6
+        version: 2.0.7(zod@3.24.2)
     devDependencies:
       '@types/node':
         specifier: ^20
@@ -95,8 +95,8 @@ importers:
         specifier: ^3.24.2
         version: 3.24.2
       zod-form-data:
-        specifier: ^2.0.2
-        version: 2.0.2(zod@3.24.2)
+        specifier: ^2.0.6
+        version: 2.0.7(zod@3.24.2)
 
 packages:
 
@@ -806,6 +806,9 @@ packages:
     resolution: {integrity: sha512-1q+mykKE3Vot1kaFJIDoUFv5TuW+QQVaf2FmTT9krg86pQrGStOSJJ0Zil7CFagyxDuouTepzt5Y5TVzyajOdQ==}
     cpu: [x64]
     os: [win32]
+
+  '@rvf/set-get@7.0.1':
+    resolution: {integrity: sha512-GkTSn9K1GrTYoTUqlUs36k6nJnzjQaFBTTEIqUYmzBcsGsoJM8xG7EAx2WLHWAA4QzFjcwWUSHQ3vM3Fbw50Tg==}
 
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -2745,8 +2748,8 @@ packages:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
 
-  zod-form-data@2.0.2:
-    resolution: {integrity: sha512-sKTi+k0fvkxdakD0V5rq+9WVJA3cuTQUfEmNqvHrTzPLvjfLmkkBLfR0ed3qOi9MScJXTHIDH/jUNnEJ3CBX4g==}
+  zod-form-data@2.0.7:
+    resolution: {integrity: sha512-O27uzKMx7qc7z51KXER326Fp966jqHGvZX3i18CbvElF/QqVsQQN6Q7BnzepkzeBzTJnU3golibVSagf4dp7RQ==}
     peerDependencies:
       zod: '>= 3.11.0'
 
@@ -3374,6 +3377,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.9.5':
     optional: true
+
+  '@rvf/set-get@7.0.1': {}
 
   '@sinclair/typebox@0.27.8': {}
 
@@ -5402,8 +5407,9 @@ snapshots:
 
   yocto-queue@1.0.0: {}
 
-  zod-form-data@2.0.2(zod@3.24.2):
+  zod-form-data@2.0.7(zod@3.24.2):
     dependencies:
+      '@rvf/set-get': 7.0.1
       zod: 3.24.2
 
   zod@3.24.2: {}

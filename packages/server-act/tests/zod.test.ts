@@ -70,7 +70,7 @@ describe("action", () => {
       .action(async ({ input }) => Promise.resolve(input.foo));
 
     expectTypeOf(action).toEqualTypeOf<
-      (input: FormData | FormDataLikeInput) => Promise<string>
+      (input: FormData | FormDataLikeInput | { foo: string }) => Promise<string>
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
@@ -156,7 +156,7 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: string | undefined,
-        formData: FormData | FormDataLikeInput,
+        formData: FormData | FormDataLikeInput | { foo: string },
       ) => Promise<string | undefined>
     >();
 
@@ -187,7 +187,7 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData | FormDataLikeInput,
+        formData: FormData | FormDataLikeInput | { foo: string },
       ) => Promise<State | undefined>
     >();
 
@@ -226,7 +226,7 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData | FormDataLikeInput,
+        formData: FormData | FormDataLikeInput | { list: { foo: string }[] },
       ) => Promise<State | undefined>
     >();
 
@@ -262,7 +262,7 @@ describe("formAction", () => {
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
-        formData: FormData | FormDataLikeInput,
+        formData: FormData | FormDataLikeInput | { foo: string },
       ) => Promise<State | undefined>
     >();
 
