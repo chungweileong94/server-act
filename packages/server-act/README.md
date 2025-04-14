@@ -127,7 +127,7 @@ import { useActionState } from "react";
 import { sayHelloAction } from "./action";
 
 export const ClientComponent = () => {
-  const [state, dispatch] = useFormState(sayHelloAction, undefined);
+  const [state, dispatch] = useActionState(sayHelloAction, undefined);
 
   return (
     <form action={dispatch}>
