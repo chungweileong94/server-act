@@ -9,7 +9,8 @@
     "typecheck": "turbo run typecheck",
     "sherif": "sherif",
     "changeset:add": "changeset add",
-    "changeset:publish": "changeset publish && biome format --write ."
+    "changeset:publish": "changeset publish && biome format --write .",
+    "changeset:version": "changeset version && biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
