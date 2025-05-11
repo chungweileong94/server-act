@@ -1,5 +1,11 @@
 # server-act
 
+## 1.5.2
+
+### Patch Changes
+
+- [`7f3e2d7`](https://github.com/chungweileong94/server-act/commit/7f3e2d7863cef4c25ad9088ef54a09d459d241f7) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Update peer dependencies to support Zod v4
+
 ## 1.5.1
 
 ### Patch Changes
