@@ -44,6 +44,16 @@
       "code_actions_on_format": {
         "source.organizeImports.biome": true
       }
+    },
+    "JSON": {
+      "formatter": {
+        "language_server": { "name": "biome" }
+      }
+    },
+    "JSONC": {
+      "formatter": {
+        "language_server": { "name": "biome" }
+      }
     }
   }
 }
