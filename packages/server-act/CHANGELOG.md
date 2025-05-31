@@ -1,5 +1,11 @@
 # server-act
 
+## 1.5.3
+
+### Patch Changes
+
+- [`a8fecb2`](https://github.com/chungweileong94/server-act/commit/a8fecb234c42efada3f5692fc7084c3a5e15dad5) Thanks [@chungweileong94](https://github.com/chungweileong94)! - There are no code changes in this release, but it is now bundled using tsdown.
+
 ## 1.5.2
 
 ### Patch Changes
