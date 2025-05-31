@@ -31,7 +31,8 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepack": "node ../../.github/scripts/cleanup-package-json.mjs"
   },
   "keywords": [
     "next",
