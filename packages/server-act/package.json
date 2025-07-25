@@ -11,20 +11,13 @@
   "bugs": {
     "url": "https://github.com/chungweileong94/server-act/issues"
   },
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "files": ["dist", "package.json", "LICENSE", "README.md"],
   "scripts": {
@@ -66,7 +59,7 @@
     }
   },
   "devDependencies": {
-    "tsdown": "^0.12.5",
+    "tsdown": "^0.13.0",
     "typescript": "^5.6.3",
     "valibot": "1.0.0-rc.0",
     "zod": "^3.24.2",
