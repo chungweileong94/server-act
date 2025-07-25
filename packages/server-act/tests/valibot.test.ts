@@ -112,11 +112,11 @@ describe("action", () => {
   });
 });
 
-describe("formAction", () => {
+describe("stateAction", () => {
   test("should able to create form action with input", async () => {
     const action = serverAct
       .input(v.object({ foo: v.string() }))
-      .formAction(async () => Promise.resolve("bar"));
+      .stateAction(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<
       (
@@ -132,7 +132,7 @@ describe("formAction", () => {
   test("should return form errors if the input is invalid", async () => {
     const action = serverAct
       .input(v.object({ foo: v.string() }))
-      .formAction(async ({ formErrors }) => {
+      .stateAction(async ({ formErrors }) => {
         if (formErrors) {
           return formErrors;
         }
@@ -167,7 +167,7 @@ describe("formAction", () => {
           ),
         }),
       )
-      .formAction(async ({ ctx, formErrors, input }) => {
+      .stateAction(async ({ ctx, formErrors, input }) => {
         if (formErrors) {
           return formErrors;
         }

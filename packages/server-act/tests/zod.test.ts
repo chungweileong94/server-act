@@ -132,9 +132,9 @@ describe("action", () => {
   });
 });
 
-describe("formAction", () => {
+describe("stateAction", () => {
   test("should able to create form action without input", async () => {
-    const action = serverAct.formAction(async () => Promise.resolve("bar"));
+    const action = serverAct.stateAction(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<
       (
@@ -151,7 +151,7 @@ describe("formAction", () => {
   test("should able to create form action with input", async () => {
     const action = serverAct
       .input(zfd.formData({ foo: zfd.text() }))
-      .formAction(async () => Promise.resolve("bar"));
+      .stateAction(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<
       (
@@ -174,7 +174,7 @@ describe("formAction", () => {
           foo: zfd.text(z.string({ required_error: "Required" })),
         }),
       )
-      .formAction(async ({ formErrors }) => {
+      .stateAction(async ({ formErrors }) => {
         if (formErrors) {
           return formErrors;
         }
@@ -213,7 +213,7 @@ describe("formAction", () => {
           ),
         }),
       )
-      .formAction(async ({ formErrors }) => {
+      .stateAction(async ({ formErrors }) => {
         if (formErrors) {
           return formErrors;
         }
@@ -249,7 +249,7 @@ describe("formAction", () => {
           foo: zfd.text(z.string().transform((v) => `${ctx.prefix}-${v}`)),
         }),
       )
-      .formAction(async ({ ctx, formErrors, input }) => {
+      .stateAction(async ({ ctx, formErrors, input }) => {
         if (formErrors) {
           return formErrors;
         }
@@ -276,7 +276,7 @@ describe("formAction", () => {
   });
 
   test("should able to infer the state correctly if `prevState` is being accessed", async () => {
-    const action = serverAct.formAction(async ({ prevState }) => {
+    const action = serverAct.stateAction(async ({ prevState }) => {
       if (prevState == null) {
         return Promise.resolve("foo");
       }
@@ -296,7 +296,7 @@ describe("formAction", () => {
   });
 
   test("should able to infer the state correctly if `prevState` is being typed", async () => {
-    const action = serverAct.formAction<string, number>(
+    const action = serverAct.stateAction<string, number>(
       async ({ prevState }) => {
         if (typeof prevState === "number") {
           return Promise.resolve("foo");

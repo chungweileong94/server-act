@@ -82,7 +82,7 @@ interface ActionBuilder<TParams extends ActionParams> {
   /**
    * Create an action for React `useActionState`
    */
-  formAction: <TState, TPrevState = UnsetMarker>(
+  stateAction: <TState, TPrevState = UnsetMarker>(
     action: (
       params: Prettify<
         {
@@ -166,7 +166,7 @@ function createServerActionBuilder(
         return await action({ ctx, input: undefined });
       };
     },
-    formAction: (action) => {
+    stateAction: (action) => {
       // biome-ignore lint/suspicious/noExplicitAny: Intended
       return async (prevState, formData?: any) => {
         const ctx = await _def.middleware?.();
