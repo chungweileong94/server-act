@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-
-import { sayHelloAction } from "./actions";
+import { sayHelloAction } from "./_actions";
 
 export default function Action() {
   const [pending, startTransition] = useTransition();

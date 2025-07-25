@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { sayHelloAction } from "./actions";
+import { sayHelloAction } from "./_actions";
 
 function SubmitButton() {
   const status = useFormStatus();
