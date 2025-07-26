@@ -31,7 +31,7 @@ export default function FormAction() {
           id="name"
           name="name"
           className="rounded-md border-2 border-black px-4 py-2"
-          defaultValue={state?.input?.get("name")?.toString()}
+          defaultValue={state?.formData?.get("name")?.toString()}
         />
         <SubmitButton />
         {state?.message && <p className="text-gray-500">{state.message}</p>}
