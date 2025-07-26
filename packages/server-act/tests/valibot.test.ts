@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import { beforeEach, describe, expect, expectTypeOf, test, vi } from "vitest";
 import { serverAct } from "../src";
+import { formDataToObject } from "../src/utils";
 
 describe("action", () => {
   test("should able to create action with input", async () => {
@@ -113,10 +114,122 @@ describe("action", () => {
 });
 
 describe("stateAction", () => {
-  test("should able to create form action with input", async () => {
+  test("should able to create action with input", async () => {
     const action = serverAct
       .input(v.object({ foo: v.string() }))
       .stateAction(async () => Promise.resolve("bar"));
+
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: string | undefined,
+        input: { foo: string },
+      ) => Promise<string | undefined>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+    await expect(action("foo", { foo: "bar" })).resolves.toMatchObject("bar");
+  });
+
+  test("should able to work with `formDataToObject`", async () => {
+    const action = serverAct
+      .input(
+        v.pipe(
+          v.custom<FormData>((value) => value instanceof FormData),
+          v.transform(formDataToObject),
+          v.object({ foo: v.string() }),
+        ),
+      )
+      .stateAction(async ({ input, inputErrors }) => {
+        if (inputErrors) {
+          return inputErrors;
+        }
+        return Promise.resolve(input.foo);
+      });
+
+    type State =
+      | string
+      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: State | undefined,
+        input: FormData,
+      ) => Promise<State | undefined>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+
+    const formData = new FormData();
+    formData.append("foo", "bar");
+    await expect(action("foo", formData)).resolves.toMatchObject("bar");
+  });
+
+  test("should return input errors if the input is invalid", async () => {
+    const action = serverAct
+      .input(v.object({ foo: v.string() }))
+      .stateAction(async ({ inputErrors }) => {
+        if (inputErrors) {
+          return inputErrors;
+        }
+        return Promise.resolve("bar");
+      });
+
+    type State =
+      | string
+      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: State | undefined,
+        input: { foo: string },
+      ) => Promise<State | undefined>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+
+    // @ts-expect-error
+    const result = await action("foo", { bar: "foo" });
+    expect(result).toHaveProperty("fieldErrors.foo");
+  });
+
+  test("should able to access middleware context", async () => {
+    const action = serverAct
+      .middleware(() => ({ prefix: "best" }))
+      .input(({ ctx }) =>
+        v.object({
+          foo: v.pipe(
+            v.string(),
+            v.transform((v) => `${ctx.prefix}-${v}`),
+          ),
+        }),
+      )
+      .stateAction(async ({ ctx, inputErrors, input }) => {
+        if (inputErrors) {
+          return inputErrors;
+        }
+        return Promise.resolve(`${input.foo}-${ctx.prefix}-bar`);
+      });
+
+    type State =
+      | string
+      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: State | undefined,
+        input: { foo: string },
+      ) => Promise<State | undefined>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+    await expect(action("foo", { foo: "bar" })).resolves.toMatchObject(
+      "best-bar-best-bar",
+    );
+  });
+});
+
+describe("formAction", () => {
+  test("should able to create form action with input", async () => {
+    const action = serverAct
+      .input(v.object({ foo: v.string() }))
+      .formAction(async () => Promise.resolve("bar"));
 
     expectTypeOf(action).toEqualTypeOf<
       (
@@ -132,7 +245,7 @@ describe("stateAction", () => {
   test("should return form errors if the input is invalid", async () => {
     const action = serverAct
       .input(v.object({ foo: v.string() }))
-      .stateAction(async ({ formErrors }) => {
+      .formAction(async ({ formErrors }) => {
         if (formErrors) {
           return formErrors;
         }
@@ -167,7 +280,7 @@ describe("stateAction", () => {
           ),
         }),
       )
-      .stateAction(async ({ ctx, formErrors, input }) => {
+      .formAction(async ({ ctx, formErrors, input }) => {
         if (formErrors) {
           return formErrors;
         }

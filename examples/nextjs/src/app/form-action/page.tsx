@@ -35,7 +35,7 @@ export default function FormAction() {
         />
         <SubmitButton />
         {state?.message && <p className="text-gray-500">{state.message}</p>}
-        {state?.formErrors?.name?.map((error) => (
+        {state?.inputErrors?.name?.map((error) => (
           <p key={error} className="text-red-500">
             {error}
           </p>

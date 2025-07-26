@@ -1,6 +1,6 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
-import { getFormErrors, standardValidate } from "./utils";
+import { getInputErrors, standardValidate } from "./internal/schema";
 
 const unsetMarker = Symbol("unsetMarker");
 type UnsetMarker = typeof unsetMarker;
@@ -88,6 +88,34 @@ interface ActionBuilder<TParams extends ActionParams> {
         {
           ctx: InferContextType<TParams["_context"]>;
           prevState: RemoveUnsetMarker<TPrevState>;
+          rawInput: InferInputType<TParams["_input"], "in">;
+        } & (
+          | {
+              input: InferInputType<TParams["_input"], "out">;
+              inputErrors?: undefined;
+            }
+          | {
+              input?: undefined;
+              inputErrors: ReturnType<typeof getInputErrors>;
+            }
+        )
+      >,
+    ) => Promise<TState>,
+  ) => (
+    prevState: TState | RemoveUnsetMarker<TPrevState>,
+    input: InferInputType<TParams["_input"], "in">,
+  ) => Promise<TState | RemoveUnsetMarker<TPrevState>>;
+  /**
+   * Create an action for React `useActionState`
+   *
+   * @deprecated Use `stateAction` instead.
+   */
+  formAction: <TState, TPrevState = UnsetMarker>(
+    action: (
+      params: Prettify<
+        {
+          ctx: InferContextType<TParams["_context"]>;
+          prevState: RemoveUnsetMarker<TPrevState>;
           formData: FormData;
         } & (
           | {
@@ -96,7 +124,7 @@ interface ActionBuilder<TParams extends ActionParams> {
             }
           | {
               input?: undefined;
-              formErrors: ReturnType<typeof getFormErrors>;
+              formErrors: ReturnType<typeof getInputErrors>;
             }
         )
       >,
@@ -168,6 +196,43 @@ function createServerActionBuilder(
     },
     stateAction: (action) => {
       // biome-ignore lint/suspicious/noExplicitAny: Intended
+      return async (prevState, rawInput?: any) => {
+        const ctx = await _def.middleware?.();
+        if (_def.input) {
+          const inputSchema =
+            typeof _def.input === "function"
+              ? await _def.input({ ctx })
+              : _def.input;
+          const result = await standardValidate(inputSchema, rawInput);
+          if (result.issues) {
+            return await action({
+              ctx,
+              // biome-ignore lint/suspicious/noExplicitAny: It's fine
+              prevState: prevState as any,
+              rawInput,
+              inputErrors: getInputErrors(result.issues),
+            });
+          }
+          return await action({
+            ctx,
+            // biome-ignore lint/suspicious/noExplicitAny: It's fine
+            prevState: prevState as any,
+            rawInput,
+            // biome-ignore lint/suspicious/noExplicitAny: It's fine
+            input: result.value as any,
+          });
+        }
+        return await action({
+          ctx,
+          // biome-ignore lint/suspicious/noExplicitAny: It's fine
+          prevState: prevState as any,
+          rawInput,
+          input: undefined,
+        });
+      };
+    },
+    formAction: (action) => {
+      // biome-ignore lint/suspicious/noExplicitAny: Intended
       return async (prevState, formData?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
@@ -182,7 +247,7 @@ function createServerActionBuilder(
               // biome-ignore lint/suspicious/noExplicitAny: It's fine
               prevState: prevState as any,
               formData,
-              formErrors: getFormErrors(result.issues),
+              formErrors: getInputErrors(result.issues),
             });
           }
           return await action({

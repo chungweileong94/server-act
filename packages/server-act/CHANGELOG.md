@@ -4,7 +4,7 @@
 
 ### Minor Changes
 
-- [`0e4d9d6`](https://github.com/chungweileong94/server-act/commit/0e4d9d6fa6043758e22317614f7721eb394c886d) Thanks [@chungweileong94](https://github.com/chungweileong94)! - - `.formAction` has been renamed to `.stateAction`.
+- [`0e4d9d6`](https://github.com/chungweileong94/server-act/commit/0e4d9d6fa6043758e22317614f7721eb394c886d) Thanks [@chungweileong94](https://github.com/chungweileong94)! - `.formAction` has been renamed to `.stateAction`.
 
   If you are using `.formAction`, you must update all references to `.stateAction`:
 

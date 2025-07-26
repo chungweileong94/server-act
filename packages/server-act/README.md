@@ -91,57 +91,137 @@ export const sayHelloAction = serverAct
 >
 > - https://react.dev/reference/react/useActionState
 
-We recommend using [zod-form-data](https://www.npmjs.com/package/zod-form-data) for input validation.
-
 ```ts
 // action.ts;
 "use server";
 
 import { serverAct } from "server-act";
+import { formDataToObject } from "server-act/utils";
 import { z } from "zod";
-import { zfd } from "zod-form-data";
+
+function zodFormData<T extends z.ZodType>(
+  schema: T,
+): z.ZodPipe<z.ZodTransform<Record<string, unknown>, FormData>, T> {
+  return z.preprocess<Record<string, unknown>, T, FormData>(
+    (v) => formDataToObject(v),
+    schema,
+  );
+}
 
 export const sayHelloAction = serverAct
   .input(
-    zfd.formData({
-      name: zfd.text(
-        z
-          .string({ required_error: `You haven't told me your name` })
-          .max(20, { message: "Any shorter name? You name is too long 😬" }),
-      ),
-    }),
+    zodFormData(
+      z.object({
+        name: z
+          .string()
+          .min(1, { error: `You haven't told me your name` })
+          .max(20, { error: "Any shorter name? You name is too long 😬" }),
+      }),
+    ),
   )
-  .stateAction(async ({ formData, input, formErrors, ctx }) => {
-    if (formErrors) {
-      return { formData, formErrors: formErrors.fieldErrors };
+  .stateAction(async ({ rawInput, input, inputErrors, ctx }) => {
+    if (inputErrors) {
+      return { formData: rawInput, inputErrors: inputErrors.fieldErrors };
     }
     return { message: `Hello, ${input.name}!` };
   });
 ```
 
-```tsx
-// client-component.tsx
-"use client";
+## Utilities
 
-import { useActionState } from "react";
-import { sayHelloAction } from "./action";
+### `formDataToObject`
 
-export const ClientComponent = () => {
-  const [state, dispatch] = useActionState(sayHelloAction, undefined);
+The `formDataToObject` utility converts FormData to a structured JavaScript object, supporting nested objects, arrays, and complex form structures.
 
-  return (
-    <form action={dispatch}>
-      <input
-        name="name"
-        required
-        defaultValue={state?.formData?.get("name")?.toString()}
-      />
-      {state?.formErrors?.name?.map((error) => <p key={error}>{error}</p>)}
+```ts
+import { formDataToObject } from "server-act/utils";
+```
 
-      <button type="submit">Submit</button>
+#### Basic Usage
 
-      {!!state?.message && <p>{state.message}</p>}
-    </form>
+```ts
+const formData = new FormData();
+formData.append('name', 'John');
+
+const result = formDataToObject(formData);
+// Result: { name: 'John' }
+```
+
+#### Nested Objects and Arrays
+
+```ts
+const formData = new FormData();
+formData.append('user.name', 'John');
+
+const result = formDataToObject(formData);
+// Result: { user: { name: 'John' } }
+```
+
+#### With Zod
+
+```ts
+"use server";
+
+import { serverAct } from "server-act";
+import { formDataToObject } from "server-act/utils";
+import { z } from "zod";
+
+function zodFormData<T extends z.ZodType>(
+  schema: T,
+): z.ZodPipe<z.ZodTransform<Record<string, unknown>, FormData>, T> {
+  return z.preprocess<Record<string, unknown>, T, FormData>(
+    (v) => formDataToObject(v),
+    schema,
   );
-};
+}
+
+export const createUserAction = serverAct
+  .input(
+    zodFormData(
+      z.object({
+        name: z.string().min(1, "Name is required"),
+      }),
+    ),
+  )
+  .stateAction(async ({ rawInput, input, inputErrors }) => {
+    if (inputErrors) {
+      return { formData: rawInput, errors: inputErrors.fieldErrors };
+    }
+
+    // Process the validated input
+    console.log("User:", input.name);
+
+    return { success: true, userId: "123" };
+  });
+```
+
+#### With Valibot
+
+```ts
+"use server";
+
+import { serverAct } from "server-act";
+import { formDataToObject } from "server-act/utils";
+import * as v from "valibot";
+
+export const createPostAction = serverAct
+  .input(
+    v.pipe(
+      v.custom<FormData>((value) => value instanceof FormData),
+      v.transform(formDataToObject),
+      v.object({
+        title: v.pipe(v.string(), v.minLength(1, "Title is required")),
+      }),
+    ),
+  )
+  .stateAction(async ({ rawInput, input, inputErrors }) => {
+    if (inputErrors) {
+      return { formData: rawInput, errors: inputErrors.fieldErrors };
+    }
+
+    // Process the validated input
+    console.log("Post:", input.title);
+
+    return { success: true, postId: "456" };
+  });
 ```
