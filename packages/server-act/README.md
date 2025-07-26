@@ -91,29 +91,38 @@ export const sayHelloAction = serverAct
 >
 > - https://react.dev/reference/react/useActionState
 
-We recommend using [zod-form-data](https://www.npmjs.com/package/zod-form-data) for input validation.
-
 ```ts
 // action.ts;
 "use server";
 
 import { serverAct } from "server-act";
+import { formDataToObject } from "server-act/utils";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 
+function zodFormData<T extends z.ZodType>(
+  schema: T,
+): z.ZodPipe<z.ZodTransform<Record<string, unknown>, FormData>, T> {
+  return z.preprocess<Record<string, unknown>, T, FormData>(
+    (v) => formDataToObject(v),
+    schema,
+  );
+}
+
 export const sayHelloAction = serverAct
   .input(
-    zfd.formData({
-      name: zfd.text(
-        z
-          .string({ required_error: `You haven't told me your name` })
-          .max(20, { message: "Any shorter name? You name is too long 😬" }),
-      ),
-    }),
+    zodFormData(
+      z.object({
+        name: z
+          .string()
+          .min(1, { error: `You haven't told me your name` })
+          .max(20, { error: "Any shorter name? You name is too long 😬" }),
+      }),
+    ),
   )
-  .stateAction(async ({ formData, input, formErrors, ctx }) => {
-    if (formErrors) {
-      return { formData, formErrors: formErrors.fieldErrors };
+  .stateAction(async ({ rawInput, input, inputErrors, ctx }) => {
+    if (inputErrors) {
+      return { formData: rawInput, inputErrors: inputErrors.fieldErrors };
     }
     return { message: `Hello, ${input.name}!` };
   });
@@ -136,7 +145,7 @@ export const ClientComponent = () => {
         required
         defaultValue={state?.formData?.get("name")?.toString()}
       />
-      {state?.formErrors?.name?.map((error) => <p key={error}>{error}</p>)}
+      {state?.inputErrors?.name?.map((error) => <p key={error}>{error}</p>)}
 
       <button type="submit">Submit</button>
 

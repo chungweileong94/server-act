@@ -31,11 +31,11 @@ export default function FormAction() {
           id="name"
           name="name"
           className="rounded-md border-2 border-black px-4 py-2"
-          defaultValue={state?.formData?.get("name")?.toString()}
+          defaultValue={state?.input?.get("name")?.toString()}
         />
         <SubmitButton />
         {state?.message && <p className="text-gray-500">{state.message}</p>}
-        {state?.formErrors?.name?.map((error) => (
+        {state?.inputErrors?.name?.map((error) => (
           <p key={error} className="text-red-500">
             {error}
           </p>

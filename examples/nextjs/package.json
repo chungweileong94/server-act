@@ -13,8 +13,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "server-act": "workspace:*",
-    "zod": "^3.24.2",
-    "zod-form-data": "^2.0.6"
+    "zod": "^4.0.10"
   },
   "devDependencies": {
     "@types/node": "^20",

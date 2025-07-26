@@ -1,8 +1,17 @@
 "use server";
 
 import { serverAct } from "server-act";
+import { formDataToObject } from "server-act/utils";
 import { z } from "zod";
-import { zfd } from "zod-form-data";
+
+function zodFormData<T extends z.ZodType>(
+  schema: T,
+): z.ZodPipe<z.ZodTransform<Record<string, unknown>, FormData>, T> {
+  return z.preprocess<Record<string, unknown>, T, FormData>(
+    (v) => formDataToObject(v),
+    schema,
+  );
+}
 
 const requestTimeMiddleware = () => {
   return {
@@ -13,17 +22,18 @@ const requestTimeMiddleware = () => {
 export const sayHelloAction = serverAct
   .middleware(requestTimeMiddleware)
   .input(
-    zfd.formData({
-      name: zfd.text(
-        z
-          .string({ required_error: `You haven't told me your name` })
-          .max(20, { message: "Any shorter name? You name is too long 😬" }),
-      ),
-    }),
+    zodFormData(
+      z.object({
+        name: z
+          .string()
+          .min(1, { error: `You haven't told me your name` })
+          .max(20, { error: "Any shorter name? You name is too long 😬" }),
+      }),
+    ),
   )
-  .stateAction(async ({ formData, input, formErrors, ctx }) => {
-    if (formErrors) {
-      return { formData, formErrors: formErrors.fieldErrors };
+  .stateAction(async ({ rawInput, input, inputErrors, ctx }) => {
+    if (inputErrors) {
+      return { input: rawInput, inputErrors: inputErrors.fieldErrors };
     }
 
     console.log(

@@ -1,33 +1,50 @@
-import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { getDotPath } from "@standard-schema/utils";
+import { assert } from "./internal/assert";
 
-export async function standardValidate<T extends StandardSchemaV1>(
-  schema: T,
-  input: StandardSchemaV1.InferInput<T>,
-): Promise<
-  StandardSchemaV1.Result<
-    StandardSchemaV1.InferOutput<T> | StandardSchemaV1.FailureResult
-  >
-> {
-  let result = schema["~standard"].validate(input);
-  if (result instanceof Promise) result = await result;
-  return result;
+function isNumberString(str: string) {
+  return /^\d+$/.test(str);
 }
 
-export function getFormErrors(issues: ReadonlyArray<StandardSchemaV1.Issue>) {
-  const messages: string[] = [];
-  const fieldErrors: Record<string, string[]> = {};
-  for (const issue of issues) {
-    const dotPath = getDotPath(issue);
-    if (dotPath) {
-      if (fieldErrors[dotPath]) {
-        fieldErrors[dotPath].push(issue.message);
-      } else {
-        fieldErrors[dotPath] = [issue.message];
-      }
-    } else {
-      messages.push(issue.message);
+function set(
+  // biome-ignore lint/suspicious/noExplicitAny: No worries
+  obj: Record<string, any>,
+  path: readonly string[],
+  value: unknown,
+): void {
+  if (path.length > 1) {
+    const newPath = [...path];
+    const key = newPath.shift();
+    assert(key != null);
+    const nextKey = newPath[0];
+    assert(nextKey != null);
+
+    if (!obj[key]) {
+      obj[key] = isNumberString(nextKey) ? [] : {};
+    } else if (Array.isArray(obj[key]) && !isNumberString(nextKey)) {
+      obj[key] = Object.fromEntries(Object.entries(obj[key]));
     }
+
+    set(obj[key], newPath, value);
+
+    return;
   }
-  return { messages, fieldErrors };
+  const p = path[0];
+  assert(p != null);
+  if (obj[p] === undefined) {
+    obj[p] = value;
+  } else if (Array.isArray(obj[p])) {
+    obj[p].push(value);
+  } else {
+    obj[p] = [obj[p], value];
+  }
+}
+
+export function formDataToObject(formData: FormData) {
+  const obj: Record<string, unknown> = {};
+
+  for (const [key, value] of formData.entries()) {
+    const parts = key.split(/[\.\[\]]/).filter(Boolean);
+    set(obj, parts, value);
+  }
+
+  return obj;
 }
