@@ -4,9 +4,7 @@ import { serverAct } from "server-act";
 import { formDataToObject } from "server-act/utils";
 import { z } from "zod";
 
-function zodFormData<T extends z.ZodType>(
-  schema: T,
-): z.ZodPipe<z.ZodTransform<Record<string, unknown>, FormData>, T> {
+function zodFormData<T extends z.ZodType>(schema: T) {
   return z.preprocess<Record<string, unknown>, T, FormData>(
     (v) => formDataToObject(v),
     schema,
