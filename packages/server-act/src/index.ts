@@ -7,11 +7,10 @@ type UnsetMarker = typeof unsetMarker;
 
 type RemoveUnsetMarker<T> = T extends UnsetMarker ? undefined : T;
 
-type Equals<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y
-  ? 1
-  : 2
-  ? true
-  : false;
+type Equals<X, Y> =
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+    ? true
+    : false;
 
 type Prettify<T> = {
   [P in keyof T]: T[P];
@@ -60,9 +59,9 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   input: <TParser extends StandardSchemaV1>(
     input:
-      | ((params: { ctx: InferContextType<TParams["_context"]> }) =>
-          | Promise<TParser>
-          | TParser)
+      | ((params: {
+          ctx: InferContextType<TParams["_context"]>;
+        }) => Promise<TParser> | TParser)
       | TParser,
   ) => Omit<
     ActionBuilder<{ _input: TParser; _context: TParams["_context"] }>,
@@ -140,9 +139,9 @@ type AnyActionBuilder = ActionBuilder<any>;
 // biome-ignore lint/suspicious/noExplicitAny: Intended
 interface ActionBuilderDef<TParams extends ActionParams<any>> {
   input:
-    | ((params: { ctx: TParams["_context"] }) =>
-        | Promise<TParams["_input"]>
-        | TParams["_input"])
+    | ((params: {
+        ctx: TParams["_context"];
+      }) => Promise<TParams["_input"]> | TParams["_input"])
     | TParams["_input"]
     | undefined;
   middleware:

@@ -51,7 +51,7 @@ describe("action", () => {
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    // @ts-ignore
+    // @ts-expect-error
     await expect(action(1)).rejects.toThrowError();
   });
 
