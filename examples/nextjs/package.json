@@ -16,12 +16,12 @@
     "zod": "^4.0.10"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^20",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
-    "autoprefixer": "10.4.15",
     "postcss": "8.4.30",
-    "tailwindcss": "3.3.3",
+    "tailwindcss": "4.1.18",
     "typescript": "^5.6.3"
   }
 }
