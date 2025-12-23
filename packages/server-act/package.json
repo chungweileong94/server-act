@@ -70,7 +70,7 @@
   },
   "devDependencies": {
     "tsdown": "^0.13.0",
-    "typescript": "^5.6.3",
+    "typescript": "^5.9.3",
     "valibot": "1.0.0-rc.0",
     "zod": "^4.0.10"
   }
