@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
     "next": "16.1.1",
@@ -20,8 +20,8 @@
     "@types/node": "^20",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
+    "@typescript/native-preview": "7.0.0-dev.20260106.1",
     "postcss": "8.4.30",
-    "tailwindcss": "4.1.18",
-    "typescript": "^5.9.3"
+    "tailwindcss": "4.1.18"
   }
 }

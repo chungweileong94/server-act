@@ -14,10 +14,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "a11y": {
-        "useButtonType": "off"
-      }
+      "recommended": true
     }
   },
   "overrides": [

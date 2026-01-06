@@ -74,7 +74,7 @@ describe("action", () => {
     });
 
     beforeEach(() => {
-      vi.restoreAllMocks();
+      vi.clearAllMocks();
     });
 
     test("without input", async () => {
@@ -134,7 +134,7 @@ describe("stateAction", () => {
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    await expect(action("foo", undefined)).resolves.toMatchObject("bar");
+    await expect(action("foo", undefined)).resolves.toMatch("bar");
   });
 
   test("should able to create action with input", async () => {
@@ -150,7 +150,7 @@ describe("stateAction", () => {
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toMatchObject("bar");
+    await expect(action("foo", { foo: "bar" })).resolves.toMatch("bar");
   });
 
   test("should return input errors if the input is invalid", async () => {
@@ -283,7 +283,7 @@ describe("stateAction", () => {
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toMatchObject(
+    await expect(action("foo", { foo: "bar" })).resolves.toMatch(
       "best-bar-best-bar",
     );
   });
@@ -305,7 +305,7 @@ describe("stateAction", () => {
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    await expect(action(undefined, undefined)).resolves.toMatchObject("foo");
+    await expect(action(undefined, undefined)).resolves.toMatch("foo");
   });
 
   test("should able to infer the state correctly if `prevState` is being typed", async () => {
@@ -327,7 +327,7 @@ describe("stateAction", () => {
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    await expect(action(123, undefined)).resolves.toMatchObject("foo");
+    await expect(action(123, undefined)).resolves.toMatch("foo");
   });
 });
 
@@ -344,7 +344,7 @@ describe("formAction", () => {
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    await expect(action("foo", undefined)).resolves.toMatchObject("bar");
+    await expect(action("foo", undefined)).resolves.toMatch("bar");
   });
 
   test("should able to create form action with input", async () => {
@@ -363,7 +363,7 @@ describe("formAction", () => {
 
     const formData = new FormData();
     formData.append("foo", "bar");
-    await expect(action("foo", formData)).resolves.toMatchObject("bar");
+    await expect(action("foo", formData)).resolves.toMatch("bar");
   });
 
   test("should return form errors if the input is invalid", async () => {
@@ -465,9 +465,7 @@ describe("formAction", () => {
 
     const formData = new FormData();
     formData.append("foo", "bar");
-    await expect(action("foo", formData)).resolves.toMatchObject(
-      "best-bar-best-bar",
-    );
+    await expect(action("foo", formData)).resolves.toMatch("best-bar-best-bar");
   });
 
   test("should able to infer the state correctly if `prevState` is being accessed", async () => {
@@ -487,7 +485,7 @@ describe("formAction", () => {
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    await expect(action(undefined, undefined)).resolves.toMatchObject("foo");
+    await expect(action(undefined, undefined)).resolves.toMatch("foo");
   });
 
   test("should able to infer the state correctly if `prevState` is being typed", async () => {
@@ -509,6 +507,6 @@ describe("formAction", () => {
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    await expect(action(123, undefined)).resolves.toMatchObject("foo");
+    await expect(action(123, undefined)).resolves.toMatch("foo");
   });
 });

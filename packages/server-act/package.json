@@ -33,7 +33,7 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsgo --noEmit",
     "test": "vitest run",
     "prepack": "node ../../.github/scripts/cleanup-package-json.mjs"
   },
@@ -69,8 +69,8 @@
     }
   },
   "devDependencies": {
-    "tsdown": "^0.13.0",
-    "typescript": "^5.9.3",
+    "@typescript/native-preview": "7.0.0-dev.20260106.1",
+    "tsdown": "^0.18.4",
     "valibot": "1.0.0-rc.0",
     "zod": "^4.0.10"
   }

@@ -15,6 +15,6 @@
     "noEmit": true,
     "lib": ["es2022", "dom", "dom.iterable"]
   },
-  "include": ["src"],
+  "include": ["src", "tests"],
   "exclude": ["dist"]
 }

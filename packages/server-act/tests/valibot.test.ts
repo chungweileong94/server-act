@@ -61,7 +61,7 @@ describe("action", () => {
     });
 
     beforeEach(() => {
-      vi.restoreAllMocks();
+      vi.clearAllMocks();
     });
 
     test("without input", async () => {
@@ -127,7 +127,7 @@ describe("stateAction", () => {
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toMatchObject("bar");
+    await expect(action("foo", { foo: "bar" })).resolves.toMatch("bar");
   });
 
   test("should able to work with `formDataToObject`", async () => {
@@ -160,7 +160,7 @@ describe("stateAction", () => {
 
     const formData = new FormData();
     formData.append("foo", "bar");
-    await expect(action("foo", formData)).resolves.toMatchObject("bar");
+    await expect(action("foo", formData)).resolves.toMatch("bar");
   });
 
   test("should return input errors if the input is invalid", async () => {
@@ -219,7 +219,7 @@ describe("stateAction", () => {
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toMatchObject(
+    await expect(action("foo", { foo: "bar" })).resolves.toMatch(
       "best-bar-best-bar",
     );
   });
@@ -239,7 +239,7 @@ describe("formAction", () => {
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toMatchObject("bar");
+    await expect(action("foo", { foo: "bar" })).resolves.toMatch("bar");
   });
 
   test("should return form errors if the input is invalid", async () => {
@@ -298,7 +298,7 @@ describe("formAction", () => {
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toMatchObject(
+    await expect(action("foo", { foo: "bar" })).resolves.toMatch(
       "best-bar-best-bar",
     );
   });
