@@ -1,13 +1,6 @@
 {
   "languages": {
     "JavaScript": {
-      "language_servers": [
-        "vtsls",
-        "!typescript-language-server",
-        "biome",
-        "!eslint",
-        "..."
-      ],
       "formatter": {
         "language_server": { "name": "biome" }
       },
@@ -16,13 +9,6 @@
       }
     },
     "TypeScript": {
-      "language_servers": [
-        "vtsls",
-        "!typescript-language-server",
-        "biome",
-        "!eslint",
-        "..."
-      ],
       "formatter": {
         "language_server": { "name": "biome" }
       },
@@ -31,13 +17,6 @@
       }
     },
     "TSX": {
-      "language_servers": [
-        "vtsls",
-        "!typescript-language-server",
-        "biome",
-        "!eslint",
-        "..."
-      ],
       "formatter": {
         "language_server": { "name": "biome" }
       },
