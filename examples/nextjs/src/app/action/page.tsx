@@ -32,7 +32,7 @@ export default function Action() {
         />
         <button
           type="submit"
-          className=" rounded-md border-2 border-black bg-red-100 px-4 py-2"
+          className="rounded-md border-2 border-black bg-red-100 px-4 py-2"
           disabled={pending}
         >
           {pending ? "Loading..." : "Say hello to the server"}

@@ -1,16 +1,33 @@
 {
   "name": "server-act",
   "version": "1.6.1",
+  "keywords": [
+    "action",
+    "next",
+    "nextjs",
+    "react",
+    "react server action",
+    "react server component",
+    "rsc",
+    "server action",
+    "server component"
+  ],
   "homepage": "https://github.com/chungweileong94/server-act#readme",
-  "author": "chungweileong94",
+  "bugs": {
+    "url": "https://github.com/chungweileong94/server-act/issues"
+  },
   "license": "MIT",
+  "author": "chungweileong94",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chungweileong94/server-act.git"
   },
-  "bugs": {
-    "url": "https://github.com/chungweileong94/server-act/issues"
-  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "package.json",
+    "README.md"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -24,12 +41,6 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "package.json",
-    "LICENSE",
-    "README.md"
-  ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
@@ -37,20 +48,15 @@
     "test": "vitest run",
     "prepack": "node ../../.github/scripts/cleanup-package-json.mjs"
   },
-  "keywords": [
-    "next",
-    "nextjs",
-    "react",
-    "react server component",
-    "react server action",
-    "rsc",
-    "server component",
-    "server action",
-    "action"
-  ],
   "dependencies": {
     "@standard-schema/spec": "^1.0.0",
     "@standard-schema/utils": "^0.3.0"
+  },
+  "devDependencies": {
+    "@typescript/native-preview": "7.0.0-dev.20260106.1",
+    "tsdown": "^0.18.4",
+    "valibot": "1.0.0-rc.0",
+    "zod": "^4.0.10"
   },
   "peerDependencies": {
     "typescript": ">=5.0.0",
@@ -67,11 +73,5 @@
     "valibot": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "@typescript/native-preview": "7.0.0-dev.20260106.1",
-    "tsdown": "^0.18.4",
-    "valibot": "1.0.0-rc.0",
-    "zod": "^4.0.10"
   }
 }

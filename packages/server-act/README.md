@@ -71,7 +71,7 @@ import { z } from "zod";
 export const sayHelloAction = serverAct
   .middleware(() => {
     const t = i18n();
-    const userId = "..."
+    const userId = "...";
     return { t, userId };
   })
   .input((ctx) => {
@@ -139,7 +139,7 @@ import { formDataToObject } from "server-act/utils";
 
 ```ts
 const formData = new FormData();
-formData.append('name', 'John');
+formData.append("name", "John");
 
 const result = formDataToObject(formData);
 // Result: { name: 'John' }
@@ -149,7 +149,7 @@ const result = formDataToObject(formData);
 
 ```ts
 const formData = new FormData();
-formData.append('user.name', 'John');
+formData.append("user.name", "John");
 
 const result = formDataToObject(formData);
 // Result: { user: { name: 'John' } }

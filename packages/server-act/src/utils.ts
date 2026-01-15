@@ -5,7 +5,7 @@ function isNumberString(str: string) {
 }
 
 function set(
-  // biome-ignore lint/suspicious/noExplicitAny: No worries
+  // oxlint-disable-next-line typescript/no-explicit-any
   obj: Record<string, any>,
   path: readonly string[],
   value: unknown,
