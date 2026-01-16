@@ -18,7 +18,7 @@
     "@changesets/cli": "^2.26.2",
     "oxfmt": "^0.24.0",
     "oxlint": "^1.39.0",
-    "oxlint-tsgolint": "^0.11.0",
+    "oxlint-tsgolint": "^0.11.1",
     "sherif": "^1.9.0",
     "turbo": "^2.7.3",
     "vitest": "^4.0.16"
