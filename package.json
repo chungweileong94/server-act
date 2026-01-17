@@ -10,8 +10,8 @@
     "format": "oxfmt",
     "sherif": "sherif",
     "changeset:add": "changeset add",
-    "changeset:publish": "changeset publish && biome format --write .",
-    "changeset:version": "changeset version && biome format --write ."
+    "changeset:publish": "changeset publish && oxfmt",
+    "changeset:version": "changeset version && oxfmt"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
