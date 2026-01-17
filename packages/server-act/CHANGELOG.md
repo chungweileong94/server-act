@@ -9,7 +9,6 @@
   This update improves the developer experience when working with `stateAction`, aligning it more closely with modern React conventions and removing legacy form-related naming. Please refer to this [PR](https://github.com/chungweileong94/server-act/pull/47) for more details.
 
   #### Breaking Changes
-
   - `formAction` has been officially deprecated in favor of `stateAction`.
   - Inside `stateAction`:
     - `formData` → `rawInput`
@@ -17,11 +16,10 @@
   - The input type now infers directly from the schema instead of defaulting to `FormData`.
 
   #### New Utility
-
   - Introduced `formDataToObject`, a new utility inspired by [tRPC](https://trpc.io), to help transition from `zod-form-data`:
     ```ts
     function zodFormData<T extends z.ZodType>(
-      schema: T
+      schema: T,
     ): z.ZodPipe<z.ZodTransform<Record<string, unknown>, FormData>, T> {
       return z.preprocess((v) => formDataToObject(v), schema);
     }
@@ -67,7 +65,6 @@
   You can now use any validation library that supports Standard Schema.
 
   Breaking changes:
-
   - Minimum required version of Zod is now `^3.24.0`.
   - `formErrors` in `formAction` will now return `{ messages: string[]; fieldErrors: Record<string, string[]> }` instead of `ZodError`.
   - You can no longer use an object as input if you are using `zfd.formData` from `zod-form-data`.
@@ -107,7 +104,6 @@
 ### Minor Changes
 
 - [#22](https://github.com/chungweileong94/server-act/pull/22) [`a71e8ba`](https://github.com/chungweileong94/server-act/commit/a71e8ba1131b226ad3acc58b8b8f3dc91f759d77) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Better React 19 support
-
   - Updated `useFormState` example to `useActionState`.
   - `prevState` from form action is now `undefined` type by default.
   - You can now access `formData` in form action.

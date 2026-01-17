@@ -17,7 +17,7 @@ export const sayHelloAction = serverAct
     }),
   )
   .action(async ({ input, ctx }) => {
-    console.log(
+    console.info(
       `Someone say hi from the client at ${ctx.requestTime.toTimeString()}!`,
     );
     await new Promise((resolve) => setTimeout(resolve, 1000));

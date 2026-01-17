@@ -16,7 +16,7 @@ type Prettify<T> = {
   [P in keyof T]: T[P];
 } & {};
 
-// biome-ignore lint/suspicious/noExplicitAny: Intended
+// oxlint-disable-next-line typescript/no-explicit-any
 type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
   param: infer P,
 ) => infer R
@@ -133,10 +133,10 @@ interface ActionBuilder<TParams extends ActionParams> {
     formData: InferInputType<TParams["_input"], "in">,
   ) => Promise<TState | RemoveUnsetMarker<TPrevState>>;
 }
-// biome-ignore lint/suspicious/noExplicitAny: Intended
+// oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilder = ActionBuilder<any>;
 
-// biome-ignore lint/suspicious/noExplicitAny: Intended
+// oxlint-disable-next-line typescript/no-explicit-any
 interface ActionBuilderDef<TParams extends ActionParams<any>> {
   input:
     | ((params: {
@@ -148,7 +148,7 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
     | (() => Promise<TParams["_context"]> | TParams["_context"])
     | undefined;
 }
-// biome-ignore lint/suspicious/noExplicitAny: Intended
+// oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilderDef = ActionBuilderDef<any>;
 
 function createNewServerActionBuilder(def: Partial<AnyActionBuilderDef>) {
@@ -175,7 +175,7 @@ function createServerActionBuilder(
     input: (input) =>
       createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,
     action: (action) => {
-      // biome-ignore lint/suspicious/noExplicitAny: Intended
+      // oxlint-disable-next-line typescript/no-explicit-any
       return async (input?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
@@ -187,14 +187,14 @@ function createServerActionBuilder(
           if (result.issues) {
             throw new SchemaError(result.issues);
           }
-          // biome-ignore lint/suspicious/noExplicitAny: It's fine
+          // oxlint-disable-next-line typescript/no-explicit-any
           return await action({ ctx, input: result.value as any });
         }
         return await action({ ctx, input: undefined });
       };
     },
     stateAction: (action) => {
-      // biome-ignore lint/suspicious/noExplicitAny: Intended
+      // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, rawInput?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
@@ -206,7 +206,7 @@ function createServerActionBuilder(
           if (result.issues) {
             return await action({
               ctx,
-              // biome-ignore lint/suspicious/noExplicitAny: It's fine
+              // oxlint-disable-next-line typescript/no-explicit-any
               prevState: prevState as any,
               rawInput,
               inputErrors: getInputErrors(result.issues),
@@ -214,16 +214,16 @@ function createServerActionBuilder(
           }
           return await action({
             ctx,
-            // biome-ignore lint/suspicious/noExplicitAny: It's fine
+            // oxlint-disable-next-line typescript/no-explicit-any
             prevState: prevState as any,
             rawInput,
-            // biome-ignore lint/suspicious/noExplicitAny: It's fine
+            // oxlint-disable-next-line typescript/no-explicit-any
             input: result.value as any,
           });
         }
         return await action({
           ctx,
-          // biome-ignore lint/suspicious/noExplicitAny: It's fine
+          // oxlint-disable-next-line typescript/no-explicit-any
           prevState: prevState as any,
           rawInput,
           input: undefined,
@@ -231,7 +231,7 @@ function createServerActionBuilder(
       };
     },
     formAction: (action) => {
-      // biome-ignore lint/suspicious/noExplicitAny: Intended
+      // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, formData?: any) => {
         const ctx = await _def.middleware?.();
         if (_def.input) {
@@ -243,7 +243,7 @@ function createServerActionBuilder(
           if (result.issues) {
             return await action({
               ctx,
-              // biome-ignore lint/suspicious/noExplicitAny: It's fine
+              // oxlint-disable-next-line typescript/no-explicit-any
               prevState: prevState as any,
               formData,
               formErrors: getInputErrors(result.issues),
@@ -251,16 +251,16 @@ function createServerActionBuilder(
           }
           return await action({
             ctx,
-            // biome-ignore lint/suspicious/noExplicitAny: It's fine
+            // oxlint-disable-next-line typescript/no-explicit-any
             prevState: prevState as any,
             formData,
-            // biome-ignore lint/suspicious/noExplicitAny: It's fine
+            // oxlint-disable-next-line typescript/no-explicit-any
             input: result.value as any,
           });
         }
         return await action({
           ctx,
-          // biome-ignore lint/suspicious/noExplicitAny: It's fine
+          // oxlint-disable-next-line typescript/no-explicit-any
           prevState: prevState as any,
           formData,
           input: undefined,

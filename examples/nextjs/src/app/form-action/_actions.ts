@@ -34,7 +34,7 @@ export const sayHelloAction = serverAct
       return { formData: rawInput, inputErrors: inputErrors.fieldErrors };
     }
 
-    console.log(
+    console.info(
       `Someone say hi from the client at ${ctx.requestTime.toTimeString()}!`,
     );
     await new Promise((resolve) => setTimeout(resolve, 1000));

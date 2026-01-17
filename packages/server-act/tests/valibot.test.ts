@@ -51,7 +51,7 @@ describe("action", () => {
     expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<string>>();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    // @ts-expect-error
+    // @ts-expect-error: It's a test
     await expect(action(1)).rejects.toThrowError();
   });
 
@@ -185,7 +185,7 @@ describe("stateAction", () => {
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    // @ts-expect-error
+    // @ts-expect-error: It's a test
     const result = await action("foo", { bar: "foo" });
     expect(result).toHaveProperty("fieldErrors.foo");
   });
@@ -264,7 +264,7 @@ describe("formAction", () => {
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    // @ts-expect-error
+    // @ts-expect-error: It's a test
     const result = await action("foo", { bar: "foo" });
     expect(result).toHaveProperty("fieldErrors.foo");
   });
