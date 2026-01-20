@@ -85,6 +85,30 @@ export const sayHelloAction = serverAct
   });
 ```
 
+#### `experimental_chainMiddleware`
+
+Chain multiple middleware functions while merging their return values into a
+single context object. Each middleware must return an object or `undefined`.
+
+```ts
+import { experimental_chainMiddleware, serverAct } from "server-act";
+
+const middleware = experimental_chainMiddleware(
+  async () => {
+    return { locale: "en" };
+  },
+  async (ctx) => {
+    return { userId: ctx?.locale ? "user-1" : "unknown" };
+  },
+);
+
+export const sayHelloAction = serverAct
+  .middleware(middleware)
+  .action(async ({ ctx }) => {
+    return `Hello ${ctx.userId} (${ctx.locale})`;
+  });
+```
+
 ### `useActionState` Support
 
 > `useActionState` Documentation:
