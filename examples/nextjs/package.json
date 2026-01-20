@@ -22,6 +22,7 @@
     "@types/react-dom": "19.2.3",
     "@typescript/native-preview": "7.0.0-dev.20260116.1",
     "postcss": "8.4.30",
-    "tailwindcss": "4.1.18"
+    "tailwindcss": "4.1.18",
+    "typescript": "5.9.3"
   }
 }

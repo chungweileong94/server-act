@@ -72,6 +72,9 @@ importers:
       tailwindcss:
         specifier: 4.1.18
         version: 4.1.18
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
 
   packages/server-act:
     dependencies:
