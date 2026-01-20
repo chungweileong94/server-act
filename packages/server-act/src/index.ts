@@ -2,8 +2,6 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
 import { getInputErrors, standardValidate } from "./internal/schema";
 
-export { experimental_chainMiddleware } from "./middleware";
-
 const unsetMarker = Symbol("unsetMarker");
 type UnsetMarker = typeof unsetMarker;
 

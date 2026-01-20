@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { experimental_chainMiddleware, serverAct } from "../src";
+import { serverAct } from "../src";
+import { experimental_chainMiddleware } from "../src/middleware";
 
 describe("experimental_chainMiddleware", () => {
   test("merges middleware patches", async () => {

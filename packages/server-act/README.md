@@ -91,7 +91,8 @@ Chain multiple middleware functions while merging their return values into a
 single context object. Each middleware must return an object or `undefined`.
 
 ```ts
-import { experimental_chainMiddleware, serverAct } from "server-act";
+import { serverAct } from "server-act";
+import { experimental_chainMiddleware } from "server-act/middleware";
 
 const middleware = experimental_chainMiddleware(
   async () => {
