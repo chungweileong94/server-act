@@ -14,6 +14,7 @@
     "typescript/ban-ts-comment": "error",
     "typescript/consistent-type-imports": "error",
     "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-non-null-assertion": "error",
     "typescript/no-unsafe-type-assertion": "off",
 
     "react/rules-of-hooks": "error",
