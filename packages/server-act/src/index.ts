@@ -38,9 +38,7 @@ type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   : InferParserType<T, TType>;
 
 // Extract object types from a type, filtering out symbol markers
-type InferContextType<T> = T extends UnsetMarker
-  ? undefined
-  : T;
+type InferContextType<T> = T extends UnsetMarker ? undefined : T;
 
 interface ActionParams<TInput = unknown, TContext = unknown> {
   _input: TInput;
@@ -157,7 +155,6 @@ interface ActionBuilder<TParams extends ActionParams> {
 // oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilder = ActionBuilder<any>;
 
-// oxlint-disable-next-line typescript/no-explicit-any
 type MiddlewareFunction<TContext, TReturn> = (params: {
   ctx: TContext;
 }) => Promise<TReturn> | TReturn;
@@ -228,7 +225,8 @@ function createServerActionBuilder(
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (input?: any) => {
         // Execute single middleware (for backward compatibility)
-        let ctx: unknown = {};
+        // oxlint-disable-next-line typescript/no-explicit-any
+        let ctx: any = {};
         if (_def.middleware) {
           ctx = await _def.middleware();
         }
@@ -258,7 +256,8 @@ function createServerActionBuilder(
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, rawInput?: any) => {
         // Execute single middleware (for backward compatibility)
-        let ctx: unknown = {};
+        // oxlint-disable-next-line typescript/no-explicit-any
+        let ctx: any = {};
         if (_def.middleware) {
           ctx = await _def.middleware();
         }
@@ -306,7 +305,8 @@ function createServerActionBuilder(
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, formData?: any) => {
         // Execute single middleware (for backward compatibility)
-        let ctx: unknown = {};
+        // oxlint-disable-next-line typescript/no-explicit-any
+        let ctx: any = {};
         if (_def.middleware) {
           ctx = await _def.middleware();
         }

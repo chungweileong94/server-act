@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, expectTypeOf, test, vi } from "vitest";
+import { describe, expect, expectTypeOf, test, vi } from "vitest";
 import { z } from "zod";
 import { serverAct } from "../src";
 
@@ -69,13 +69,11 @@ describe("use middleware", () => {
       type User = { id: string; name: string };
 
       const action = serverAct
-        .use((): { db: Database } => ({ db: { query: () => "data" } }))
-        .use(
-          ({ ctx }): { user: User } => ({
-            user: { id: "123", name: "John" },
-          }),
-        )
-        .use(({ ctx }): { permissions: string[] } => ({
+        .use(() => ({ db: { query: () => "data" as string } }))
+        .use(() => ({
+          user: { id: "123", name: "John" },
+        }))
+        .use((): { permissions: string[] } => ({
           permissions: ["read", "write"],
         }))
         .action(async ({ ctx }) => {
@@ -93,9 +91,7 @@ describe("use middleware", () => {
     test("should access context from use in input", async () => {
       const action = serverAct
         .use(() => ({ prefix: "best" }))
-        .input(({ ctx }) =>
-          z.string().transform((v) => `${ctx.prefix}-${v}`),
-        )
+        .input(({ ctx }) => z.string().transform((v) => `${ctx.prefix}-${v}`))
         .action(async ({ ctx, input }) => {
           return `${input}-${ctx.prefix}-bar`;
         });
@@ -107,11 +103,11 @@ describe("use middleware", () => {
     test("should access chained context in input", async () => {
       const action = serverAct
         .use(() => ({ prefix: "best" }))
-        .use(({ ctx }) => ({ suffix: "ever" }))
+        .use(() => ({ suffix: "ever" }))
         .input(({ ctx }) =>
           z.string().transform((v) => `${ctx.prefix}-${v}-${ctx.suffix}`),
         )
-        .action(async ({ ctx, input }) => {
+        .action(async ({ input }) => {
           return input;
         });
 
@@ -123,7 +119,7 @@ describe("use middleware", () => {
     test("should work with stateAction", async () => {
       const action = serverAct
         .use(() => ({ prefix: "best" }))
-        .use(({ ctx }) => ({ suffix: "ever" }))
+        .use(() => ({ suffix: "ever" }))
         .input(z.object({ foo: z.string() }))
         .stateAction(async ({ ctx, input }) => {
           return `${ctx.prefix}-${input.foo}-${ctx.suffix}`;
@@ -138,11 +134,11 @@ describe("use middleware", () => {
     test("should work with formAction", async () => {
       const action = serverAct
         .use(() => ({ prefix: "best" }))
-        .use(({ ctx }) => ({ suffix: "ever" }))
+        .use(() => ({ suffix: "ever" }))
         .input(
           z.preprocess<Record<string, unknown>, { foo: string }, FormData>(
             (v) => {
-              const formData = v as FormData;
+              const formData: FormData = v;
               const obj: Record<string, unknown> = {};
               formData.forEach((value, key) => {
                 obj[key] = value;
