@@ -1,6 +1,16 @@
 import { describe, expect, expectTypeOf, test, vi } from "vitest";
 import { z } from "zod";
 import { serverAct } from "../src";
+import { formDataToObject } from "../src/utils";
+
+function zodFormData<T extends z.ZodType>(
+  schema: T,
+): z.ZodPipe<z.ZodTransform<Record<string, unknown>, FormData>, T> {
+  return z.preprocess<Record<string, unknown>, T, FormData>(
+    (v) => formDataToObject(v),
+    schema,
+  );
+}
 
 describe("use middleware", () => {
   describe("single use", () => {
@@ -32,11 +42,11 @@ describe("use middleware", () => {
       const action = serverAct
         .use(() => ({ a: 1 }))
         .use(({ ctx }) => {
-          expectTypeOf(ctx).toEqualTypeOf<{ a: number }>();
+          expectTypeOf(ctx).toMatchTypeOf<{ a: number }>();
           return { b: 2 };
         })
         .action(async ({ ctx }) => {
-          expectTypeOf(ctx).toEqualTypeOf<{ a: number } & { b: number }>();
+          expectTypeOf(ctx).toMatchTypeOf<{ a: number; b: number }>();
           return ctx.a + ctx.b;
         });
 
@@ -51,13 +61,11 @@ describe("use middleware", () => {
           return { b: ctx.a + 1 };
         })
         .use(({ ctx }) => {
-          expectTypeOf(ctx).toEqualTypeOf<{ a: number } & { b: number }>();
+          expectTypeOf(ctx).toMatchTypeOf<{ a: number; b: number }>();
           return { c: ctx.a + ctx.b };
         })
         .action(async ({ ctx }) => {
-          expectTypeOf(ctx).toEqualTypeOf<
-            { a: number } & { b: number } & { c: number }
-          >();
+          expectTypeOf(ctx).toMatchTypeOf<{ a: number; b: number; c: number }>();
           return ctx.a + ctx.b + ctx.c;
         });
 
@@ -121,7 +129,8 @@ describe("use middleware", () => {
         .use(() => ({ prefix: "best" }))
         .use(() => ({ suffix: "ever" }))
         .input(z.object({ foo: z.string() }))
-        .stateAction(async ({ ctx, input }) => {
+        .stateAction(async ({ ctx, input, inputErrors }) => {
+          if (inputErrors) return inputErrors;
           return `${ctx.prefix}-${input.foo}-${ctx.suffix}`;
         });
 
@@ -135,20 +144,9 @@ describe("use middleware", () => {
       const action = serverAct
         .use(() => ({ prefix: "best" }))
         .use(() => ({ suffix: "ever" }))
-        .input(
-          z.preprocess<Record<string, unknown>, { foo: string }, FormData>(
-            (v) => {
-              const formData: FormData = v;
-              const obj: Record<string, unknown> = {};
-              formData.forEach((value, key) => {
-                obj[key] = value;
-              });
-              return obj;
-            },
-            z.object({ foo: z.string() }),
-          ),
-        )
-        .formAction(async ({ ctx, input }) => {
+        .input(zodFormData(z.object({ foo: z.string() })))
+        .formAction(async ({ ctx, input, formErrors }) => {
+          if (formErrors) return formErrors;
           return `${ctx.prefix}-${input.foo}-${ctx.suffix}`;
         });
 
