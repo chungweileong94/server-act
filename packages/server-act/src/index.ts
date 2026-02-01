@@ -37,7 +37,10 @@ type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
   : InferParserType<T, TType>;
 
-type InferContextType<T> = RemoveUnsetMarker<T>;
+// Extract object types from a type, filtering out symbol markers
+type InferContextType<T> = T extends UnsetMarker
+  ? undefined
+  : T;
 
 interface ActionParams<TInput = unknown, TContext = unknown> {
   _input: TInput;
@@ -47,6 +50,7 @@ interface ActionParams<TInput = unknown, TContext = unknown> {
 interface ActionBuilder<TParams extends ActionParams> {
   /**
    * Middleware allows you to run code before the action, its return value will pass as context to the action.
+   * Can only be called once. For chaining multiple middlewares, use `.use()` instead.
    */
   middleware: <TContext>(
     middleware: () => Promise<TContext> | TContext,
@@ -54,6 +58,23 @@ interface ActionBuilder<TParams extends ActionParams> {
     ActionBuilder<{ _input: TParams["_input"]; _context: TContext }>,
     "middleware"
   >;
+  /**
+   * Express-style middleware chaining. Each middleware receives context from previous middlewares
+   * and returns additional context that gets merged. Can be called multiple times.
+   */
+  use: <TNewContext>(
+    middleware: MiddlewareFunction<
+      InferContextType<TParams["_context"]>,
+      TNewContext
+    >,
+  ) => ActionBuilder<{
+    _input: TParams["_input"];
+    _context: TNewContext extends UnsetMarker
+      ? TNewContext
+      : TParams["_context"] extends UnsetMarker
+        ? TNewContext
+        : Prettify<TParams["_context"] & TNewContext>;
+  }>;
   /**
    * Input validation for the action.
    */
@@ -137,6 +158,11 @@ interface ActionBuilder<TParams extends ActionParams> {
 type AnyActionBuilder = ActionBuilder<any>;
 
 // oxlint-disable-next-line typescript/no-explicit-any
+type MiddlewareFunction<TContext, TReturn> = (params: {
+  ctx: TContext;
+}) => Promise<TReturn> | TReturn;
+
+// oxlint-disable-next-line typescript/no-explicit-any
 interface ActionBuilderDef<TParams extends ActionParams<any>> {
   input:
     | ((params: {
@@ -147,12 +173,30 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
   middleware:
     | (() => Promise<TParams["_context"]> | TParams["_context"])
     | undefined;
+  // Middlewares for chaining with .use()
+  // oxlint-disable-next-line typescript/no-explicit-any
+  useMiddlewares: Array<MiddlewareFunction<any, any>>;
 }
 // oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilderDef = ActionBuilderDef<any>;
 
 function createNewServerActionBuilder(def: Partial<AnyActionBuilderDef>) {
   return createServerActionBuilder(def);
+}
+
+async function executeMiddlewares(
+  middlewares: Array<MiddlewareFunction<unknown, unknown>>,
+  initialCtx?: unknown,
+): Promise<unknown> {
+  let ctx: Record<string, unknown> =
+    initialCtx && typeof initialCtx === "object" ? { ...initialCtx } : {};
+  for (const middleware of middlewares) {
+    const result = await middleware({ ctx });
+    if (result && typeof result === "object") {
+      ctx = { ...ctx, ...result };
+    }
+  }
+  return ctx;
 }
 
 function createServerActionBuilder(
@@ -167,17 +211,34 @@ function createServerActionBuilder(
   }> = {
     input: undefined,
     middleware: undefined,
+    useMiddlewares: [],
     ...initDef,
   };
   return {
     middleware: (middleware) =>
       createNewServerActionBuilder({ ..._def, middleware }) as AnyActionBuilder,
+    use: (middleware) =>
+      createNewServerActionBuilder({
+        ..._def,
+        useMiddlewares: [..._def.useMiddlewares, middleware],
+      }) as AnyActionBuilder,
     input: (input) =>
       createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,
     action: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (input?: any) => {
-        const ctx = await _def.middleware?.();
+        // Execute single middleware (for backward compatibility)
+        let ctx: unknown = {};
+        if (_def.middleware) {
+          ctx = await _def.middleware();
+        }
+        // Execute chained middlewares with context from legacy middleware
+        if (_def.useMiddlewares.length > 0) {
+          ctx = await executeMiddlewares(
+            _def.useMiddlewares as Array<MiddlewareFunction<unknown, unknown>>,
+            ctx,
+          );
+        }
         if (_def.input) {
           const inputSchema =
             typeof _def.input === "function"
@@ -196,7 +257,18 @@ function createServerActionBuilder(
     stateAction: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, rawInput?: any) => {
-        const ctx = await _def.middleware?.();
+        // Execute single middleware (for backward compatibility)
+        let ctx: unknown = {};
+        if (_def.middleware) {
+          ctx = await _def.middleware();
+        }
+        // Execute chained middlewares with context from legacy middleware
+        if (_def.useMiddlewares.length > 0) {
+          ctx = await executeMiddlewares(
+            _def.useMiddlewares as Array<MiddlewareFunction<unknown, unknown>>,
+            ctx,
+          );
+        }
         if (_def.input) {
           const inputSchema =
             typeof _def.input === "function"
@@ -233,7 +305,18 @@ function createServerActionBuilder(
     formAction: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, formData?: any) => {
-        const ctx = await _def.middleware?.();
+        // Execute single middleware (for backward compatibility)
+        let ctx: unknown = {};
+        if (_def.middleware) {
+          ctx = await _def.middleware();
+        }
+        // Execute chained middlewares with context from legacy middleware
+        if (_def.useMiddlewares.length > 0) {
+          ctx = await executeMiddlewares(
+            _def.useMiddlewares as Array<MiddlewareFunction<unknown, unknown>>,
+            ctx,
+          );
+        }
         if (_def.input) {
           const inputSchema =
             typeof _def.input === "function"
