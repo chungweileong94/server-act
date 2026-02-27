@@ -42,11 +42,11 @@ describe("use middleware", () => {
       const action = serverAct
         .use(() => ({ a: 1 }))
         .use(({ ctx }) => {
-          expectTypeOf(ctx).toMatchTypeOf<{ a: number }>();
+          expectTypeOf(ctx).toMatchObjectType<{ a: number }>();
           return { b: 2 };
         })
         .action(async ({ ctx }) => {
-          expectTypeOf(ctx).toMatchTypeOf<{ a: number; b: number }>();
+          expectTypeOf(ctx).toMatchObjectType<{ a: number; b: number }>();
           return ctx.a + ctx.b;
         });
 
@@ -61,11 +61,15 @@ describe("use middleware", () => {
           return { b: ctx.a + 1 };
         })
         .use(({ ctx }) => {
-          expectTypeOf(ctx).toMatchTypeOf<{ a: number; b: number }>();
+          expectTypeOf(ctx).toMatchObjectType<{ a: number; b: number }>();
           return { c: ctx.a + ctx.b };
         })
         .action(async ({ ctx }) => {
-          expectTypeOf(ctx).toMatchTypeOf<{ a: number; b: number; c: number }>();
+          expectTypeOf(ctx).toMatchObjectType<{
+            a: number;
+            b: number;
+            c: number;
+          }>();
           return ctx.a + ctx.b + ctx.c;
         });
 
