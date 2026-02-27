@@ -98,7 +98,7 @@ describe("action", () => {
       .input(({ ctx }) =>
         v.pipe(
           v.string(),
-          v.transform((v) => `${ctx.prefix}-${v}`),
+          v.transform((value) => `${ctx.prefix}-${value}`),
         ),
       )
       .action(async ({ ctx, input }) => {
@@ -197,7 +197,7 @@ describe("stateAction", () => {
         v.object({
           foo: v.pipe(
             v.string(),
-            v.transform((v) => `${ctx.prefix}-${v}`),
+            v.transform((value) => `${ctx.prefix}-${value}`),
           ),
         }),
       )
@@ -276,7 +276,7 @@ describe("formAction", () => {
         v.object({
           foo: v.pipe(
             v.string(),
-            v.transform((v) => `${ctx.prefix}-${v}`),
+            v.transform((value) => `${ctx.prefix}-${value}`),
           ),
         }),
       )
