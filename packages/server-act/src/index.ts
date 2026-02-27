@@ -16,6 +16,10 @@ type Prettify<T> = {
   [P in keyof T]: T[P];
 } & {};
 
+type MiddlewareFunction<TContext, TReturn> = (params: {
+  ctx: TContext;
+}) => Promise<TReturn> | TReturn;
+
 // oxlint-disable-next-line typescript/no-explicit-any
 type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
   param: infer P,
@@ -151,10 +155,6 @@ interface ActionBuilder<TParams extends ActionParams> {
 }
 // oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilder = ActionBuilder<any>;
-
-type MiddlewareFunction<TContext, TReturn> = (params: {
-  ctx: TContext;
-}) => Promise<TReturn> | TReturn;
 
 // oxlint-disable-next-line typescript/no-explicit-any
 interface ActionBuilderDef<TParams extends ActionParams<any>> {
