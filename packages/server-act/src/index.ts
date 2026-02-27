@@ -47,6 +47,8 @@ interface ActionParams<TInput = unknown, TContext = unknown> {
 
 interface ActionBuilder<TParams extends ActionParams> {
   /**
+   * @deprecated Please use `.use()` instead.
+   *
    * Middleware allows you to run code before the action, its return value will pass as context to the action.
    * Can only be called once. For chaining multiple middlewares, use `.use()` instead.
    */
