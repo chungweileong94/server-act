@@ -66,11 +66,9 @@ interface ActionBuilder<TParams extends ActionParams> {
     >,
   ) => ActionBuilder<{
     _input: TParams["_input"];
-    _context: TNewContext extends UnsetMarker
+    _context: TParams["_context"] extends UnsetMarker
       ? TNewContext
-      : TParams["_context"] extends UnsetMarker
-        ? TNewContext
-        : Prettify<TParams["_context"] & TNewContext>;
+      : Prettify<TParams["_context"] & TNewContext>;
   }>;
   /**
    * Input validation for the action.
