@@ -16,7 +16,7 @@ describe("executeMiddlewares", () => {
   });
 
   test.each([undefined, null, "", 0, false, "x"])(
-    "uses empty object when initial context is %p",
+    "uses empty object when initial context is `%s`",
     async (initialCtx) => {
       const middleware = vi.fn(({ ctx }) => {
         expect(ctx).toEqual({});
