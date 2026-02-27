@@ -37,9 +37,6 @@ type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
   : InferParserType<T, TType>;
 
-// Extract object types from a type, filtering out symbol markers
-type InferContextType<T> = T extends UnsetMarker ? undefined : T;
-
 interface ActionParams<TInput = unknown, TContext = unknown> {
   _input: TInput;
   _context: TContext;
@@ -64,7 +61,7 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   use: <TNewContext>(
     middleware: MiddlewareFunction<
-      InferContextType<TParams["_context"]>,
+      RemoveUnsetMarker<TParams["_context"]>,
       TNewContext
     >,
   ) => ActionBuilder<{
@@ -81,7 +78,7 @@ interface ActionBuilder<TParams extends ActionParams> {
   input: <TParser extends StandardSchemaV1>(
     input:
       | ((params: {
-          ctx: InferContextType<TParams["_context"]>;
+          ctx: RemoveUnsetMarker<TParams["_context"]>;
         }) => Promise<TParser> | TParser)
       | TParser,
   ) => Omit<
@@ -93,7 +90,7 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   action: <TOutput>(
     action: (params: {
-      ctx: InferContextType<TParams["_context"]>;
+      ctx: RemoveUnsetMarker<TParams["_context"]>;
       input: InferInputType<TParams["_input"], "out">;
     }) => Promise<TOutput>,
   ) => SanitizeFunctionParam<
@@ -106,7 +103,7 @@ interface ActionBuilder<TParams extends ActionParams> {
     action: (
       params: Prettify<
         {
-          ctx: InferContextType<TParams["_context"]>;
+          ctx: RemoveUnsetMarker<TParams["_context"]>;
           prevState: RemoveUnsetMarker<TPrevState>;
           rawInput: InferInputType<TParams["_input"], "in">;
         } & (
@@ -134,7 +131,7 @@ interface ActionBuilder<TParams extends ActionParams> {
     action: (
       params: Prettify<
         {
-          ctx: InferContextType<TParams["_context"]>;
+          ctx: RemoveUnsetMarker<TParams["_context"]>;
           prevState: RemoveUnsetMarker<TPrevState>;
           formData: FormData;
         } & (
