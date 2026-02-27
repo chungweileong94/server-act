@@ -242,10 +242,7 @@ function createServerActionBuilder(
         }
         // Execute chained middlewares with context from legacy middleware
         if (_def.useMiddlewares.length > 0) {
-          ctx = await executeMiddlewares(
-            _def.useMiddlewares as Array<MiddlewareFunction<unknown, unknown>>,
-            ctx,
-          );
+          ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
         }
         if (_def.input) {
           const inputSchema =
@@ -291,10 +288,7 @@ function createServerActionBuilder(
         }
         // Execute chained middlewares with context from legacy middleware
         if (_def.useMiddlewares.length > 0) {
-          ctx = await executeMiddlewares(
-            _def.useMiddlewares as Array<MiddlewareFunction<unknown, unknown>>,
-            ctx,
-          );
+          ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
         }
         if (_def.input) {
           const inputSchema =
