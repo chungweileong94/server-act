@@ -1,5 +1,9 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
+import {
+  executeMiddlewares,
+  type MiddlewareFunction,
+} from "./internal/middleware";
 import { getInputErrors, standardValidate } from "./internal/schema";
 
 const unsetMarker = Symbol("unsetMarker");
@@ -15,10 +19,6 @@ type Equals<X, Y> =
 type Prettify<T> = {
   [P in keyof T]: T[P];
 } & {};
-
-type MiddlewareFunction<TContext, TReturn> = (params: {
-  ctx: TContext;
-}) => Promise<TReturn> | TReturn;
 
 // oxlint-disable-next-line typescript/no-explicit-any
 type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
@@ -178,21 +178,6 @@ function createNewServerActionBuilder(def: Partial<AnyActionBuilderDef>) {
   return createServerActionBuilder(def);
 }
 
-async function executeMiddlewares(
-  middlewares: Array<MiddlewareFunction<unknown, unknown>>,
-  initialCtx?: unknown,
-): Promise<unknown> {
-  let ctx: Record<string, unknown> =
-    initialCtx && typeof initialCtx === "object" ? { ...initialCtx } : {};
-  for (const middleware of middlewares) {
-    const result = await middleware({ ctx });
-    if (result && typeof result === "object") {
-      ctx = { ...ctx, ...result };
-    }
-  }
-  return ctx;
-}
-
 function createServerActionBuilder(
   initDef: Partial<AnyActionBuilderDef> = {},
 ): ActionBuilder<{
@@ -229,10 +214,7 @@ function createServerActionBuilder(
         }
         // Execute chained middlewares with context from legacy middleware
         if (_def.useMiddlewares.length > 0) {
-          ctx = await executeMiddlewares(
-            _def.useMiddlewares as Array<MiddlewareFunction<unknown, unknown>>,
-            ctx,
-          );
+          ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
         }
         if (_def.input) {
           const inputSchema =
