@@ -206,13 +206,11 @@ function createServerActionBuilder(
     action: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (input?: any) => {
-        // Execute single middleware (for backward compatibility)
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
         if (_def.middleware) {
           ctx = await _def.middleware();
         }
-        // Execute chained middlewares with context from legacy middleware
         if (_def.useMiddlewares.length > 0) {
           ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
         }
@@ -234,13 +232,11 @@ function createServerActionBuilder(
     stateAction: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, rawInput?: any) => {
-        // Execute single middleware (for backward compatibility)
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
         if (_def.middleware) {
           ctx = await _def.middleware();
         }
-        // Execute chained middlewares with context from legacy middleware
         if (_def.useMiddlewares.length > 0) {
           ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
         }
@@ -280,13 +276,11 @@ function createServerActionBuilder(
     formAction: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, formData?: any) => {
-        // Execute single middleware (for backward compatibility)
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
         if (_def.middleware) {
           ctx = await _def.middleware();
         }
-        // Execute chained middlewares with context from legacy middleware
         if (_def.useMiddlewares.length > 0) {
           ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
         }
