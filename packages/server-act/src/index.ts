@@ -167,7 +167,7 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
   middleware:
     | (() => Promise<TParams["_context"]> | TParams["_context"])
     | undefined;
-  // Middlewares for chaining with .use()
+  /** Middlewares for chaining with .use() */
   // oxlint-disable-next-line typescript/no-explicit-any
   useMiddlewares: Array<MiddlewareFunction<any, any>>;
 }
