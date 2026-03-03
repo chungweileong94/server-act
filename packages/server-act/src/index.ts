@@ -154,7 +154,6 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
       }) => Promise<TParams["_input"]> | TParams["_input"])
     | TParams["_input"]
     | undefined;
-  /** Middlewares for chaining with .use() */
   // oxlint-disable-next-line typescript/no-explicit-any
   middleware: Array<MiddlewareFunction<any, any>>;
 }
