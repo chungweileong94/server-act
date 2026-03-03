@@ -1,13 +1,4 @@
 {
-  "lsp": {
-    "oxlint": {
-      "initialization_options": {
-        "settings": {
-          "typeAware": true
-        }
-      }
-    }
-  },
   "languages": {
     "JavaScript": {
       "formatter": {
