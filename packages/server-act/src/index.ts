@@ -1,5 +1,9 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
+import {
+  executeMiddlewares,
+  type MiddlewareFunction,
+} from "./internal/middleware";
 import { getInputErrors, standardValidate } from "./internal/schema";
 
 const unsetMarker = Symbol("unsetMarker");
@@ -37,8 +41,6 @@ type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
   : InferParserType<T, TType>;
 
-type InferContextType<T> = RemoveUnsetMarker<T>;
-
 interface ActionParams<TInput = unknown, TContext = unknown> {
   _input: TInput;
   _context: TContext;
@@ -47,20 +49,28 @@ interface ActionParams<TInput = unknown, TContext = unknown> {
 interface ActionBuilder<TParams extends ActionParams> {
   /**
    * Middleware allows you to run code before the action, its return value will pass as context to the action.
+   *
+   * Chaining multiple middlewares is possible, each middleware receives context from previous middlewares
+   * and returns additional context that gets merged.
    */
-  middleware: <TContext>(
-    middleware: () => Promise<TContext> | TContext,
-  ) => Omit<
-    ActionBuilder<{ _input: TParams["_input"]; _context: TContext }>,
-    "middleware"
-  >;
+  middleware: <TNewContext>(
+    middleware: MiddlewareFunction<
+      RemoveUnsetMarker<TParams["_context"]>,
+      TNewContext
+    >,
+  ) => ActionBuilder<{
+    _input: TParams["_input"];
+    _context: TParams["_context"] extends UnsetMarker
+      ? TNewContext
+      : Prettify<TParams["_context"] & TNewContext>;
+  }>;
   /**
    * Input validation for the action.
    */
   input: <TParser extends StandardSchemaV1>(
     input:
       | ((params: {
-          ctx: InferContextType<TParams["_context"]>;
+          ctx: RemoveUnsetMarker<TParams["_context"]>;
         }) => Promise<TParser> | TParser)
       | TParser,
   ) => Omit<
@@ -72,7 +82,7 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   action: <TOutput>(
     action: (params: {
-      ctx: InferContextType<TParams["_context"]>;
+      ctx: RemoveUnsetMarker<TParams["_context"]>;
       input: InferInputType<TParams["_input"], "out">;
     }) => Promise<TOutput>,
   ) => SanitizeFunctionParam<
@@ -85,7 +95,7 @@ interface ActionBuilder<TParams extends ActionParams> {
     action: (
       params: Prettify<
         {
-          ctx: InferContextType<TParams["_context"]>;
+          ctx: RemoveUnsetMarker<TParams["_context"]>;
           prevState: RemoveUnsetMarker<TPrevState>;
           rawInput: InferInputType<TParams["_input"], "in">;
         } & (
@@ -113,7 +123,7 @@ interface ActionBuilder<TParams extends ActionParams> {
     action: (
       params: Prettify<
         {
-          ctx: InferContextType<TParams["_context"]>;
+          ctx: RemoveUnsetMarker<TParams["_context"]>;
           prevState: RemoveUnsetMarker<TPrevState>;
           formData: FormData;
         } & (
@@ -144,9 +154,9 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
       }) => Promise<TParams["_input"]> | TParams["_input"])
     | TParams["_input"]
     | undefined;
-  middleware:
-    | (() => Promise<TParams["_context"]> | TParams["_context"])
-    | undefined;
+  /** Middlewares for chaining with .use() */
+  // oxlint-disable-next-line typescript/no-explicit-any
+  middleware: Array<MiddlewareFunction<any, any>>;
 }
 // oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilderDef = ActionBuilderDef<any>;
@@ -166,18 +176,25 @@ function createServerActionBuilder(
     _context: undefined;
   }> = {
     input: undefined,
-    middleware: undefined,
+    middleware: [],
     ...initDef,
   };
   return {
     middleware: (middleware) =>
-      createNewServerActionBuilder({ ..._def, middleware }) as AnyActionBuilder,
+      createNewServerActionBuilder({
+        ..._def,
+        middleware: [..._def.middleware, middleware],
+      }) as AnyActionBuilder,
     input: (input) =>
       createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,
     action: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (input?: any) => {
-        const ctx = await _def.middleware?.();
+        // oxlint-disable-next-line typescript/no-explicit-any
+        let ctx: any = {};
+        if (_def.middleware.length > 0) {
+          ctx = await executeMiddlewares(_def.middleware, ctx);
+        }
         if (_def.input) {
           const inputSchema =
             typeof _def.input === "function"
@@ -196,7 +213,11 @@ function createServerActionBuilder(
     stateAction: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, rawInput?: any) => {
-        const ctx = await _def.middleware?.();
+        // oxlint-disable-next-line typescript/no-explicit-any
+        let ctx: any = {};
+        if (_def.middleware.length > 0) {
+          ctx = await executeMiddlewares(_def.middleware, ctx);
+        }
         if (_def.input) {
           const inputSchema =
             typeof _def.input === "function"
@@ -233,7 +254,11 @@ function createServerActionBuilder(
     formAction: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, formData?: any) => {
-        const ctx = await _def.middleware?.();
+        // oxlint-disable-next-line typescript/no-explicit-any
+        let ctx: any = {};
+        if (_def.middleware.length > 0) {
+          ctx = await executeMiddlewares(_def.middleware, ctx);
+        }
         if (_def.input) {
           const inputSchema =
             typeof _def.input === "function"

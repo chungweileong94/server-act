@@ -85,6 +85,39 @@ export const sayHelloAction = serverAct
   });
 ```
 
+#### Chaining Middlewares
+
+You can chain multiple middlewares by calling `.middleware(...)` repeatedly.
+
+- Middlewares run in registration order.
+- Each middleware receives the current `ctx` and can return additional context.
+- Returned objects are shallow-merged into `ctx`.
+- Later middleware values override earlier values for the same key.
+- Errors thrown in middleware propagate and stop later middleware from running.
+
+```ts
+// action.ts
+"use server";
+
+import { serverAct } from "server-act";
+
+export const createGreetingAction = serverAct
+  .middleware(() => ({
+    requestId: crypto.randomUUID(),
+    role: "user",
+  }))
+  .middleware(({ ctx }) => ({
+    role: "admin", // overrides previous role
+    actorLabel: `${ctx.role}-actor`,
+  }))
+  .middleware(({ ctx }) => ({
+    trace: `${ctx.requestId}:${ctx.actorLabel}`,
+  }))
+  .action(async ({ ctx }) => {
+    return `${ctx.role} -> ${ctx.trace}`;
+  });
+```
+
 ### `useActionState` Support
 
 > `useActionState` Documentation:
