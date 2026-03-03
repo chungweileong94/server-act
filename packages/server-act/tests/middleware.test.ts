@@ -12,11 +12,11 @@ function zodFormData<T extends z.ZodType>(
   );
 }
 
-describe("use middleware", () => {
+describe("middleware", () => {
   describe("single use", () => {
     test("should work like middleware", async () => {
       const action = serverAct
-        .use(() => ({ prefix: "best" }))
+        .middleware(() => ({ prefix: "best" }))
         .action(async ({ ctx }) => Promise.resolve(`${ctx.prefix}-bar`));
 
       expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
@@ -30,7 +30,7 @@ describe("use middleware", () => {
         return { prefix: "best" };
       });
 
-      const action = serverAct.use(useSpy).action(async () => "bar");
+      const action = serverAct.middleware(useSpy).action(async () => "bar");
 
       await action();
       expect(useSpy).toBeCalledTimes(1);
@@ -40,8 +40,8 @@ describe("use middleware", () => {
   describe("chaining multiple use calls", () => {
     test("should chain two use calls", async () => {
       const action = serverAct
-        .use(() => ({ a: 1 }))
-        .use(({ ctx }) => {
+        .middleware(() => ({ a: 1 }))
+        .middleware(({ ctx }) => {
           expectTypeOf(ctx).toMatchObjectType<{ a: number }>();
           return { b: 2 };
         })
@@ -56,11 +56,11 @@ describe("use middleware", () => {
 
     test("should chain three use calls", async () => {
       const action = serverAct
-        .use(() => ({ a: 1 }))
-        .use(({ ctx }) => {
+        .middleware(() => ({ a: 1 }))
+        .middleware(({ ctx }) => {
           return { b: ctx.a + 1 };
         })
-        .use(({ ctx }) => {
+        .middleware(({ ctx }) => {
           expectTypeOf(ctx).toMatchObjectType<{ a: number; b: number }>();
           return { c: ctx.a + ctx.b };
         })
@@ -81,11 +81,11 @@ describe("use middleware", () => {
       type User = { id: string; name: string };
 
       const action = serverAct
-        .use(() => ({ db: { query: () => "data" as string } }))
-        .use(() => ({
+        .middleware(() => ({ db: { query: () => "data" as string } }))
+        .middleware(() => ({
           user: { id: "123", name: "John" },
         }))
-        .use((): { permissions: string[] } => ({
+        .middleware((): { permissions: string[] } => ({
           permissions: ["read", "write"],
         }))
         .action(async ({ ctx }) => {
@@ -102,7 +102,7 @@ describe("use middleware", () => {
   describe("use with input", () => {
     test("should access context from use in input", async () => {
       const action = serverAct
-        .use(() => ({ prefix: "best" }))
+        .middleware(() => ({ prefix: "best" }))
         .input(({ ctx }) => z.string().transform((v) => `${ctx.prefix}-${v}`))
         .action(async ({ ctx, input }) => {
           return `${input}-${ctx.prefix}-bar`;
@@ -114,8 +114,8 @@ describe("use middleware", () => {
 
     test("should access chained context in input", async () => {
       const action = serverAct
-        .use(() => ({ prefix: "best" }))
-        .use(() => ({ suffix: "ever" }))
+        .middleware(() => ({ prefix: "best" }))
+        .middleware(() => ({ suffix: "ever" }))
         .input(({ ctx }) =>
           z.string().transform((v) => `${ctx.prefix}-${v}-${ctx.suffix}`),
         )
@@ -130,8 +130,8 @@ describe("use middleware", () => {
   describe("use with stateAction", () => {
     test("should work with stateAction", async () => {
       const action = serverAct
-        .use(() => ({ prefix: "best" }))
-        .use(() => ({ suffix: "ever" }))
+        .middleware(() => ({ prefix: "best" }))
+        .middleware(() => ({ suffix: "ever" }))
         .input(z.object({ foo: z.string() }))
         .stateAction(async ({ ctx, input, inputErrors }) => {
           if (inputErrors) return inputErrors;
@@ -146,8 +146,8 @@ describe("use middleware", () => {
   describe("use with formAction", () => {
     test("should work with formAction", async () => {
       const action = serverAct
-        .use(() => ({ prefix: "best" }))
-        .use(() => ({ suffix: "ever" }))
+        .middleware(() => ({ prefix: "best" }))
+        .middleware(() => ({ suffix: "ever" }))
         .input(zodFormData(z.object({ foo: z.string() })))
         .formAction(async ({ ctx, input, formErrors }) => {
           if (formErrors) return formErrors;
@@ -167,16 +167,16 @@ describe("use middleware", () => {
       const order: string[] = [];
 
       const action = serverAct
-        .use(() => {
+        .middleware(() => {
           order.push("first");
           return { a: 1 };
         })
-        .use(({ ctx }) => {
+        .middleware(({ ctx }) => {
           order.push("second");
           expect(ctx.a).toBe(1);
           return { b: 2 };
         })
-        .use(({ ctx }) => {
+        .middleware(({ ctx }) => {
           order.push("third");
           expect(ctx.a).toBe(1);
           expect(ctx.b).toBe(2);
@@ -195,11 +195,11 @@ describe("use middleware", () => {
   describe("async middlewares", () => {
     test("should handle async middlewares", async () => {
       const action = serverAct
-        .use(async () => {
+        .middleware(async () => {
           await new Promise((resolve) => setTimeout(resolve, 10));
           return { async: "value" };
         })
-        .use(async ({ ctx }) => {
+        .middleware(async ({ ctx }) => {
           await new Promise((resolve) => setTimeout(resolve, 10));
           return { another: ctx.async };
         })
@@ -215,7 +215,7 @@ describe("use middleware", () => {
     test("should work with legacy middleware (middleware runs first)", async () => {
       const action = serverAct
         .middleware(() => ({ legacy: "value" }))
-        .use(({ ctx }) => {
+        .middleware(({ ctx }) => {
           // ctx should have legacy from middleware
           return { new: ctx.legacy + "-new" };
         })
@@ -230,8 +230,8 @@ describe("use middleware", () => {
   describe("context merging", () => {
     test("should merge contexts with object spread", async () => {
       const action = serverAct
-        .use(() => ({ shared: "first", a: 1 }))
-        .use(() => ({ shared: "second", b: 2 }))
+        .middleware(() => ({ shared: "first", a: 1 }))
+        .middleware(() => ({ shared: "second", b: 2 }))
         .action(async ({ ctx }) => {
           // Later value should override earlier value
           return `${ctx.shared}-${ctx.a}-${ctx.b}`;

@@ -48,22 +48,12 @@ interface ActionParams<TInput = unknown, TContext = unknown> {
 
 interface ActionBuilder<TParams extends ActionParams> {
   /**
-   * @deprecated Please use `.use()` instead.
-   *
    * Middleware allows you to run code before the action, its return value will pass as context to the action.
-   * Can only be called once. For chaining multiple middlewares, use `.use()` instead.
+   *
+   * Chaining multiple middlewares is possible, each middleware receives context from previous middlewares
+   * and returns additional context that gets merged.
    */
-  middleware: <TContext>(
-    middleware: () => Promise<TContext> | TContext,
-  ) => Omit<
-    ActionBuilder<{ _input: TParams["_input"]; _context: TContext }>,
-    "middleware"
-  >;
-  /**
-   * Express-style middleware chaining. Each middleware receives context from previous middlewares
-   * and returns additional context that gets merged. Can be called multiple times.
-   */
-  use: <TNewContext>(
+  middleware: <TNewContext>(
     middleware: MiddlewareFunction<
       RemoveUnsetMarker<TParams["_context"]>,
       TNewContext
@@ -164,12 +154,9 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
       }) => Promise<TParams["_input"]> | TParams["_input"])
     | TParams["_input"]
     | undefined;
-  middleware:
-    | (() => Promise<TParams["_context"]> | TParams["_context"])
-    | undefined;
   /** Middlewares for chaining with .use() */
   // oxlint-disable-next-line typescript/no-explicit-any
-  useMiddlewares: Array<MiddlewareFunction<any, any>>;
+  middleware: Array<MiddlewareFunction<any, any>>;
 }
 // oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilderDef = ActionBuilderDef<any>;
@@ -189,17 +176,14 @@ function createServerActionBuilder(
     _context: undefined;
   }> = {
     input: undefined,
-    middleware: undefined,
-    useMiddlewares: [],
+    middleware: [],
     ...initDef,
   };
   return {
     middleware: (middleware) =>
-      createNewServerActionBuilder({ ..._def, middleware }) as AnyActionBuilder,
-    use: (middleware) =>
       createNewServerActionBuilder({
         ..._def,
-        useMiddlewares: [..._def.useMiddlewares, middleware],
+        middleware: [..._def.middleware, middleware],
       }) as AnyActionBuilder,
     input: (input) =>
       createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,
@@ -208,11 +192,8 @@ function createServerActionBuilder(
       return async (input?: any) => {
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
-        if (_def.middleware) {
-          ctx = await _def.middleware();
-        }
-        if (_def.useMiddlewares.length > 0) {
-          ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
+        if (_def.middleware.length > 0) {
+          ctx = await executeMiddlewares(_def.middleware, ctx);
         }
         if (_def.input) {
           const inputSchema =
@@ -234,11 +215,8 @@ function createServerActionBuilder(
       return async (prevState, rawInput?: any) => {
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
-        if (_def.middleware) {
-          ctx = await _def.middleware();
-        }
-        if (_def.useMiddlewares.length > 0) {
-          ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
+        if (_def.middleware.length > 0) {
+          ctx = await executeMiddlewares(_def.middleware, ctx);
         }
         if (_def.input) {
           const inputSchema =
@@ -278,11 +256,8 @@ function createServerActionBuilder(
       return async (prevState, formData?: any) => {
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
-        if (_def.middleware) {
-          ctx = await _def.middleware();
-        }
-        if (_def.useMiddlewares.length > 0) {
-          ctx = await executeMiddlewares(_def.useMiddlewares, ctx);
+        if (_def.middleware.length > 0) {
+          ctx = await executeMiddlewares(_def.middleware, ctx);
         }
         if (_def.input) {
           const inputSchema =
