@@ -1,5 +1,11 @@
 # server-act
 
+## 1.7.0
+
+### Minor Changes
+
+- [#50](https://github.com/chungweileong94/server-act/pull/50) [`8858299`](https://github.com/chungweileong94/server-act/commit/8858299fa015f397bbc3d63937c077ef71057107) Thanks [@chungweileong94](https://github.com/chungweileong94)! - 🎉 Support middleware chaining. Multiple middlewares can now be chained, with their contexts merged accordingly.
+
 ## 1.6.1
 
 ### Patch Changes
