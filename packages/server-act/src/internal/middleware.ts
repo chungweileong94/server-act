@@ -8,7 +8,7 @@ export type MiddlewareFunction<TContext, TReturn> = (params: {
 export async function executeMiddlewares(
   middlewares: Array<MiddlewareFunction<unknown, unknown>>,
   initialCtx?: unknown,
-): Promise<unknown> {
+) {
   let ctx: Record<string, unknown> =
     initialCtx && typeof initialCtx === "object" ? { ...initialCtx } : {};
   for (const middleware of middlewares) {
