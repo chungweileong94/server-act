@@ -1,8 +1,11 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
 import {
+  adaptLegacyMiddleware,
   executeMiddlewares,
   type MiddlewareFunction,
+  type NextContextCarrier,
+  type UseMiddlewareFunction,
 } from "./internal/middleware";
 import { getInputErrors, standardValidate } from "./internal/schema";
 
@@ -19,6 +22,41 @@ type Equals<X, Y> =
 type Prettify<T> = {
   [P in keyof T]: T[P];
 } & {};
+
+type Overwrite<TBase, TOverride> = Prettify<
+  Omit<TBase, keyof TOverride> & TOverride
+>;
+
+type ObjectOnly<T> = T extends object ? T : {};
+
+type MergeContext<TContext, TNewContext> = TContext extends UnsetMarker
+  ? ObjectOnly<TNewContext>
+  : Overwrite<RemoveUnsetMarker<TContext>, ObjectOnly<TNewContext>>;
+
+// oxlint-disable-next-line typescript/no-explicit-any
+type InferUseContext<TMiddleware extends (...args: any) => any> = Extract<
+  Awaited<ReturnType<TMiddleware>>,
+  NextContextCarrier<object>
+> extends NextContextCarrier<infer TNextContext>
+  ? TNextContext
+  : {};
+
+// oxlint-disable-next-line typescript/no-explicit-any
+type MiddlewareAlwaysCallsNext<TMiddleware extends (...args: any) => any> = [
+  Exclude<Awaited<ReturnType<TMiddleware>>, NextContextCarrier<object>>,
+] extends [never]
+  ? true
+  : false;
+
+type MergeShortCircuitFlag<
+  TPrev extends boolean,
+  // oxlint-disable-next-line typescript/no-explicit-any
+  TMiddleware extends (...args: any) => any,
+> = TPrev extends true
+  ? true
+  : MiddlewareAlwaysCallsNext<TMiddleware> extends true
+    ? false
+    : true;
 
 // oxlint-disable-next-line typescript/no-explicit-any
 type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
@@ -41,12 +79,35 @@ type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
   : InferParserType<T, TType>;
 
-interface ActionParams<TInput = unknown, TContext = unknown> {
+interface ActionParams<
+  TInput = unknown,
+  TContext = unknown,
+  TMayShortCircuit extends boolean = false,
+> {
   _input: TInput;
   _context: TContext;
+  _mayShortCircuit: TMayShortCircuit;
 }
 
-interface ActionBuilder<TParams extends ActionParams> {
+interface ActionBuilder<TParams extends ActionParams<any, any, boolean>> {
+  /**
+   * Use middleware receives the current context and `next` function.
+   * Calling `next` passes partial context to downstream middleware and action.
+   */
+  use: <
+    TMiddleware extends UseMiddlewareFunction<
+      RemoveUnsetMarker<TParams["_context"]>
+    >,
+  >(
+    middleware: TMiddleware,
+  ) => ActionBuilder<{
+    _input: TParams["_input"];
+    _context: MergeContext<TParams["_context"], InferUseContext<TMiddleware>>;
+    _mayShortCircuit: MergeShortCircuitFlag<
+      TParams["_mayShortCircuit"],
+      TMiddleware
+    >;
+  }>;
   /**
    * Middleware allows you to run code before the action, its return value will pass as context to the action.
    *
@@ -60,9 +121,8 @@ interface ActionBuilder<TParams extends ActionParams> {
     >,
   ) => ActionBuilder<{
     _input: TParams["_input"];
-    _context: TParams["_context"] extends UnsetMarker
-      ? TNewContext
-      : Prettify<TParams["_context"] & TNewContext>;
+    _context: MergeContext<TParams["_context"], TNewContext>;
+    _mayShortCircuit: TParams["_mayShortCircuit"];
   }>;
   /**
    * Input validation for the action.
@@ -74,7 +134,11 @@ interface ActionBuilder<TParams extends ActionParams> {
         }) => Promise<TParser> | TParser)
       | TParser,
   ) => Omit<
-    ActionBuilder<{ _input: TParser; _context: TParams["_context"] }>,
+    ActionBuilder<{
+      _input: TParser;
+      _context: TParams["_context"];
+      _mayShortCircuit: TParams["_mayShortCircuit"];
+    }>,
     "input"
   >;
   /**
@@ -86,7 +150,11 @@ interface ActionBuilder<TParams extends ActionParams> {
       input: InferInputType<TParams["_input"], "out">;
     }) => Promise<TOutput>,
   ) => SanitizeFunctionParam<
-    (input: InferInputType<TParams["_input"], "in">) => Promise<TOutput>
+    (
+      input: InferInputType<TParams["_input"], "in">,
+    ) => Promise<
+      TParams["_mayShortCircuit"] extends true ? TOutput | undefined : TOutput
+    >
   >;
   /**
    * Create an action for React `useActionState`
@@ -147,7 +215,7 @@ interface ActionBuilder<TParams extends ActionParams> {
 type AnyActionBuilder = ActionBuilder<any>;
 
 // oxlint-disable-next-line typescript/no-explicit-any
-interface ActionBuilderDef<TParams extends ActionParams<any>> {
+interface ActionBuilderDef<TParams extends ActionParams<any, any, boolean>> {
   input:
     | ((params: {
         ctx: TParams["_context"];
@@ -155,7 +223,7 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
     | TParams["_input"]
     | undefined;
   // oxlint-disable-next-line typescript/no-explicit-any
-  middleware: Array<MiddlewareFunction<any, any>>;
+  middleware: Array<UseMiddlewareFunction<any>>;
 }
 // oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilderDef = ActionBuilderDef<any>;
@@ -169,20 +237,27 @@ function createServerActionBuilder(
 ): ActionBuilder<{
   _input: UnsetMarker;
   _context: UnsetMarker;
+  _mayShortCircuit: false;
 }> {
   const _def: ActionBuilderDef<{
     _input: StandardSchemaV1;
     _context: undefined;
+    _mayShortCircuit: false;
   }> = {
     input: undefined,
     middleware: [],
     ...initDef,
   };
   return {
-    middleware: (middleware) =>
+    use: (middleware) =>
       createNewServerActionBuilder({
         ..._def,
         middleware: [..._def.middleware, middleware],
+      }) as AnyActionBuilder,
+    middleware: (middleware) =>
+      createNewServerActionBuilder({
+        ..._def,
+        middleware: [..._def.middleware, adaptLegacyMiddleware(middleware)],
       }) as AnyActionBuilder,
     input: (input) =>
       createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,
@@ -191,8 +266,14 @@ function createServerActionBuilder(
       return async (input?: any) => {
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
-        if (_def.middleware.length > 0) {
-          ctx = await executeMiddlewares(_def.middleware, ctx);
+        const middlewareResult =
+          _def.middleware.length > 0
+            ? await executeMiddlewares(_def.middleware, ctx)
+            : { ctx, completed: true };
+        ctx = middlewareResult.ctx;
+        if (!middlewareResult.completed) {
+          // oxlint-disable-next-line typescript/no-explicit-any
+          return undefined as any;
         }
         if (_def.input) {
           const inputSchema =
@@ -214,8 +295,13 @@ function createServerActionBuilder(
       return async (prevState, rawInput?: any) => {
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
-        if (_def.middleware.length > 0) {
-          ctx = await executeMiddlewares(_def.middleware, ctx);
+        const middlewareResult =
+          _def.middleware.length > 0
+            ? await executeMiddlewares(_def.middleware, ctx)
+            : { ctx, completed: true };
+        ctx = middlewareResult.ctx;
+        if (!middlewareResult.completed) {
+          return prevState;
         }
         if (_def.input) {
           const inputSchema =
@@ -255,8 +341,13 @@ function createServerActionBuilder(
       return async (prevState, formData?: any) => {
         // oxlint-disable-next-line typescript/no-explicit-any
         let ctx: any = {};
-        if (_def.middleware.length > 0) {
-          ctx = await executeMiddlewares(_def.middleware, ctx);
+        const middlewareResult =
+          _def.middleware.length > 0
+            ? await executeMiddlewares(_def.middleware, ctx)
+            : { ctx, completed: true };
+        ctx = middlewareResult.ctx;
+        if (!middlewareResult.completed) {
+          return prevState;
         }
         if (_def.input) {
           const inputSchema =

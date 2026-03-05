@@ -69,12 +69,12 @@ import { serverAct } from "server-act";
 import { z } from "zod";
 
 export const sayHelloAction = serverAct
-  .middleware(() => {
+  .use(({ next }) => {
     const t = i18n();
     const userId = "...";
-    return { t, userId };
+    return next({ t, userId });
   })
-  .input((ctx) => {
+  .input(({ ctx }) => {
     return z.object({
       name: z.string().min(1, { message: ctx.t("form.name.required") }),
     });
@@ -87,12 +87,15 @@ export const sayHelloAction = serverAct
 
 #### Chaining Middlewares
 
-You can chain multiple middlewares by calling `.middleware(...)` repeatedly.
+You can chain multiple middlewares by calling `.use(...)` repeatedly.
 
 - Middlewares run in registration order.
-- Each middleware receives the current `ctx` and can return additional context.
-- Returned objects are shallow-merged into `ctx`.
+- Each middleware receives `{ ctx, next }`.
+- Call `next(partialCtx)` to pass context to downstream middleware/action.
+- Return `next(partialCtx)` to get context type inference without explicit generics.
+- If middleware might not call/return `next()`, action return type includes `undefined`.
 - Later middleware values override earlier values for the same key.
+- If `next()` is not called, execution short-circuits and later middleware/action will not run.
 - Errors thrown in middleware propagate and stop later middleware from running.
 
 ```ts
@@ -102,21 +105,24 @@ You can chain multiple middlewares by calling `.middleware(...)` repeatedly.
 import { serverAct } from "server-act";
 
 export const createGreetingAction = serverAct
-  .middleware(() => ({
-    requestId: crypto.randomUUID(),
-    role: "user",
-  }))
-  .middleware(({ ctx }) => ({
-    role: "admin", // overrides previous role
-    actorLabel: `${ctx.role}-actor`,
-  }))
-  .middleware(({ ctx }) => ({
-    trace: `${ctx.requestId}:${ctx.actorLabel}`,
-  }))
+  .use(({ next }) => {
+    return next({ requestId: crypto.randomUUID(), role: "user" });
+  })
+  .use(({ ctx, next }) => {
+    return next({
+      role: "admin", // overrides previous role
+      actorLabel: `${ctx.role}-actor`,
+    });
+  })
+  .use(({ ctx, next }) => {
+    return next({ trace: `${ctx.requestId}:${ctx.actorLabel}` });
+  })
   .action(async ({ ctx }) => {
     return `${ctx.role} -> ${ctx.trace}`;
   });
 ```
+
+`.middleware(...)` is still supported for compatibility and behaves like a legacy shorthand for returning context objects.
 
 ### `useActionState` Support
 

@@ -13,6 +13,30 @@ function zodFormData<T extends z.ZodType>(
 }
 
 describe("middleware", () => {
+  describe("use middleware", () => {
+    test("should pass context via next", async () => {
+      const action = serverAct
+        .use(({ ctx, next }) => {
+          expect(ctx).toEqual({});
+          return next({ prefix: "best" });
+        })
+        .action(async ({ ctx }) => Promise.resolve(`${ctx.prefix}-bar`));
+
+      expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
+      await expect(action()).resolves.toBe("best-bar");
+    });
+
+    test("should short-circuit when next is not called", async () => {
+      const actionSpy = vi.fn(async () => "should-not-run");
+
+      const action = serverAct.use(async () => {}).action(actionSpy);
+
+      expectTypeOf(action).toEqualTypeOf<() => Promise<string | undefined>>();
+      await expect(action()).resolves.toBeUndefined();
+      expect(actionSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("single use", () => {
     test("should work like middleware", async () => {
       const action = serverAct
@@ -96,6 +120,33 @@ describe("middleware", () => {
         });
 
       await expect(action()).resolves.toBe("John:data");
+    });
+  });
+
+  describe("mixed use and middleware", () => {
+    test("should work with middleware then use", async () => {
+      const action = serverAct
+        .middleware(() => ({ legacy: "value" as const }))
+        .use(({ ctx, next }) => {
+          return next({ modern: `${ctx.legacy}-modern` as const });
+        })
+        .action(async ({ ctx }) => `${ctx.legacy}-${ctx.modern}`);
+
+      await expect(action()).resolves.toBe("value-value-modern");
+    });
+
+    test("should apply latest-key-wins typing", async () => {
+      const action = serverAct
+        .middleware(() => ({ role: "user" as const }))
+        .use(({ next }) => {
+          return next({ role: "admin" as const });
+        })
+        .action(async ({ ctx }) => {
+          expectTypeOf(ctx.role).toEqualTypeOf<"admin">();
+          return ctx.role;
+        });
+
+      await expect(action()).resolves.toBe("admin");
     });
   });
 
