@@ -6,7 +6,7 @@
     "dev": "turbo run dev",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "lint": "oxlint --report-unused-disable-directives",
+    "lint": "oxlint",
     "format": "oxfmt",
     "sherif": "sherif",
     "changeset:add": "changeset add",

@@ -2,7 +2,9 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["eslint", "unicorn", "typescript", "oxc", "react"],
   "options": {
-    "typeAware": true
+    "typeAware": true,
+    "typeCheck": true,
+    "reportUnusedDisableDirectives": "error"
   },
   "categories": {
     "correctness": "error",
