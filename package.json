@@ -21,7 +21,7 @@
     "oxlint-tsgolint": "^0.16.0",
     "sherif": "^1.9.0",
     "turbo": "^2.8.16",
-    "vitest": "^4.0.16"
+    "vitest": "^4.1.0"
   },
   "engines": {
     "node": "24.x",
