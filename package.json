@@ -5,23 +5,19 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
-    "typecheck": "turbo run typecheck",
-    "lint": "oxlint",
-    "format": "oxfmt",
+    "check": "vp check",
+    "format": "vp fmt",
     "sherif": "sherif",
     "changeset:add": "changeset add",
-    "changeset:publish": "changeset publish && oxfmt",
-    "changeset:version": "changeset version && oxfmt"
+    "changeset:publish": "changeset publish && vp fmt",
+    "changeset:version": "changeset version && vp fmt"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
-    "oxfmt": "^0.38.0",
-    "oxlint": "^1.53.0",
-    "oxlint-tsgolint": "^0.16.0",
     "sherif": "^1.9.0",
     "turbo": "^2.8.16",
-    "vitest": "^4.1.0"
+    "vite-plus": "0.1.11"
   },
   "engines": {
     "node": "24.x",

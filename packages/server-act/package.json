@@ -42,10 +42,9 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsdown",
-    "dev": "tsdown --watch",
-    "typecheck": "tsgo --noEmit",
-    "test": "vitest run",
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
     "prepack": "node ../../.github/scripts/cleanup-package-json.mjs"
   },
   "dependencies": {
@@ -53,9 +52,8 @@
     "@standard-schema/utils": "^0.3.0"
   },
   "devDependencies": {
-    "@typescript/native-preview": "7.0.0-dev.20260227.1",
-    "tsdown": "^0.18.4",
     "valibot": "1.0.0-rc.0",
+    "vite-plus": "0.1.11",
     "zod": "^4.0.10"
   },
   "peerDependencies": {

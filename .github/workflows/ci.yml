@@ -15,45 +15,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Use PNPM
-        uses: pnpm/action-setup@v4.0.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Vite Plus
+        uses: voidzero-dev/setup-vp@v1
         with:
           node-version-file: ".node-version"
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          cache: true
 
       - name: Install deps
-        run: pnpm install
-
-      - name: Build
-        run: pnpm build
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Test
-        run: pnpm test
+        run: vp install
 
       - name: Sherif
-        run: pnpm sherif
+        run: vp run sherif
+
+      - name: Build
+        run: vp run build
+
+      - name: Check
+        run: vp check
+
+      - name: Test
+        run: vp run test
