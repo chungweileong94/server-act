@@ -1,5 +1,12 @@
 import * as v from "valibot";
-import { beforeEach, describe, expect, expectTypeOf, test, vi } from "vitest";
+import {
+  beforeEach,
+  describe,
+  expect,
+  expectTypeOf,
+  test,
+  vi,
+} from "vite-plus/test";
 import { serverAct } from "../src";
 import { formDataToObject } from "../src/utils";
 
