@@ -1,17 +1,11 @@
 {
   "$schema": "https://v2-8-16.turborepo.dev/schema.json",
   "tasks": {
-    "topo": {
-      "dependsOn": ["^topo"]
-    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "test": {},
-    "typecheck": {
-      "dependsOn": ["^topo", "build"]
-    },
     "dev": {
       "cache": false,
       "persistent": true

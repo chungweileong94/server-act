@@ -5,7 +5,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
-    "check": "vp check",
+    "check": "turbo run build --filter=./packages/* && vp check",
     "format": "vp fmt",
     "sherif": "sherif",
     "changeset:add": "changeset add",

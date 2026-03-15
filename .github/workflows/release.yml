@@ -28,7 +28,7 @@ jobs:
         run: vp install
 
       - name: Build
-        run: vpx turbo --filter "./packages/*" build
+        run: vpx turbo run build --filter=./packages/*
 
       - name: Create Release
         id: changeset
