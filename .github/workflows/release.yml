@@ -24,9 +24,6 @@ jobs:
           node-version-file: ".node-version"
           cache: true
 
-      - name: Install deps
-        run: vp install
-
       - name: Build
         run: vpx turbo run build --filter=./packages/*
 

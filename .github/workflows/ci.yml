@@ -25,9 +25,6 @@ jobs:
           node-version-file: ".node-version"
           cache: true
 
-      - name: Install deps
-        run: vp install
-
       - name: Sherif
         run: vp run sherif
 
