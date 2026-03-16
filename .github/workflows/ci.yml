@@ -32,10 +32,7 @@ jobs:
         run: vp run build
 
       - name: Check
-        run: |
-          # TODO: Remove this workaround, https://github.com/voidzero-dev/setup-vp/issues/7#issuecomment-4063076822
-          unset GITHUB_ACTIONS
-          vp check
+        run: vp check
 
       - name: Test
         run: vp run test

@@ -17,7 +17,7 @@
     "@changesets/cli": "^2.26.2",
     "sherif": "^1.9.0",
     "turbo": "^2.8.16",
-    "vite-plus": "0.1.11"
+    "vite-plus": "0.1.12"
   },
   "engines": {
     "node": "24.x",
