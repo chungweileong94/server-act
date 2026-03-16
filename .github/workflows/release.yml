@@ -25,7 +25,7 @@ jobs:
           cache: true
 
       - name: Build
-        run: vpx turbo run build --filter=./packages/*
+        run: npx turbo run build --filter=./packages/*
 
       - name: Create Release
         id: changeset
