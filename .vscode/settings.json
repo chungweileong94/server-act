@@ -1,6 +1,5 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "oxc.typeAware": true,
   "[javascript]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
