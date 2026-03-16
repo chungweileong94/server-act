@@ -3,6 +3,6 @@
     "label": "vp test $ZED_SYMBOL",
     "command": "npx",
     "args": ["vp", "test", "run", "-t", "\"$ZED_SYMBOL\"", "$ZED_FILE"],
-    "tags": ["js-test", "ts-test", "tsx-test"],
-  },
+    "tags": ["js-test", "ts-test", "tsx-test"]
+  }
 ]
