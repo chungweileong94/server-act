@@ -25,7 +25,11 @@ jobs:
           cache: true
 
       - name: Build
-        run: vpx turbo build --filter "./packages/*" build
+        run: |
+          # Have to make sure the pnpm binary is there
+          vp i -g corepack
+          corepack prepare --activate
+          vpx turbo build --filter "./packages/*" build
 
       - name: Create Release
         id: changeset
