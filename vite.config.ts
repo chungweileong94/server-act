@@ -4,7 +4,7 @@ export default defineConfig({
   fmt: {
     ignorePatterns: ["**/drizzle/meta/**/*.json"],
     printWidth: 80,
-    experimentalSortImports: {
+    sortImports: {
       newlinesBetween: false,
     },
     experimentalTailwindcss: {},
