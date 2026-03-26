@@ -2,7 +2,9 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { SchemaError } from "@standard-schema/utils";
 import {
   executeMiddlewares,
-  type MiddlewareFunction,
+  type LegacyMiddlewareFunction,
+  type MiddlewareDef,
+  type UseMiddlewareFunction,
 } from "./internal/middleware";
 import { getInputErrors, standardValidate } from "./internal/schema";
 
@@ -10,6 +12,10 @@ const unsetMarker = Symbol("unsetMarker");
 type UnsetMarker = typeof unsetMarker;
 
 type RemoveUnsetMarker<T> = T extends UnsetMarker ? undefined : T;
+type NormalizeContext<T> =
+  RemoveUnsetMarker<T> extends Record<string, unknown>
+    ? RemoveUnsetMarker<T>
+    : {};
 
 type Equals<X, Y> =
   (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
@@ -52,10 +58,12 @@ interface ActionBuilder<TParams extends ActionParams> {
    *
    * Chaining multiple middlewares is possible, each middleware receives context from previous middlewares
    * and returns additional context that gets merged.
+   *
+   * @deprecated Use `.use()` instead.
    */
   middleware: <TNewContext>(
-    middleware: MiddlewareFunction<
-      RemoveUnsetMarker<TParams["_context"]>,
+    middleware: LegacyMiddlewareFunction<
+      NormalizeContext<TParams["_context"]>,
       TNewContext
     >,
   ) => ActionBuilder<{
@@ -65,12 +73,24 @@ interface ActionBuilder<TParams extends ActionParams> {
       : Prettify<TParams["_context"] & TNewContext>;
   }>;
   /**
+   * tRPC-style middleware that forwards context via `next()`.
+   */
+  use: <TNextContext extends Record<string, unknown>>(
+    middleware: UseMiddlewareFunction<
+      NormalizeContext<TParams["_context"]>,
+      TNextContext
+    >,
+  ) => ActionBuilder<{
+    _input: TParams["_input"];
+    _context: TNextContext;
+  }>;
+  /**
    * Input validation for the action.
    */
   input: <TParser extends StandardSchemaV1>(
     input:
       | ((params: {
-          ctx: RemoveUnsetMarker<TParams["_context"]>;
+          ctx: NormalizeContext<TParams["_context"]>;
         }) => Promise<TParser> | TParser)
       | TParser,
   ) => Omit<
@@ -82,7 +102,7 @@ interface ActionBuilder<TParams extends ActionParams> {
    */
   action: <TOutput>(
     action: (params: {
-      ctx: RemoveUnsetMarker<TParams["_context"]>;
+      ctx: NormalizeContext<TParams["_context"]>;
       input: InferInputType<TParams["_input"], "out">;
     }) => Promise<TOutput>,
   ) => SanitizeFunctionParam<
@@ -95,7 +115,7 @@ interface ActionBuilder<TParams extends ActionParams> {
     action: (
       params: Prettify<
         {
-          ctx: RemoveUnsetMarker<TParams["_context"]>;
+          ctx: NormalizeContext<TParams["_context"]>;
           prevState: RemoveUnsetMarker<TPrevState>;
           rawInput: InferInputType<TParams["_input"], "in">;
         } & (
@@ -123,7 +143,7 @@ interface ActionBuilder<TParams extends ActionParams> {
     action: (
       params: Prettify<
         {
-          ctx: RemoveUnsetMarker<TParams["_context"]>;
+          ctx: NormalizeContext<TParams["_context"]>;
           prevState: RemoveUnsetMarker<TPrevState>;
           formData: FormData;
         } & (
@@ -154,14 +174,25 @@ interface ActionBuilderDef<TParams extends ActionParams<any>> {
       }) => Promise<TParams["_input"]> | TParams["_input"])
     | TParams["_input"]
     | undefined;
-  // oxlint-disable-next-line typescript/no-explicit-any
-  middleware: Array<MiddlewareFunction<any, any>>;
+  middleware: MiddlewareDef[];
 }
 // oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilderDef = ActionBuilderDef<any>;
 
 function createNewServerActionBuilder(def: Partial<AnyActionBuilderDef>) {
   return createServerActionBuilder(def);
+}
+
+export function createServerActMiddleware<
+  TAddedContext extends Record<string, unknown>,
+  TContext extends Record<string, unknown> = {},
+>(
+  middleware: UseMiddlewareFunction<
+    TContext,
+    Prettify<TContext & TAddedContext>
+  >,
+): UseMiddlewareFunction<TContext, Prettify<TContext & TAddedContext>> {
+  return middleware;
 }
 
 function createServerActionBuilder(
@@ -182,8 +213,24 @@ function createServerActionBuilder(
     middleware: (middleware) =>
       createNewServerActionBuilder({
         ..._def,
-        middleware: [..._def.middleware, middleware],
+        middleware: [
+          ..._def.middleware,
+          { kind: "legacy", middleware } as MiddlewareDef,
+        ],
       }) as AnyActionBuilder,
+    use: ((
+      middleware: UseMiddlewareFunction<
+        Record<string, unknown>,
+        Record<string, unknown>
+      >,
+    ) =>
+      createNewServerActionBuilder({
+        ..._def,
+        middleware: [
+          ..._def.middleware,
+          { kind: "use", middleware } as MiddlewareDef,
+        ],
+      })) as AnyActionBuilder["use"],
     input: (input) =>
       createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,
     action: (action) => {

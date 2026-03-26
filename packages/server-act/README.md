@@ -69,12 +69,12 @@ import { serverAct } from "server-act";
 import { z } from "zod";
 
 export const sayHelloAction = serverAct
-  .middleware(() => {
+  .use(({ next }) => {
     const t = i18n();
     const userId = "...";
-    return { t, userId };
+    return next({ ctx: { t, userId } });
   })
-  .input((ctx) => {
+  .input(({ ctx }) => {
     return z.object({
       name: z.string().min(1, { message: ctx.t("form.name.required") }),
     });
@@ -87,11 +87,12 @@ export const sayHelloAction = serverAct
 
 #### Chaining Middlewares
 
-You can chain multiple middlewares by calling `.middleware(...)` repeatedly.
+You can chain multiple middlewares by calling `.use(...)` repeatedly.
 
 - Middlewares run in registration order.
-- Each middleware receives the current `ctx` and can return additional context.
-- Returned objects are shallow-merged into `ctx`.
+- Each middleware receives the current `ctx` and forwards additions with `next({ ctx })`.
+- `next()` can be called without params when nothing needs to be added.
+- `next({ ctx })` shallow-merges the provided keys into the current context.
 - Later middleware values override earlier values for the same key.
 - Errors thrown in middleware propagate and stop later middleware from running.
 
@@ -102,20 +103,71 @@ You can chain multiple middlewares by calling `.middleware(...)` repeatedly.
 import { serverAct } from "server-act";
 
 export const createGreetingAction = serverAct
-  .middleware(() => ({
-    requestId: crypto.randomUUID(),
-    role: "user",
-  }))
-  .middleware(({ ctx }) => ({
-    role: "admin", // overrides previous role
-    actorLabel: `${ctx.role}-actor`,
-  }))
-  .middleware(({ ctx }) => ({
-    trace: `${ctx.requestId}:${ctx.actorLabel}`,
-  }))
+  .use(({ next }) =>
+    next({
+      ctx: {
+        requestId: crypto.randomUUID(),
+        role: "user",
+      },
+    }),
+  )
+  .use(({ ctx, next }) =>
+    next({
+      ctx: {
+        role: "admin", // overrides previous role
+        actorLabel: `${ctx.role}-actor`,
+      },
+    }),
+  )
+  .use(({ ctx, next }) =>
+    next({
+      ctx: {
+        trace: `${ctx.requestId}:${ctx.actorLabel}`,
+      },
+    }),
+  )
   .action(async ({ ctx }) => {
     return `${ctx.role} -> ${ctx.trace}`;
   });
+```
+
+#### Migrating From `.middleware()`
+
+`.middleware()` is still supported for backward compatibility, but it is deprecated in favor of `.use()`.
+
+```ts
+const legacyAction = serverAct.middleware(({ ctx }) => ({
+  user: getUser(),
+}));
+
+const nextStyleAction = serverAct.use(({ ctx, next }) =>
+  next({
+    ctx: {
+      user: getUser(),
+    },
+  }),
+);
+```
+
+#### Reusable Middleware
+
+Use `createServerActMiddleware` to define middleware once and reuse it across actions.
+
+```ts
+import { createServerActMiddleware, serverAct } from "server-act";
+
+const requestIdMiddleware = createServerActMiddleware(({ next }) =>
+  next({ ctx: { requestId: crypto.randomUUID() } }),
+);
+
+const traceMiddleware = createServerActMiddleware(({ ctx, next }) =>
+  next({ ctx: { trace: `${ctx.requestId}-trace` } }),
+);
+
+export const action = serverAct
+  .use(requestIdMiddleware)
+  .use(traceMiddleware)
+  .action(async ({ ctx }) => `${ctx.requestId}:${ctx.trace}`);
 ```
 
 ### `useActionState` Support

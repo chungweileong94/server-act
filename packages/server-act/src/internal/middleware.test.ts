@@ -23,7 +23,10 @@ describe("executeMiddlewares", () => {
         return { ok: true };
       });
 
-      const result = await executeMiddlewares([middleware], initialCtx);
+      const result = await executeMiddlewares(
+        [{ kind: "legacy", middleware }],
+        initialCtx,
+      );
 
       expect(result).toEqual({ ok: true });
       expect(middleware).toHaveBeenCalledTimes(1);
@@ -34,15 +37,21 @@ describe("executeMiddlewares", () => {
     const order: string[] = [];
 
     const result = await executeMiddlewares([
-      async () => {
-        order.push("first");
-        await Promise.resolve();
-        return { a: 1 };
+      {
+        kind: "legacy",
+        middleware: async () => {
+          order.push("first");
+          await Promise.resolve();
+          return { a: 1 };
+        },
       },
-      ({ ctx }) => {
-        order.push("second");
-        expect(ctx).toEqual({ a: 1 });
-        return { b: 2 };
+      {
+        kind: "legacy",
+        middleware: ({ ctx }) => {
+          order.push("second");
+          expect(ctx).toEqual({ a: 1 });
+          return { b: 2 };
+        },
       },
     ]);
 
@@ -50,11 +59,75 @@ describe("executeMiddlewares", () => {
     expect(result).toEqual({ a: 1, b: 2 });
   });
 
+  test("executes `.use()` middlewares sequentially via next", async () => {
+    const order: string[] = [];
+
+    const result = await executeMiddlewares([
+      {
+        kind: "use",
+        middleware: async ({ ctx, next }) => {
+          order.push("first");
+          expect(ctx).toEqual({});
+          await Promise.resolve();
+          return await next({ ctx: { a: 1 } });
+        },
+      },
+      {
+        kind: "use",
+        middleware: ({ ctx, next }) => {
+          order.push("second");
+          expect(ctx).toEqual({ a: 1 });
+          return next({ ctx: { b: 2 } });
+        },
+      },
+    ]);
+
+    expect(order).toEqual(["first", "second"]);
+    expect(result).toEqual({ a: 1, b: 2 });
+  });
+
+  test("preserves mixed middleware order", async () => {
+    const order: string[] = [];
+
+    const result = await executeMiddlewares([
+      {
+        kind: "legacy",
+        middleware: () => {
+          order.push("first");
+          return { a: 1 };
+        },
+      },
+      {
+        kind: "use",
+        middleware: ({ next }) => {
+          order.push("second");
+          return next({ ctx: { b: 2 } });
+        },
+      },
+      {
+        kind: "legacy",
+        middleware: ({ ctx }) => {
+          order.push("third");
+          return { c: (ctx as { a: number; b: number }).b };
+        },
+      },
+    ]);
+
+    expect(order).toEqual(["first", "second", "third"]);
+    expect(result).toEqual({ a: 1, b: 2, c: 2 });
+  });
+
   test("merges shallowly and later values override earlier ones", async () => {
     const result = await executeMiddlewares(
       [
-        () => ({ shared: "m1", nested: { from: "m1" } }),
-        () => ({ shared: "m2" }),
+        {
+          kind: "legacy",
+          middleware: () => ({ shared: "m1", nested: { from: "m1" } }),
+        },
+        {
+          kind: "legacy",
+          middleware: () => ({ shared: "m2" }),
+        },
       ],
       { shared: "init", nested: { from: "init" } },
     );
@@ -64,15 +137,52 @@ describe("executeMiddlewares", () => {
 
   test("ignores non-object and falsy middleware returns", async () => {
     const result = await executeMiddlewares([
-      () => undefined,
-      () => null,
-      () => 0,
-      () => "",
-      () => false,
-      () => ({ ok: true }),
+      { kind: "legacy", middleware: () => undefined },
+      { kind: "legacy", middleware: () => null },
+      { kind: "legacy", middleware: () => 0 },
+      { kind: "legacy", middleware: () => "" },
+      { kind: "legacy", middleware: () => false },
+      { kind: "legacy", middleware: () => ({ ok: true }) },
     ]);
 
     expect(result).toEqual({ ok: true });
+  });
+
+  test("returns context from the deepest next() call", async () => {
+    const result = await executeMiddlewares([
+      {
+        kind: "use",
+        middleware: ({ next }) => next({ ctx: { a: 1 } }),
+      },
+      {
+        kind: "use",
+        middleware: ({ next }) => next({ ctx: { a: 2, b: 3 } }),
+      },
+    ]);
+
+    expect(result).toEqual({ a: 2, b: 3 });
+  });
+
+  test("allows calling next without params", async () => {
+    const result = await executeMiddlewares([
+      {
+        kind: "use",
+        middleware: ({ next }) => next(),
+      },
+    ]);
+
+    expect(result).toEqual({});
+  });
+
+  test("throws when a `.use()` middleware does not call next()", async () => {
+    await expect(
+      executeMiddlewares([
+        {
+          kind: "use",
+          middleware: async () => ({}),
+        },
+      ]),
+    ).rejects.toThrow(".use() middleware must call next()");
   });
 
   test("propagates thrown errors and stops subsequent middleware execution", async () => {
@@ -80,11 +190,20 @@ describe("executeMiddlewares", () => {
 
     await expect(
       executeMiddlewares([
-        () => ({ a: 1 }),
-        () => {
-          throw new Error("boom");
+        {
+          kind: "legacy",
+          middleware: () => ({ a: 1 }),
         },
-        neverCalled,
+        {
+          kind: "legacy",
+          middleware: () => {
+            throw new Error("boom");
+          },
+        },
+        {
+          kind: "legacy",
+          middleware: neverCalled,
+        },
       ]),
     ).rejects.toThrow("boom");
 
@@ -93,7 +212,12 @@ describe("executeMiddlewares", () => {
 
   test("propagates rejected promises", async () => {
     await expect(
-      executeMiddlewares([() => Promise.reject(new Error("reject boom"))]),
+      executeMiddlewares([
+        {
+          kind: "legacy",
+          middleware: () => Promise.reject(new Error("reject boom")),
+        },
+      ]),
     ).rejects.toThrow("reject boom");
   });
 });
