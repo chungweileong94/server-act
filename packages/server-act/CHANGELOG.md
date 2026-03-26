@@ -1,5 +1,13 @@
 # server-act
 
+## 1.8.0
+
+### Minor Changes
+
+- [#55](https://github.com/chungweileong94/server-act/pull/55) [`1500ce7`](https://github.com/chungweileong94/server-act/commit/1500ce75676e5f1e11f5a9c5372f5916aa7a3f95) Thanks [@chungweileong94](https://github.com/chungweileong94)! - 🎉 New `.use()` middleware API that forwards context through `next()`. Also added a helper `createServerActMiddleware` to define reusable typed middleware.
+
+  The legacy `.middleware()` API is still supported for backward compatibility, but it is now deprecated in favor of `.use()`.
+
 ## 1.7.0
 
 ### Minor Changes
