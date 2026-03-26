@@ -1,6 +1,6 @@
 "use server";
 
-import { serverAct } from "server-act";
+import { createServerActMiddleware, serverAct } from "server-act";
 import { formDataToObject } from "server-act/utils";
 import { z } from "zod";
 
@@ -11,14 +11,16 @@ function zodFormData<T extends z.ZodType>(schema: T) {
   );
 }
 
-const requestTimeMiddleware = () => {
-  return {
-    requestTime: new Date(),
-  };
-};
+const requestTimeMiddleware = createServerActMiddleware(({ next }) =>
+  next({
+    ctx: {
+      requestTime: new Date(),
+    },
+  }),
+);
 
 export const sayHelloAction = serverAct
-  .middleware(requestTimeMiddleware)
+  .use(requestTimeMiddleware)
   .input(
     zodFormData(
       z.object({

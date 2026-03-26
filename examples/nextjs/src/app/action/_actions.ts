@@ -1,16 +1,18 @@
 "use server";
 
-import { serverAct } from "server-act";
+import { createServerActMiddleware, serverAct } from "server-act";
 import { z } from "zod";
 
-const requestTimeMiddleware = () => {
-  return {
-    requestTime: new Date(),
-  };
-};
+const requestTimeMiddleware = createServerActMiddleware(({ next }) =>
+  next({
+    ctx: {
+      requestTime: new Date(),
+    },
+  }),
+);
 
 export const sayHelloAction = serverAct
-  .middleware(requestTimeMiddleware)
+  .use(requestTimeMiddleware)
   .input(
     z.object({
       name: z.string().optional(),

@@ -7,7 +7,7 @@ import {
   test,
   vi,
 } from "vite-plus/test";
-import { serverAct } from "../src";
+import { createServerActMiddleware, serverAct } from "../src";
 import { formDataToObject } from "../src/utils";
 
 describe("action", () => {
@@ -63,9 +63,11 @@ describe("action", () => {
   });
 
   describe("middleware should be called once", () => {
-    const middlewareSpy = vi.fn(() => {
-      return { prefix: "best" };
-    });
+    const middlewareSpy = vi.fn(
+      createServerActMiddleware(({ next }) =>
+        next({ ctx: { prefix: "best" } }),
+      ),
+    );
 
     beforeEach(() => {
       vi.clearAllMocks();
@@ -73,19 +75,19 @@ describe("action", () => {
 
     test("without input", async () => {
       const action = serverAct
-        .middleware(middlewareSpy)
+        .use(middlewareSpy)
         .action(async ({ ctx }) => Promise.resolve(`${ctx.prefix}-bar`));
 
       expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
 
       expect(action.constructor.name).toBe("AsyncFunction");
       await expect(action()).resolves.toBe("best-bar");
-      expect(middlewareSpy).toBeCalledTimes(1);
+      expect(middlewareSpy).toHaveBeenCalledTimes(1);
     });
 
     test("with input", async () => {
       const action = serverAct
-        .middleware(middlewareSpy)
+        .use(middlewareSpy)
         .input(v.string())
         .action(async ({ ctx, input }) =>
           Promise.resolve(`${ctx.prefix}-${input}-bar`),
@@ -95,13 +97,17 @@ describe("action", () => {
 
       expect(action.constructor.name).toBe("AsyncFunction");
       await expect(action("foo")).resolves.toBe("best-foo-bar");
-      expect(middlewareSpy).toBeCalledTimes(1);
+      expect(middlewareSpy).toHaveBeenCalledTimes(1);
     });
   });
 
   test("should able to access middleware context in input", async () => {
+    const prefixMiddleware = createServerActMiddleware(({ next }) =>
+      next({ ctx: { prefix: "best" } }),
+    );
+
     const action = serverAct
-      .middleware(() => ({ prefix: "best" }))
+      .use(prefixMiddleware)
       .input(({ ctx }) =>
         v.pipe(
           v.string(),
@@ -198,8 +204,12 @@ describe("stateAction", () => {
   });
 
   test("should able to access middleware context", async () => {
+    const prefixMiddleware = createServerActMiddleware(({ next }) =>
+      next({ ctx: { prefix: "best" } }),
+    );
+
     const action = serverAct
-      .middleware(() => ({ prefix: "best" }))
+      .use(prefixMiddleware)
       .input(({ ctx }) =>
         v.object({
           foo: v.pipe(
@@ -277,8 +287,12 @@ describe("formAction", () => {
   });
 
   test("should able to access middleware context", async () => {
+    const prefixMiddleware = createServerActMiddleware(({ next }) =>
+      next({ ctx: { prefix: "best" } }),
+    );
+
     const action = serverAct
-      .middleware(() => ({ prefix: "best" }))
+      .use(prefixMiddleware)
       .input(({ ctx }) =>
         v.object({
           foo: v.pipe(
