@@ -16,9 +16,7 @@ describe("middleware", () => {
   describe("single use", () => {
     test("should work like middleware", async () => {
       const action = serverAct
-        .use<{ prefix: string }>(({ next }) =>
-          next({ ctx: { prefix: "best" } }),
-        )
+        .use(({ next }) => next({ ctx: { prefix: "best" } }))
         .action(async ({ ctx }) => Promise.resolve(`${ctx.prefix}-bar`));
 
       expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
@@ -32,9 +30,7 @@ describe("middleware", () => {
         return next({ ctx: { prefix: "best" } });
       });
 
-      const action = serverAct
-        .use<{ prefix: string }>(useSpy)
-        .action(async () => "bar");
+      const action = serverAct.use(useSpy).action(async () => "bar");
 
       await action();
       expect(useSpy).toHaveBeenCalledTimes(1);
@@ -44,8 +40,8 @@ describe("middleware", () => {
   describe("chaining multiple use calls", () => {
     test("should chain two use calls", async () => {
       const action = serverAct
-        .use<{ a: number }>(({ next }) => next({ ctx: { a: 1 } }))
-        .use<{ a: number; b: number }>(({ ctx, next }) => {
+        .use(({ next }) => next({ ctx: { a: 1 } }))
+        .use(({ ctx, next }) => {
           expectTypeOf(ctx).toMatchObjectType<{ a: number }>();
           return next({ ctx: { b: 2 } });
         })
@@ -60,11 +56,11 @@ describe("middleware", () => {
 
     test("should chain three use calls", async () => {
       const action = serverAct
-        .use<{ a: number }>(({ next }) => next({ ctx: { a: 1 } }))
-        .use<{ a: number; b: number }>(({ ctx, next }) => {
+        .use(({ next }) => next({ ctx: { a: 1 } }))
+        .use(({ ctx, next }) => {
           return next({ ctx: { b: ctx.a + 1 } });
         })
-        .use<{ a: number; b: number; c: number }>(({ ctx, next }) => {
+        .use(({ ctx, next }) => {
           expectTypeOf(ctx).toMatchObjectType<{ a: number; b: number }>();
           return next({ ctx: { c: ctx.a + ctx.b } });
         })
@@ -85,22 +81,15 @@ describe("middleware", () => {
       type User = { id: string; name: string };
 
       const action = serverAct
-        .use<{ db: { query: () => string } }>(({ next }) =>
+        .use(({ next }) =>
           next({ ctx: { db: { query: () => "data" as string } } }),
         )
-        .use<{
-          db: { query: () => string };
-          user: { id: string; name: string };
-        }>(({ next }) =>
+        .use(({ next }) =>
           next({
             ctx: { user: { id: "123", name: "John" } },
           }),
         )
-        .use<{
-          db: { query: () => string };
-          user: { id: string; name: string };
-          permissions: string[];
-        }>(({ next }) => next({ ctx: { permissions: ["read", "write"] } }))
+        .use(({ next }) => next({ ctx: { permissions: ["read", "write"] } }))
         .action(async ({ ctx }) => {
           expectTypeOf(ctx.db).toEqualTypeOf<Database>();
           expectTypeOf(ctx.user).toEqualTypeOf<User>();
@@ -115,9 +104,7 @@ describe("middleware", () => {
   describe("use with input", () => {
     test("should access context from use in input", async () => {
       const action = serverAct
-        .use<{ prefix: string }>(({ next }) =>
-          next({ ctx: { prefix: "best" } }),
-        )
+        .use(({ next }) => next({ ctx: { prefix: "best" } }))
         .input(({ ctx }) => z.string().transform((v) => `${ctx.prefix}-${v}`))
         .action(async ({ ctx, input }) => {
           return `${input}-${ctx.prefix}-bar`;
@@ -129,12 +116,8 @@ describe("middleware", () => {
 
     test("should access chained context in input", async () => {
       const action = serverAct
-        .use<{ prefix: string }>(({ next }) =>
-          next({ ctx: { prefix: "best" } }),
-        )
-        .use<{ prefix: string; suffix: string }>(({ next }) =>
-          next({ ctx: { suffix: "ever" } }),
-        )
+        .use(({ next }) => next({ ctx: { prefix: "best" } }))
+        .use(({ next }) => next({ ctx: { suffix: "ever" } }))
         .input(({ ctx }) =>
           z.string().transform((v) => `${ctx.prefix}-${v}-${ctx.suffix}`),
         )
@@ -149,12 +132,8 @@ describe("middleware", () => {
   describe("use with stateAction", () => {
     test("should work with stateAction", async () => {
       const action = serverAct
-        .use<{ prefix: string }>(({ next }) =>
-          next({ ctx: { prefix: "best" } }),
-        )
-        .use<{ prefix: string; suffix: string }>(({ next }) =>
-          next({ ctx: { suffix: "ever" } }),
-        )
+        .use(({ next }) => next({ ctx: { prefix: "best" } }))
+        .use(({ next }) => next({ ctx: { suffix: "ever" } }))
         .input(z.object({ foo: z.string() }))
         .stateAction(async ({ ctx, input, inputErrors }) => {
           if (inputErrors) return inputErrors;
@@ -169,12 +148,8 @@ describe("middleware", () => {
   describe("use with formAction", () => {
     test("should work with formAction", async () => {
       const action = serverAct
-        .use<{ prefix: string }>(({ next }) =>
-          next({ ctx: { prefix: "best" } }),
-        )
-        .use<{ prefix: string; suffix: string }>(({ next }) =>
-          next({ ctx: { suffix: "ever" } }),
-        )
+        .use(({ next }) => next({ ctx: { prefix: "best" } }))
+        .use(({ next }) => next({ ctx: { suffix: "ever" } }))
         .input(zodFormData(z.object({ foo: z.string() })))
         .formAction(async ({ ctx, input, formErrors }) => {
           if (formErrors) return formErrors;
@@ -194,16 +169,16 @@ describe("middleware", () => {
       const order: string[] = [];
 
       const action = serverAct
-        .use<{ a: number }>(({ next }) => {
+        .use(({ next }) => {
           order.push("first");
           return next({ ctx: { a: 1 } });
         })
-        .use<{ a: number; b: number }>(({ ctx, next }) => {
+        .use(({ ctx, next }) => {
           order.push("second");
           expect(ctx.a).toBe(1);
           return next({ ctx: { b: 2 } });
         })
-        .use<{ a: number; b: number; c: number }>(({ ctx, next }) => {
+        .use(({ ctx, next }) => {
           order.push("third");
           expect(ctx.a).toBe(1);
           expect(ctx.b).toBe(2);
@@ -222,11 +197,11 @@ describe("middleware", () => {
   describe("async middlewares", () => {
     test("should handle async middlewares", async () => {
       const action = serverAct
-        .use<{ async: string }>(async ({ next }) => {
+        .use(async ({ next }) => {
           await new Promise((resolve) => setTimeout(resolve, 10));
           return await next({ ctx: { async: "value" } });
         })
-        .use<{ async: string; another: string }>(async ({ ctx, next }) => {
+        .use(async ({ ctx, next }) => {
           await new Promise((resolve) => setTimeout(resolve, 10));
           return await next({ ctx: { another: ctx.async } });
         })
@@ -242,7 +217,7 @@ describe("middleware", () => {
     test("should work with legacy middleware before `.use()`", async () => {
       const action = serverAct
         .middleware(() => ({ legacy: "value" }))
-        .use<{ legacy: string; new: string }>(({ ctx, next }) => {
+        .use(({ ctx, next }) => {
           return next({ ctx: { new: ctx.legacy + "-new" } });
         })
         .action(async ({ ctx }) => {
@@ -254,9 +229,7 @@ describe("middleware", () => {
 
     test("should work with `.use()` before legacy middleware", async () => {
       const action = serverAct
-        .use<{ requestId: string }>(({ next }) =>
-          next({ ctx: { requestId: "request-1" } }),
-        )
+        .use(({ next }) => next({ ctx: { requestId: "request-1" } }))
         .middleware(({ ctx }) => ({
           trace: `${ctx.requestId}-trace`,
         }))
@@ -271,12 +244,8 @@ describe("middleware", () => {
   describe("context merging", () => {
     test("should merge contexts with object spread", async () => {
       const action = serverAct
-        .use<{ shared: string; a: number }>(({ next }) =>
-          next({ ctx: { shared: "first", a: 1 } }),
-        )
-        .use<{ shared: string; a: number; b: number }>(({ next }) =>
-          next({ ctx: { shared: "second", b: 2 } }),
-        )
+        .use(({ next }) => next({ ctx: { shared: "first", a: 1 } }))
+        .use(({ next }) => next({ ctx: { shared: "second", b: 2 } }))
         .action(async ({ ctx }) => {
           // Later value should override earlier value
           return `${ctx.shared}-${ctx.a}-${ctx.b}`;
