@@ -3,23 +3,28 @@ export type LegacyMiddlewareFunction<TContext, TReturn> = (params: {
 }) => Promise<TReturn> | TReturn;
 
 type MiddlewareContext = Record<string, unknown>;
-type Prettify<T> = {
-  [P in keyof T]: T[P];
-} & {};
+type Awaitable<T> = T | Promise<T>;
+declare const middlewareResultBrand: unique symbol;
 
-export type MiddlewareNextFunction<TContext extends MiddlewareContext> = <
-  TAddedContext extends MiddlewareContext,
+export type MiddlewareResult<
+  TAddedContext extends MiddlewareContext = MiddlewareContext,
+> = {
+  readonly [middlewareResultBrand]: TAddedContext;
+};
+
+export type MiddlewareNextFunction = <
+  TAddedContext extends MiddlewareContext = {},
 >(opts?: {
   ctx?: TAddedContext;
-}) => Promise<Prettify<TContext & TAddedContext>>;
+}) => Promise<MiddlewareResult<TAddedContext>>;
 
 export type UseMiddlewareFunction<
   TContext extends MiddlewareContext,
-  TNextContext extends MiddlewareContext,
+  TAddedContext extends MiddlewareContext,
 > = (params: {
   ctx: TContext;
-  next: MiddlewareNextFunction<TContext>;
-}) => Promise<TNextContext> | TNextContext;
+  next: MiddlewareNextFunction;
+}) => Awaitable<MiddlewareResult<TAddedContext>>;
 
 export type MiddlewareDef =
   | {
@@ -38,18 +43,19 @@ function normalizeCtx(ctx?: unknown) {
 /**
  * Executes an array of middleware functions with the given initial context.
  */
-export async function executeMiddlewares(
+export async function executeMiddlewares<TOutput>(
   middlewares: MiddlewareDef[],
-  initialCtx?: unknown,
+  initialCtx: unknown,
+  terminal: (ctx: Record<string, unknown>) => Promise<TOutput>,
 ) {
   const executeAt = async (
     index: number,
     ctx: Record<string, unknown>,
-  ): Promise<Record<string, unknown>> => {
+  ): Promise<TOutput> => {
     const entry = middlewares[index];
 
     if (!entry) {
-      return ctx;
+      return await terminal(ctx);
     }
 
     if (entry.kind === "legacy") {
@@ -62,12 +68,15 @@ export async function executeMiddlewares(
     let nextCalled = false;
     const result = await entry.middleware({
       ctx,
-      next: async (opts) => {
+      next: async <TAddedContext extends MiddlewareContext = {}>(opts?: {
+        ctx?: TAddedContext;
+      }) => {
         nextCalled = true;
         const nextCtx = opts?.ctx ? { ...ctx, ...opts.ctx } : ctx;
-        return (await executeAt(index + 1, nextCtx)) as Prettify<
-          typeof ctx & NonNullable<typeof opts>["ctx"]
-        >;
+        return (await executeAt(
+          index + 1,
+          nextCtx,
+        )) as MiddlewareResult<TAddedContext>;
       },
     });
 
@@ -75,7 +84,7 @@ export async function executeMiddlewares(
       throw new Error(".use() middleware must call next()");
     }
 
-    return normalizeCtx(result);
+    return result as TOutput;
   };
 
   return await executeAt(0, normalizeCtx(initialCtx));

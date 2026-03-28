@@ -82,7 +82,9 @@ interface ActionBuilder<TParams extends ActionParams> {
     >,
   ) => ActionBuilder<{
     _input: TParams["_input"];
-    _context: TNextContext;
+    _context: TParams["_context"] extends UnsetMarker
+      ? TNextContext
+      : Prettify<NormalizeContext<TParams["_context"]> & TNextContext>;
   }>;
   /**
    * Input validation for the action.
@@ -187,11 +189,8 @@ export function createServerActMiddleware<
   TAddedContext extends Record<string, unknown>,
   TContext extends Record<string, unknown> = {},
 >(
-  middleware: UseMiddlewareFunction<
-    TContext,
-    Prettify<TContext & TAddedContext>
-  >,
-): UseMiddlewareFunction<TContext, Prettify<TContext & TAddedContext>> {
+  middleware: UseMiddlewareFunction<TContext, TAddedContext>,
+): UseMiddlewareFunction<TContext, TAddedContext> {
   return middleware;
 }
 
@@ -236,47 +235,49 @@ function createServerActionBuilder(
     action: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (input?: any) => {
-        // oxlint-disable-next-line typescript/no-explicit-any
-        let ctx: any = {};
-        if (_def.middleware.length > 0) {
-          ctx = await executeMiddlewares(_def.middleware, ctx);
-        }
-        if (_def.input) {
-          const inputSchema =
-            typeof _def.input === "function"
-              ? await _def.input({ ctx })
-              : _def.input;
-          const result = await standardValidate(inputSchema, input);
-          if (result.issues) {
-            throw new SchemaError(result.issues);
+        return await executeMiddlewares(_def.middleware, {}, async (ctx) => {
+          if (_def.input) {
+            const inputSchema =
+              typeof _def.input === "function"
+                ? await _def.input({ ctx: ctx as never })
+                : _def.input;
+            const result = await standardValidate(inputSchema, input);
+            if (result.issues) {
+              throw new SchemaError(result.issues);
+            }
+            // oxlint-disable-next-line typescript/no-explicit-any
+            return await action({ ctx, input: result.value as any });
           }
-          // oxlint-disable-next-line typescript/no-explicit-any
-          return await action({ ctx, input: result.value as any });
-        }
-        return await action({ ctx, input: undefined });
+          return await action({ ctx, input: undefined });
+        });
       };
     },
     stateAction: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, rawInput?: any) => {
-        // oxlint-disable-next-line typescript/no-explicit-any
-        let ctx: any = {};
-        if (_def.middleware.length > 0) {
-          ctx = await executeMiddlewares(_def.middleware, ctx);
-        }
-        if (_def.input) {
-          const inputSchema =
-            typeof _def.input === "function"
-              ? await _def.input({ ctx })
-              : _def.input;
-          const result = await standardValidate(inputSchema, rawInput);
-          if (result.issues) {
+        return await executeMiddlewares(_def.middleware, {}, async (ctx) => {
+          if (_def.input) {
+            const inputSchema =
+              typeof _def.input === "function"
+                ? await _def.input({ ctx: ctx as never })
+                : _def.input;
+            const result = await standardValidate(inputSchema, rawInput);
+            if (result.issues) {
+              return await action({
+                ctx,
+                // oxlint-disable-next-line typescript/no-explicit-any
+                prevState: prevState as any,
+                rawInput,
+                inputErrors: getInputErrors(result.issues),
+              });
+            }
             return await action({
               ctx,
               // oxlint-disable-next-line typescript/no-explicit-any
               prevState: prevState as any,
               rawInput,
-              inputErrors: getInputErrors(result.issues),
+              // oxlint-disable-next-line typescript/no-explicit-any
+              input: result.value as any,
             });
           }
           return await action({
@@ -284,40 +285,37 @@ function createServerActionBuilder(
             // oxlint-disable-next-line typescript/no-explicit-any
             prevState: prevState as any,
             rawInput,
-            // oxlint-disable-next-line typescript/no-explicit-any
-            input: result.value as any,
+            input: undefined,
           });
-        }
-        return await action({
-          ctx,
-          // oxlint-disable-next-line typescript/no-explicit-any
-          prevState: prevState as any,
-          rawInput,
-          input: undefined,
         });
       };
     },
     formAction: (action) => {
       // oxlint-disable-next-line typescript/no-explicit-any
       return async (prevState, formData?: any) => {
-        // oxlint-disable-next-line typescript/no-explicit-any
-        let ctx: any = {};
-        if (_def.middleware.length > 0) {
-          ctx = await executeMiddlewares(_def.middleware, ctx);
-        }
-        if (_def.input) {
-          const inputSchema =
-            typeof _def.input === "function"
-              ? await _def.input({ ctx })
-              : _def.input;
-          const result = await standardValidate(inputSchema, formData);
-          if (result.issues) {
+        return await executeMiddlewares(_def.middleware, {}, async (ctx) => {
+          if (_def.input) {
+            const inputSchema =
+              typeof _def.input === "function"
+                ? await _def.input({ ctx: ctx as never })
+                : _def.input;
+            const result = await standardValidate(inputSchema, formData);
+            if (result.issues) {
+              return await action({
+                ctx,
+                // oxlint-disable-next-line typescript/no-explicit-any
+                prevState: prevState as any,
+                formData,
+                formErrors: getInputErrors(result.issues),
+              });
+            }
             return await action({
               ctx,
               // oxlint-disable-next-line typescript/no-explicit-any
               prevState: prevState as any,
               formData,
-              formErrors: getInputErrors(result.issues),
+              // oxlint-disable-next-line typescript/no-explicit-any
+              input: result.value as any,
             });
           }
           return await action({
@@ -325,16 +323,8 @@ function createServerActionBuilder(
             // oxlint-disable-next-line typescript/no-explicit-any
             prevState: prevState as any,
             formData,
-            // oxlint-disable-next-line typescript/no-explicit-any
-            input: result.value as any,
+            input: undefined,
           });
-        }
-        return await action({
-          ctx,
-          // oxlint-disable-next-line typescript/no-explicit-any
-          prevState: prevState as any,
-          formData,
-          input: undefined,
         });
       };
     },
