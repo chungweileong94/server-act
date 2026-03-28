@@ -1,5 +1,13 @@
 # server-act
 
+## 1.8.1
+
+### Patch Changes
+
+- [#59](https://github.com/chungweileong94/server-act/pull/59) [`247133d`](https://github.com/chungweileong94/server-act/commit/247133d19a5c93f95005e9e27e154de59c5ccb78) Thanks [@chungweileong94](https://github.com/chungweileong94)! - `.use()` middlewares now wrap the full execution chain, so calling `next()` continues through the remaining middlewares and then into the final action. This allows reusable middleware to measure full action duration, observe downstream errors, and participate in end-to-end control flow.
+
+  At the type level, `.use()` now requires returning the result of `next()`, which helps prevent accidentally returning arbitrary values from middleware.
+
 ## 1.8.0
 
 ### Minor Changes
