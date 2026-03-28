@@ -192,6 +192,29 @@ describe("middleware", () => {
       await action();
       expect(order).toEqual(["first", "second", "third", "action"]);
     });
+
+    test("should continue from the last middleware into the action", async () => {
+      const order: string[] = [];
+
+      const action = serverAct
+        .use(async ({ next }) => {
+          order.push("middleware:before");
+          const result = await next({ ctx: { value: 2 } });
+          order.push("middleware:after");
+          return result;
+        })
+        .action(async ({ ctx }) => {
+          order.push("action");
+          return ctx.value * 2;
+        });
+
+      await expect(action()).resolves.toBe(4);
+      expect(order).toEqual([
+        "middleware:before",
+        "action",
+        "middleware:after",
+      ]);
+    });
   });
 
   describe("async middlewares", () => {
@@ -274,6 +297,48 @@ describe("middleware", () => {
         .action(async () => "bar");
 
       await expect(action()).resolves.toBe("bar");
+    });
+  });
+
+  describe("action wrapping", () => {
+    test("should measure overall action execution time", async () => {
+      let duration = 0;
+
+      const action = serverAct
+        .use(async ({ next }) => {
+          const start = Date.now();
+          const result = await next({ ctx: { timed: true } });
+          duration = Date.now() - start;
+          return result;
+        })
+        .action(async ({ ctx }) => {
+          expect(ctx.timed).toBe(true);
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          return "done";
+        });
+
+      await expect(action()).resolves.toBe("done");
+      expect(duration).toBeGreaterThanOrEqual(10);
+    });
+
+    test("should allow middleware to observe action errors", async () => {
+      const errorSpy = vi.fn();
+
+      const action = serverAct
+        .use(async ({ next }) => {
+          try {
+            return await next();
+          } catch (error) {
+            errorSpy(error);
+            throw error;
+          }
+        })
+        .action(async () => {
+          throw new Error("boom");
+        });
+
+      await expect(action()).rejects.toThrow("boom");
+      expect(errorSpy).toHaveBeenCalledTimes(1);
     });
   });
 
