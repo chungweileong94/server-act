@@ -9,7 +9,7 @@ declare const middlewareResultBrand: unique symbol;
 export type MiddlewareResult<
   TAddedContext extends MiddlewareContext = MiddlewareContext,
 > = {
-  readonly [middlewareResultBrand]?: TAddedContext;
+  readonly [middlewareResultBrand]: TAddedContext;
 };
 
 export type MiddlewareNextFunction = <

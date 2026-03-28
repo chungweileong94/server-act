@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vite-plus/test";
-import { executeMiddlewares } from "./middleware";
+import { executeMiddlewares, type MiddlewareResult } from "./middleware";
 
 async function returnContext(ctx: Record<string, unknown>) {
   return ctx;
@@ -212,7 +212,7 @@ describe("executeMiddlewares", () => {
         [
           {
             kind: "use",
-            middleware: async () => ({}),
+            middleware: async () => ({}) as MiddlewareResult,
           },
         ],
         undefined,
