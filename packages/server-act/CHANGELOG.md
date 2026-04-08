@@ -1,5 +1,11 @@
 # server-act
 
+## 1.8.2
+
+### Patch Changes
+
+- [#61](https://github.com/chungweileong94/server-act/pull/61) [`c05e14a`](https://github.com/chungweileong94/server-act/commit/c05e14a2883c3bc010fb1e476e4589dacd425d17) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Refine .use() JSDoc
+
 ## 1.8.1
 
 ### Patch Changes
