@@ -73,7 +73,9 @@ interface ActionBuilder<TParams extends ActionParams> {
       : Prettify<TParams["_context"] & TNewContext>;
   }>;
   /**
-   * tRPC-style middleware that forwards context via `next()`.
+   * Registers middleware in the action pipeline.
+   * Call `next()` to continue, optionally passing `ctx` to merge additional
+   * context for downstream middleware and the action handler.
    */
   use: <TNextContext extends Record<string, unknown>>(
     middleware: UseMiddlewareFunction<
