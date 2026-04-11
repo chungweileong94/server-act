@@ -187,15 +187,6 @@ function createNewServerActionBuilder(def: Partial<AnyActionBuilderDef>) {
   return createServerActionBuilder(def);
 }
 
-export function createServerActMiddleware<
-  TAddedContext extends Record<string, unknown>,
-  TContext extends Record<string, unknown> = {},
->(
-  middleware: UseMiddlewareFunction<TContext, TAddedContext>,
-): UseMiddlewareFunction<TContext, TAddedContext> {
-  return middleware;
-}
-
 function createServerActionBuilder(
   initDef: Partial<AnyActionBuilderDef> = {},
 ): ActionBuilder<{
@@ -337,3 +328,15 @@ function createServerActionBuilder(
  * Server action builder
  */
 export const serverAct = createServerActionBuilder();
+
+/**
+ * Create reusable middleware
+ */
+export function createServerActMiddleware<
+  TAddedContext extends Record<string, unknown>,
+  TContext extends Record<string, unknown> = {},
+>(
+  middleware: UseMiddlewareFunction<TContext, TAddedContext>,
+): UseMiddlewareFunction<TContext, TAddedContext> {
+  return middleware;
+}
