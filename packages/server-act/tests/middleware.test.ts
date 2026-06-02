@@ -1,16 +1,6 @@
 import { describe, expect, expectTypeOf, test, vi } from "vite-plus/test";
 import { z } from "zod";
 import { createServerActMiddleware, serverAct } from "../src";
-import { formDataToObject } from "../src/utils";
-
-function zodFormData<T extends z.ZodType>(
-  schema: T,
-): z.ZodPipe<z.ZodTransform<Record<string, unknown>, FormData>, T> {
-  return z.preprocess<Record<string, unknown>, T, FormData>(
-    (v) => formDataToObject(v),
-    schema,
-  );
-}
 
 describe("middleware", () => {
   describe("single use", () => {
@@ -141,25 +131,6 @@ describe("middleware", () => {
         });
 
       const result = await action(undefined, { foo: "test" });
-      expect(result).toBe("best-test-ever");
-    });
-  });
-
-  describe("use with formAction", () => {
-    test("should work with formAction", async () => {
-      const action = serverAct
-        .use(({ next }) => next({ ctx: { prefix: "best" } }))
-        .use(({ next }) => next({ ctx: { suffix: "ever" } }))
-        .input(zodFormData(z.object({ foo: z.string() })))
-        .formAction(async ({ ctx, input, formErrors }) => {
-          if (formErrors) return formErrors;
-          return `${ctx.prefix}-${input.foo}-${ctx.suffix}`;
-        });
-
-      const formData = new FormData();
-      formData.append("foo", "test");
-
-      const result = await action(undefined, formData);
       expect(result).toBe("best-test-ever");
     });
   });

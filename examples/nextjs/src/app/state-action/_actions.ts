@@ -33,7 +33,7 @@ export const sayHelloAction = serverAct
   )
   .stateAction(async ({ rawInput, input, inputErrors, ctx }) => {
     if (inputErrors) {
-      return { formData: rawInput, inputErrors: inputErrors.fieldErrors };
+      return { rawInput, inputErrors: inputErrors.fieldErrors };
     }
 
     console.info(
