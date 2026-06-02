@@ -10,8 +10,8 @@
     "format": "vp fmt",
     "sherif": "sherif",
     "changeset:add": "changeset add",
-    "changeset:publish": "changeset publish && vp fmt",
-    "changeset:version": "changeset version && vp fmt"
+    "changeset:publish": "changeset publish",
+    "changeset:version": "changeset version"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
