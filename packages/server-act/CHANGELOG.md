@@ -1,5 +1,13 @@
 # server-act
 
+## 1.9.0
+
+### Minor Changes
+
+- [#63](https://github.com/chungweileong94/server-act/pull/63) [`66d67ca`](https://github.com/chungweileong94/server-act/commit/66d67ca6dda1cd9814240832e82509293deb73f9) Thanks [@chungweileong94](https://github.com/chungweileong94)! - `serverAct.formAction` has been removed.
+
+  Use `serverAct.stateAction` instead, and update handler payload names from `formData` to `rawInput` and from `formErrors` to `inputErrors`.
+
 ## 1.8.2
 
 ### Patch Changes
