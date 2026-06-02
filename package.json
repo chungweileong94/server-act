@@ -2,6 +2,7 @@
   "name": "server-act-root",
   "private": true,
   "scripts": {
+    "prepare": "vp config",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
