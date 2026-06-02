@@ -287,10 +287,7 @@ describe("stateAction", () => {
     );
 
     expectTypeOf(action).toEqualTypeOf<
-      (
-        prevState: string | number,
-        input: undefined,
-      ) => Promise<string | number>
+      (prevState: string | number, input: undefined) => Promise<string | number>
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
