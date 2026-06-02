@@ -127,6 +127,21 @@ describe("action", () => {
 });
 
 describe("stateAction", () => {
+  test("should able to create action without input", async () => {
+    const action = serverAct.stateAction(async () => Promise.resolve("bar"));
+
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: string | undefined,
+        input: undefined,
+      ) => Promise<string | undefined>
+    >();
+
+    expect(action.constructor.name).toBe("AsyncFunction");
+
+    await expect(action("foo", undefined)).resolves.toMatch("bar");
+  });
+
   test("should able to create action with input", async () => {
     const action = serverAct
       .input(v.object({ foo: v.string() }))
@@ -240,87 +255,43 @@ describe("stateAction", () => {
       "best-bar-best-bar",
     );
   });
-});
 
-describe("formAction", () => {
-  test("should able to create form action with input", async () => {
-    const action = serverAct
-      .input(v.object({ foo: v.string() }))
-      .formAction(async () => Promise.resolve("bar"));
+  test("should able to infer the state correctly if `prevState` is being accessed", async () => {
+    const action = serverAct.stateAction(async ({ prevState }) => {
+      if (prevState == null) {
+        return Promise.resolve("foo");
+      }
+      return Promise.resolve("bar");
+    });
 
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: string | undefined,
-        formData: { foo: string },
+        input: undefined,
       ) => Promise<string | undefined>
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toMatch("bar");
+
+    await expect(action(undefined, undefined)).resolves.toMatch("foo");
   });
 
-  test("should return form errors if the input is invalid", async () => {
-    const action = serverAct
-      .input(v.object({ foo: v.string() }))
-      .formAction(async ({ formErrors }) => {
-        if (formErrors) {
-          return formErrors;
+  test("should able to infer the state correctly if `prevState` is being typed", async () => {
+    const action = serverAct.stateAction<string, number>(
+      async ({ prevState }) => {
+        if (typeof prevState === "number") {
+          return Promise.resolve("foo");
         }
         return Promise.resolve("bar");
-      });
+      },
+    );
 
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
     expectTypeOf(action).toEqualTypeOf<
-      (
-        prevState: State | undefined,
-        formData: { foo: string },
-      ) => Promise<State | undefined>
+      (prevState: string | number, input: undefined) => Promise<string | number>
     >();
 
     expect(action.constructor.name).toBe("AsyncFunction");
 
-    // @ts-expect-error: It's a test
-    const result = await action("foo", { bar: "foo" });
-    expect(result).toHaveProperty("fieldErrors.foo");
-  });
-
-  test("should able to access middleware context", async () => {
-    const prefixMiddleware = createServerActMiddleware(({ next }) =>
-      next({ ctx: { prefix: "best" } }),
-    );
-
-    const action = serverAct
-      .use(prefixMiddleware)
-      .input(({ ctx }) =>
-        v.object({
-          foo: v.pipe(
-            v.string(),
-            v.transform((value) => `${ctx.prefix}-${value}`),
-          ),
-        }),
-      )
-      .formAction(async ({ ctx, formErrors, input }) => {
-        if (formErrors) {
-          return formErrors;
-        }
-        return Promise.resolve(`${input.foo}-${ctx.prefix}-bar`);
-      });
-
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
-    expectTypeOf(action).toEqualTypeOf<
-      (
-        prevState: State | undefined,
-        formData: { foo: string },
-      ) => Promise<State | undefined>
-    >();
-
-    expect(action.constructor.name).toBe("AsyncFunction");
-    await expect(action("foo", { foo: "bar" })).resolves.toMatch(
-      "best-bar-best-bar",
-    );
+    await expect(action(123, undefined)).resolves.toMatch("foo");
   });
 });

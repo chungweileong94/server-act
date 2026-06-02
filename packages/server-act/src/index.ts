@@ -138,34 +138,6 @@ interface ActionBuilder<TParams extends ActionParams> {
     prevState: TState | RemoveUnsetMarker<TPrevState>,
     input: InferInputType<TParams["_input"], "in">,
   ) => Promise<TState | RemoveUnsetMarker<TPrevState>>;
-  /**
-   * Create an action for React `useActionState`
-   *
-   * @deprecated Use `stateAction` instead.
-   */
-  formAction: <TState, TPrevState = UnsetMarker>(
-    action: (
-      params: Prettify<
-        {
-          ctx: NormalizeContext<TParams["_context"]>;
-          prevState: RemoveUnsetMarker<TPrevState>;
-          formData: FormData;
-        } & (
-          | {
-              input: InferInputType<TParams["_input"], "out">;
-              formErrors?: undefined;
-            }
-          | {
-              input?: undefined;
-              formErrors: ReturnType<typeof getInputErrors>;
-            }
-        )
-      >,
-    ) => Promise<TState>,
-  ) => (
-    prevState: TState | RemoveUnsetMarker<TPrevState>,
-    formData: InferInputType<TParams["_input"], "in">,
-  ) => Promise<TState | RemoveUnsetMarker<TPrevState>>;
 }
 // oxlint-disable-next-line typescript/no-explicit-any
 type AnyActionBuilder = ActionBuilder<any>;
@@ -278,44 +250,6 @@ function createServerActionBuilder(
             // oxlint-disable-next-line typescript/no-explicit-any
             prevState: prevState as any,
             rawInput,
-            input: undefined,
-          });
-        });
-      };
-    },
-    formAction: (action) => {
-      // oxlint-disable-next-line typescript/no-explicit-any
-      return async (prevState, formData?: any) => {
-        return await executeMiddlewares(_def.middleware, {}, async (ctx) => {
-          if (_def.input) {
-            const inputSchema =
-              typeof _def.input === "function"
-                ? await _def.input({ ctx: ctx as never })
-                : _def.input;
-            const result = await standardValidate(inputSchema, formData);
-            if (result.issues) {
-              return await action({
-                ctx,
-                // oxlint-disable-next-line typescript/no-explicit-any
-                prevState: prevState as any,
-                formData,
-                formErrors: getInputErrors(result.issues),
-              });
-            }
-            return await action({
-              ctx,
-              // oxlint-disable-next-line typescript/no-explicit-any
-              prevState: prevState as any,
-              formData,
-              // oxlint-disable-next-line typescript/no-explicit-any
-              input: result.value as any,
-            });
-          }
-          return await action({
-            ctx,
-            // oxlint-disable-next-line typescript/no-explicit-any
-            prevState: prevState as any,
-            formData,
             input: undefined,
           });
         });

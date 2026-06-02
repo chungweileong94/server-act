@@ -204,7 +204,7 @@ export const sayHelloAction = serverAct
   )
   .stateAction(async ({ rawInput, input, inputErrors, ctx }) => {
     if (inputErrors) {
-      return { formData: rawInput, inputErrors: inputErrors.fieldErrors };
+      return { rawInput, inputErrors: inputErrors.fieldErrors };
     }
     return { message: `Hello, ${input.name}!` };
   });
@@ -266,7 +266,7 @@ export const createUserAction = serverAct
   )
   .stateAction(async ({ rawInput, input, inputErrors }) => {
     if (inputErrors) {
-      return { formData: rawInput, errors: inputErrors.fieldErrors };
+      return { rawInput, inputErrors: inputErrors.fieldErrors };
     }
 
     // Process the validated input
@@ -297,7 +297,7 @@ export const createPostAction = serverAct
   )
   .stateAction(async ({ rawInput, input, inputErrors }) => {
     if (inputErrors) {
-      return { formData: rawInput, errors: inputErrors.fieldErrors };
+      return { rawInput, inputErrors: inputErrors.fieldErrors };
     }
 
     // Process the validated input
