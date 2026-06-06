@@ -1,10 +1,6 @@
 "use server";
 
-import {
-  createServerActMiddleware,
-  serverAct,
-  type InputErrors,
-} from "server-act";
+import { createServerActMiddleware, serverAct } from "server-act";
 import { formDataToObject } from "server-act/utils";
 import { z } from "zod";
 
@@ -44,24 +40,12 @@ const signupSchemaWithTransform = signupSchema.transform(
   }),
 );
 
-type SignupState =
-  | {
-      rawInput: FormData;
-      inputErrors: InputErrors<{
-        firstName: string;
-        lastName: string;
-      }>["fieldErrors"];
-    }
-  | {
-      message: string;
-    };
-
 export const sayHelloOverrideAction = serverAct
   .use(requestTimeMiddleware)
   .input<typeof signupSchemaWithTransform, z.output<typeof signupSchema>>(
     signupSchemaWithTransform,
   )
-  .stateAction<SignupState>(async ({ rawInput, input, inputErrors, ctx }) => {
+  .stateAction(async ({ rawInput, input, inputErrors, ctx }) => {
     if (inputErrors) {
       return {
         rawInput,
