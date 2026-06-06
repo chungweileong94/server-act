@@ -1,5 +1,13 @@
 # server-act
 
+## 1.9.1
+
+### Patch Changes
+
+- [#66](https://github.com/chungweileong94/server-act/pull/66) [`46cff97`](https://github.com/chungweileong94/server-act/commit/46cff9770f1d57a333f90966800e92c49f04a82f) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Improve `stateAction` input error typing by inferring dot-path `fieldErrors` from the schema output shape.
+
+  Add an `inputErrorShape` override via `.input<TSchema, TInputErrorShape>(...)` for cases where the UI error paths intentionally differ from the parsed schema output.
+
 ## 1.9.0
 
 ### Minor Changes
