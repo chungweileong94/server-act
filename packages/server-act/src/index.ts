@@ -95,7 +95,6 @@ function createServerActionBuilder(
                 // oxlint-disable-next-line typescript/no-explicit-any
                 prevState: prevState as any,
                 rawInput,
-                input: undefined,
                 inputErrors: getInputErrors(result.issues),
               });
             }
@@ -106,7 +105,6 @@ function createServerActionBuilder(
               rawInput,
               // oxlint-disable-next-line typescript/no-explicit-any
               input: result.value as any,
-              inputErrors: undefined,
             });
           }
           return await action({
@@ -115,7 +113,6 @@ function createServerActionBuilder(
             prevState: prevState as any,
             rawInput,
             input: undefined,
-            inputErrors: undefined,
           });
         });
       };

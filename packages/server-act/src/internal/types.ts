@@ -150,10 +150,10 @@ export interface ActionBuilder<TParams extends ActionParams> {
         } & (
           | {
               input: InferInputType<TParams["_input"], "out">;
-              inputErrors: undefined;
+              inputErrors?: undefined;
             }
           | {
-              input: undefined;
+              input?: undefined;
               inputErrors: InputErrors<TParams["_inputErrorShape"]>;
             }
         )
