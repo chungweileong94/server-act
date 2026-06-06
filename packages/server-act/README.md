@@ -223,22 +223,32 @@ By default, `stateAction` infers `inputErrors.fieldErrors` from the schema outpu
 Sometimes that is not the right source of truth for your UI though. The common case is a schema that transforms flat form fields into a different parsed shape. In those cases, you can override the error-path source with the second generic on `.input()`.
 
 ```ts
-const signupSchema = z
-  .object({
-    firstName: z.string().min(1, { error: "First name is required" }),
-    lastName: z.string().min(1, { error: "Last name is required" }),
-  })
-  .transform(({ firstName, lastName }) => ({
+const signupSchema = zodFormData(
+  z.object({
+    firstName: z
+      .string()
+      .min(1, { error: "First name is required" })
+      .max(20, { error: "First name is too long" }),
+    lastName: z
+      .string()
+      .min(1, { error: "Last name is required" })
+      .max(20, { error: "Last name is too long" }),
+  }),
+);
+
+const signupSchemaWithTransform = signupSchema.transform(
+  ({ firstName, lastName }) => ({
     profile: {
       fullName: `${firstName} ${lastName}`,
     },
-  }));
+  }),
+);
 
 export const saveProfileAction = serverAct
   .input<
-    typeof signupSchema,
-    { firstName: string; lastName: string }
-  >(signupSchema)
+    typeof signupSchemaWithTransform,
+    z.output<typeof signupSchema>
+  >(signupSchemaWithTransform)
   .stateAction(async ({ input, inputErrors }) => {
     if (inputErrors) {
       return {

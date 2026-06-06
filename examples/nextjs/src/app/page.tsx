@@ -5,6 +5,9 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center gap-4">
       <Link href="/action">👉 Action Example</Link>
       <Link href="/state-action">👉 State Action Example</Link>
+      <Link href="/state-action-override">
+        👉 State Action with Error Shape Override Example
+      </Link>
     </main>
   );
 }
