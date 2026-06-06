@@ -204,11 +204,64 @@ export const sayHelloAction = serverAct
   )
   .stateAction(async ({ rawInput, input, inputErrors, ctx }) => {
     if (inputErrors) {
-      return { rawInput, inputErrors: inputErrors.fieldErrors };
+      return {
+        rawInput,
+        nameErrors: inputErrors.fieldErrors["name"],
+        inputErrors: inputErrors.fieldErrors,
+      };
     }
     return { message: `Hello, ${input.name}!` };
   });
 ```
+
+`inputErrors.fieldErrors` uses flat dot-path keys. The canonical way to read them is bracket access like `fieldErrors["name"]` or `fieldErrors["list.0.foo"]`.
+
+#### Overriding `inputErrorShape`
+
+By default, `stateAction` infers `inputErrors.fieldErrors` from the schema output type. That is usually what you want because it matches the parsed `input`.
+
+Sometimes that is not the right source of truth for your UI though. The common case is a schema that transforms flat form fields into a different parsed shape. In those cases, you can override the error-path source with the second generic on `.input()`.
+
+```ts
+const signupSchema = z
+  .object({
+    firstName: z.string().min(1, { error: "First name is required" }),
+    lastName: z.string().min(1, { error: "Last name is required" }),
+  })
+  .transform(({ firstName, lastName }) => ({
+    profile: {
+      fullName: `${firstName} ${lastName}`,
+    },
+  }));
+
+export const saveProfileAction = serverAct
+  .input<
+    typeof signupSchema,
+    { firstName: string; lastName: string }
+  >(signupSchema)
+  .stateAction(async ({ input, inputErrors }) => {
+    if (inputErrors) {
+      return {
+        firstNameErrors: inputErrors.fieldErrors["firstName"],
+        lastNameErrors: inputErrors.fieldErrors["lastName"],
+      };
+    }
+
+    return {
+      message: `Saved ${input.profile.fullName}`,
+    };
+  });
+```
+
+In that example:
+
+- the submitted fields are `firstName` and `lastName`
+- the parsed `input` is transformed into `{ profile: { fullName: string } }`
+- `rawInput` is still inferred from the schema input type
+- `input` is still inferred from the schema output type
+- only `inputErrors.fieldErrors` changes, so it uses `"firstName"` and `"lastName"` keys instead of the transformed output shape
+
+Use this override when your validation schema and your form/error addressing model intentionally differ.
 
 ## Utilities
 

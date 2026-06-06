@@ -7,6 +7,8 @@ import {
   type UseMiddlewareFunction,
 } from "./internal/middleware";
 import { getInputErrors, standardValidate } from "./internal/schema";
+import type { InferParserType, InputErrors } from "./internal/types";
+export type { InputErrors } from "./internal/types";
 
 const unsetMarker = Symbol("unsetMarker");
 type UnsetMarker = typeof unsetMarker;
@@ -37,19 +39,18 @@ type SanitizeFunctionParam<T extends (param: any) => any> = T extends (
       : (param: P) => R
   : never;
 
-type InferParserType<T, TType extends "in" | "out"> = T extends StandardSchemaV1
-  ? TType extends "in"
-    ? StandardSchemaV1.InferInput<T>
-    : StandardSchemaV1.InferOutput<T>
-  : never;
-
 type InferInputType<T, TType extends "in" | "out"> = T extends UnsetMarker
   ? undefined
   : InferParserType<T, TType>;
 
-interface ActionParams<TInput = unknown, TContext = unknown> {
+interface ActionParams<
+  TInput = unknown,
+  TContext = unknown,
+  TInputErrorShape = unknown,
+> {
   _input: TInput;
   _context: TContext;
+  _inputErrorShape: TInputErrorShape;
 }
 
 interface ActionBuilder<TParams extends ActionParams> {
@@ -71,6 +72,7 @@ interface ActionBuilder<TParams extends ActionParams> {
     _context: TParams["_context"] extends UnsetMarker
       ? TNewContext
       : Prettify<TParams["_context"] & TNewContext>;
+    _inputErrorShape: TParams["_inputErrorShape"];
   }>;
   /**
    * Registers middleware in the action pipeline.
@@ -87,18 +89,26 @@ interface ActionBuilder<TParams extends ActionParams> {
     _context: TParams["_context"] extends UnsetMarker
       ? TNextContext
       : Prettify<NormalizeContext<TParams["_context"]> & TNextContext>;
+    _inputErrorShape: TParams["_inputErrorShape"];
   }>;
   /**
    * Input validation for the action.
    */
-  input: <TParser extends StandardSchemaV1>(
+  input: <
+    TParser extends StandardSchemaV1,
+    TInputErrorShape = InferParserType<TParser, "out">,
+  >(
     input:
       | ((params: {
           ctx: NormalizeContext<TParams["_context"]>;
         }) => Promise<TParser> | TParser)
       | TParser,
   ) => Omit<
-    ActionBuilder<{ _input: TParser; _context: TParams["_context"] }>,
+    ActionBuilder<{
+      _input: TParser;
+      _context: TParams["_context"];
+      _inputErrorShape: TInputErrorShape;
+    }>,
     "input"
   >;
   /**
@@ -125,11 +135,11 @@ interface ActionBuilder<TParams extends ActionParams> {
         } & (
           | {
               input: InferInputType<TParams["_input"], "out">;
-              inputErrors?: undefined;
+              inputErrors: undefined;
             }
           | {
-              input?: undefined;
-              inputErrors: ReturnType<typeof getInputErrors>;
+              input: undefined;
+              inputErrors: InputErrors<TParams["_inputErrorShape"]>;
             }
         )
       >,
@@ -143,7 +153,7 @@ interface ActionBuilder<TParams extends ActionParams> {
 type AnyActionBuilder = ActionBuilder<any>;
 
 // oxlint-disable-next-line typescript/no-explicit-any
-interface ActionBuilderDef<TParams extends ActionParams<any>> {
+interface ActionBuilderDef<TParams extends ActionParams<any, any, any>> {
   input:
     | ((params: {
         ctx: TParams["_context"];
@@ -164,10 +174,12 @@ function createServerActionBuilder(
 ): ActionBuilder<{
   _input: UnsetMarker;
   _context: UnsetMarker;
+  _inputErrorShape: UnsetMarker;
 }> {
   const _def: ActionBuilderDef<{
     _input: StandardSchemaV1;
     _context: undefined;
+    _inputErrorShape: unknown;
   }> = {
     input: undefined,
     middleware: [],
@@ -233,6 +245,7 @@ function createServerActionBuilder(
                 // oxlint-disable-next-line typescript/no-explicit-any
                 prevState: prevState as any,
                 rawInput,
+                input: undefined,
                 inputErrors: getInputErrors(result.issues),
               });
             }
@@ -243,6 +256,7 @@ function createServerActionBuilder(
               rawInput,
               // oxlint-disable-next-line typescript/no-explicit-any
               input: result.value as any,
+              inputErrors: undefined,
             });
           }
           return await action({
@@ -251,6 +265,7 @@ function createServerActionBuilder(
             prevState: prevState as any,
             rawInput,
             input: undefined,
+            inputErrors: undefined,
           });
         });
       };
