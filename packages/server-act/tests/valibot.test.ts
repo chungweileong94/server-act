@@ -7,7 +7,7 @@ import {
   test,
   vi,
 } from "vite-plus/test";
-import { createServerActMiddleware, serverAct } from "../src";
+import { createServerActMiddleware, serverAct, type InputErrors } from "../src";
 import { formDataToObject } from "../src/utils";
 
 describe("action", () => {
@@ -169,14 +169,15 @@ describe("stateAction", () => {
       )
       .stateAction(async ({ input, inputErrors }) => {
         if (inputErrors) {
+          expectTypeOf(inputErrors.fieldErrors).toEqualTypeOf<
+            Partial<Record<"foo", string[]>>
+          >();
           return inputErrors;
         }
         return Promise.resolve(input.foo);
       });
 
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    type State = string | InputErrors<{ foo: string }>;
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
@@ -196,14 +197,15 @@ describe("stateAction", () => {
       .input(v.object({ foo: v.string() }))
       .stateAction(async ({ inputErrors }) => {
         if (inputErrors) {
+          expectTypeOf(inputErrors.fieldErrors).toEqualTypeOf<
+            Partial<Record<"foo", string[]>>
+          >();
           return inputErrors;
         }
         return Promise.resolve("bar");
       });
 
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    type State = string | InputErrors<{ foo: string }>;
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
@@ -240,9 +242,7 @@ describe("stateAction", () => {
         return Promise.resolve(`${input.foo}-${ctx.prefix}-bar`);
       });
 
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    type State = string | InputErrors<{ foo: string }>;
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,

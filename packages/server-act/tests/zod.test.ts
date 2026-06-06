@@ -7,7 +7,7 @@ import {
   vi,
 } from "vite-plus/test";
 import { z } from "zod";
-import { createServerActMiddleware, serverAct } from "../src";
+import { createServerActMiddleware, serverAct, type InputErrors } from "../src";
 import { formDataToObject } from "../src/utils";
 
 function zodFormData<T extends z.ZodType>(
@@ -171,14 +171,15 @@ describe("stateAction", () => {
       .input(z.object({ foo: z.string({ error: "Required" }) }))
       .stateAction(async ({ inputErrors }) => {
         if (inputErrors) {
+          expectTypeOf(inputErrors.fieldErrors).toEqualTypeOf<
+            Partial<Record<"foo", string[]>>
+          >();
           return inputErrors;
         }
         return Promise.resolve("bar");
       });
 
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    type State = string | InputErrors<{ foo: string }>;
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
@@ -204,14 +205,17 @@ describe("stateAction", () => {
       )
       .stateAction(async ({ inputErrors, input }) => {
         if (inputErrors) {
+          expectTypeOf(inputErrors.fieldErrors).toEqualTypeOf<
+            Partial<
+              Record<"list" | `list.${number}` | `list.${number}.foo`, string[]>
+            >
+          >();
           return inputErrors;
         }
         return Promise.resolve(input.list.map((item) => item.foo).join(","));
       });
 
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    type State = string | InputErrors<{ list: { foo: string }[] }>;
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
@@ -242,14 +246,17 @@ describe("stateAction", () => {
       )
       .stateAction(async ({ inputErrors }) => {
         if (inputErrors) {
+          expectTypeOf(inputErrors.fieldErrors).toEqualTypeOf<
+            Partial<
+              Record<"list" | `list.${number}` | `list.${number}.foo`, string[]>
+            >
+          >();
           return inputErrors;
         }
         return Promise.resolve("bar");
       });
 
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    type State = string | InputErrors<{ list: { foo: string }[] }>;
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
@@ -287,9 +294,7 @@ describe("stateAction", () => {
         return Promise.resolve(`${input.foo}-${ctx.prefix}-bar`);
       });
 
-    type State =
-      | string
-      | { messages: string[]; fieldErrors: Record<string, string[]> };
+    type State = string | InputErrors<{ foo: string }>;
     expectTypeOf(action).toEqualTypeOf<
       (
         prevState: State | undefined,
@@ -340,5 +345,39 @@ describe("stateAction", () => {
     expect(action.constructor.name).toBe("AsyncFunction");
 
     await expect(action(123, undefined)).resolves.toMatch("foo");
+  });
+
+  test("should allow overriding error path inference without changing input inference", async () => {
+    const schema = zodFormData(
+      z.object({
+        name: z.string(),
+      }),
+    );
+
+    const action = serverAct
+      .input<typeof schema, { profile: { name: string } }>(schema)
+      .stateAction(async ({ rawInput, input, inputErrors }) => {
+        expectTypeOf(rawInput).toEqualTypeOf<FormData>();
+        if (inputErrors) {
+          expectTypeOf(inputErrors.fieldErrors).toEqualTypeOf<
+            Partial<Record<"profile" | "profile.name", string[]>>
+          >();
+          return inputErrors;
+        }
+        expectTypeOf(input).toEqualTypeOf<{ name: string }>();
+        return Promise.resolve(input.name);
+      });
+
+    type State = string | InputErrors<{ profile: { name: string } }>;
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: State | undefined,
+        input: FormData,
+      ) => Promise<State | undefined>
+    >();
+
+    const formData = new FormData();
+    formData.append("name", "Ada");
+    await expect(action(undefined, formData)).resolves.toBe("Ada");
   });
 });
