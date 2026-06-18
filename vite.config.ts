@@ -42,6 +42,7 @@ export default defineConfig({
       "typescript/no-unnecessary-type-parameters": "off",
       "react/rules-of-hooks": "error",
       "react/self-closing-comp": "error",
+      "react/react-compiler": "error",
       "react/react-in-jsx-scope": "off",
     },
   },
