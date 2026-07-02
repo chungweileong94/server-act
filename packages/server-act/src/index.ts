@@ -52,10 +52,7 @@ function createServerActionBuilder(
     ) =>
       createNewServerActionBuilder({
         ..._def,
-        middleware: [
-          ..._def.middleware,
-          { kind: "use", middleware } as MiddlewareDef,
-        ],
+        middleware: [..._def.middleware, { kind: "use", middleware }],
       })) as AnyActionBuilder["use"],
     input: (input) =>
       createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,

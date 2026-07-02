@@ -72,7 +72,7 @@ describe("middleware", () => {
 
       const action = serverAct
         .use(({ next }) =>
-          next({ ctx: { db: { query: () => "data" as string } } }),
+          next({ ctx: { db: { query: (): string => "data" } } }),
         )
         .use(({ next }) =>
           next({

@@ -30,14 +30,24 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./utils": {
-      "types": "./dist/utils.d.ts",
-      "import": "./dist/utils.mjs",
-      "require": "./dist/utils.js"
+      "import": {
+        "types": "./dist/utils.d.mts",
+        "default": "./dist/utils.mjs"
+      },
+      "require": {
+        "types": "./dist/utils.d.cts",
+        "default": "./dist/utils.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -53,7 +63,7 @@
   },
   "devDependencies": {
     "valibot": "1.0.0-rc.0",
-    "vite-plus": "0.2.1",
+    "vite-plus": "0.2.2",
     "zod": "^4.0.10"
   },
   "peerDependencies": {
