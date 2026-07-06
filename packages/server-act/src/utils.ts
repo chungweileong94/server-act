@@ -4,37 +4,65 @@ function isNumberString(str: string) {
   return /^\d+$/.test(str);
 }
 
+/**
+ * Keys that could be used to walk up the prototype chain and pollute
+ * `Object.prototype`. They are never valid form field names, so we reject them.
+ */
+const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+/**
+ * Whether `value` is a plain object (one we created while building the
+ * structure), as opposed to a leaf value such as a `File` or `Blob`.
+ */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null) return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
 function set(
   // oxlint-disable-next-line typescript/no-explicit-any
   obj: Record<string, any>,
   path: readonly string[],
   value: unknown,
 ): void {
+  const key = path[0];
+  assert(key != null);
+
+  if (FORBIDDEN_KEYS.has(key)) {
+    throw new Error(`Unsafe form data key "${key}" is not allowed`);
+  }
+
   if (path.length > 1) {
-    const newPath = [...path];
-    const key = newPath.shift();
-    assert(key != null);
+    const newPath = path.slice(1);
     const nextKey = newPath[0];
     assert(nextKey != null);
 
-    if (!obj[key]) {
+    if (obj[key] === undefined) {
       obj[key] = isNumberString(nextKey) ? [] : {};
     } else if (Array.isArray(obj[key]) && !isNumberString(nextKey)) {
       obj[key] = Object.fromEntries(Object.entries(obj[key]));
+    } else if (!Array.isArray(obj[key]) && !isPlainObject(obj[key])) {
+      throw new Error(
+        `Conflicting form data key "${path.join(".")}": "${key}" is already a value`,
+      );
     }
 
     set(obj[key], newPath, value);
 
     return;
   }
-  const p = path[0];
-  assert(p != null);
-  if (obj[p] === undefined) {
-    obj[p] = value;
-  } else if (Array.isArray(obj[p])) {
-    obj[p].push(value);
+
+  if (obj[key] === undefined) {
+    obj[key] = value;
+  } else if (Array.isArray(obj[key])) {
+    obj[key].push(value);
+  } else if (isPlainObject(obj[key])) {
+    throw new Error(
+      `Conflicting form data key "${key}": already holds a nested object`,
+    );
   } else {
-    obj[p] = [obj[p], value];
+    obj[key] = [obj[key], value];
   }
 }
 

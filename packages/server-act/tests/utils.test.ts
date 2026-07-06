@@ -373,4 +373,91 @@ describe("formDataToObject", () => {
       },
     });
   });
+
+  describe("prototype pollution", () => {
+    test.each(["__proto__", "constructor", "prototype"])(
+      "should reject top-level unsafe key `%s`",
+      (unsafeKey) => {
+        const formData = new FormData();
+        formData.append(unsafeKey, "value");
+
+        expect(() => formDataToObject(formData)).toThrow(
+          `Unsafe form data key "${unsafeKey}" is not allowed`,
+        );
+      },
+    );
+
+    test("should reject unsafe key in nested dot path", () => {
+      const formData = new FormData();
+      formData.append("__proto__.polluted", "yes");
+
+      expect(() => formDataToObject(formData)).toThrow(
+        `Unsafe form data key "__proto__" is not allowed`,
+      );
+    });
+
+    test("should reject unsafe key in the middle of a path", () => {
+      const formData = new FormData();
+      formData.append("user.constructor.prototype.polluted", "yes");
+
+      expect(() => formDataToObject(formData)).toThrow(
+        `Unsafe form data key "constructor" is not allowed`,
+      );
+    });
+
+    test("should not pollute Object.prototype", () => {
+      const formData = new FormData();
+      formData.append("constructor.prototype.polluted", "yes");
+      formData.append("__proto__.polluted", "yes");
+
+      // Both entries throw, but critically nothing leaks onto the prototype.
+      expect(() => formDataToObject(formData)).toThrow();
+      expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+    });
+  });
+
+  describe("conflicting keys", () => {
+    test("should throw when descending into an existing scalar value", () => {
+      const formData = new FormData();
+      formData.append("a", "x");
+      formData.append("a.b", "y");
+
+      expect(() => formDataToObject(formData)).toThrow(
+        `Conflicting form data key "a.b": "a" is already a value`,
+      );
+    });
+
+    test("should throw when a scalar collides with an existing nested object", () => {
+      const formData = new FormData();
+      formData.append("a.b", "y");
+      formData.append("a", "x");
+
+      expect(() => formDataToObject(formData)).toThrow(
+        `Conflicting form data key "a": already holds a nested object`,
+      );
+    });
+
+    test("should throw when descending into an existing File value", () => {
+      const formData = new FormData();
+      const file = new File(["content"], "test.txt", { type: "text/plain" });
+      formData.append("doc", file);
+      formData.append("doc.name", "renamed");
+
+      expect(() => formDataToObject(formData)).toThrow(
+        `Conflicting form data key "doc.name": "doc" is already a value`,
+      );
+    });
+
+    test("should collapse multiple files under the same key into an array", () => {
+      const formData = new FormData();
+      const file1 = new File(["1"], "a.txt", { type: "text/plain" });
+      const file2 = new File(["2"], "b.txt", { type: "text/plain" });
+      formData.append("files", file1);
+      formData.append("files", file2);
+
+      const result = formDataToObject(formData);
+
+      expect(result).toEqual({ files: [file1, file2] });
+    });
+  });
 });
