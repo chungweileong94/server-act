@@ -71,6 +71,9 @@ export async function executeMiddlewares<TOutput>(
       next: async <TAddedContext extends MiddlewareContext = {}>(opts?: {
         ctx?: TAddedContext;
       }) => {
+        if (nextCalled) {
+          throw new Error(".use() middleware must call next() only once");
+        }
         nextCalled = true;
         const nextCtx = opts?.ctx ? { ...ctx, ...opts.ctx } : ctx;
         return (await executeAt(

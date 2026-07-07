@@ -91,6 +91,9 @@ interface ActionParams<
 }
 
 export interface ActionBuilder<TParams extends ActionParams> {
+  /**
+   * @deprecated Use `.use()` instead.
+   */
   middleware: <TNewContext>(
     middleware: LegacyMiddlewareFunction<
       NormalizeContext<TParams["_context"]>,

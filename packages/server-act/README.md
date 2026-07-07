@@ -91,6 +91,7 @@ You can chain multiple middlewares by calling `.use(...)` repeatedly.
 
 - Middlewares run in registration order.
 - Each middleware receives the current `ctx` and forwards additions with `next({ ctx })`.
+- Each middleware must call `next()` exactly once and return its result.
 - `next()` can be called without params when nothing needs to be added.
 - `next({ ctx })` shallow-merges the provided keys into the current context.
 - Later middleware values override earlier values for the same key.
