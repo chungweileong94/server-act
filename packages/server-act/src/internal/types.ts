@@ -92,6 +92,11 @@ interface ActionParams<
 
 export interface ActionBuilder<TParams extends ActionParams> {
   /**
+   * Middleware allows you to run code before the action, its return value will pass as context to the action.
+   *
+   * Chaining multiple middlewares is possible, each middleware receives context from previous middlewares
+   * and returns additional context that gets merged.
+   *
    * @deprecated Use `.use()` instead.
    */
   middleware: <TNewContext>(
@@ -106,6 +111,11 @@ export interface ActionBuilder<TParams extends ActionParams> {
       : Prettify<TParams["_context"] & TNewContext>;
     _inputErrorShape: TParams["_inputErrorShape"];
   }>;
+  /**
+   * Registers middleware in the action pipeline.
+   * Call `next()` to continue, optionally passing `ctx` to merge additional
+   * context for downstream middleware and the action handler.
+   */
   use: <TNextContext extends Record<string, unknown>>(
     middleware: UseMiddlewareFunction<
       NormalizeContext<TParams["_context"]>,
@@ -118,6 +128,9 @@ export interface ActionBuilder<TParams extends ActionParams> {
       : Prettify<NormalizeContext<TParams["_context"]> & TNextContext>;
     _inputErrorShape: TParams["_inputErrorShape"];
   }>;
+  /**
+   * Input validation for the action.
+   */
   input: <
     TParser extends StandardSchemaV1,
     TInputErrorShape = InferParserType<TParser, "out">,
@@ -135,6 +148,9 @@ export interface ActionBuilder<TParams extends ActionParams> {
     }>,
     "input"
   >;
+  /**
+   * Create an action.
+   */
   action: <TOutput>(
     action: (params: {
       ctx: NormalizeContext<TParams["_context"]>;
@@ -143,6 +159,9 @@ export interface ActionBuilder<TParams extends ActionParams> {
   ) => SanitizeFunctionParam<
     (input: InferInputType<TParams["_input"], "in">) => Promise<TOutput>
   >;
+  /**
+   * Create an action for React `useActionState`.
+   */
   stateAction: <TState, TPrevState = UnsetMarker>(
     action: (
       params: Prettify<
