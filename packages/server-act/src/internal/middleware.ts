@@ -46,7 +46,7 @@ function normalizeCtx(ctx?: unknown) {
   return ctx && typeof ctx === "object" ? { ...ctx } : {};
 }
 
-export type MiddlewareRunner = <TOutput>(
+type MiddlewareRunner = <TOutput>(
   initialCtx: unknown,
   terminal: MiddlewareTerminal<TOutput>,
 ) => Promise<TOutput>;
@@ -112,15 +112,4 @@ export function createMiddlewareRunner(
 
   return async (initialCtx, terminal) =>
     await run(normalizeCtx(initialCtx), terminal);
-}
-
-/**
- * Executes an array of middleware functions with the given initial context.
- */
-export async function executeMiddlewares<TOutput>(
-  middlewares: MiddlewareDef[],
-  initialCtx: unknown,
-  terminal: (ctx: Record<string, unknown>) => Promise<TOutput>,
-) {
-  return await createMiddlewareRunner(middlewares)(initialCtx, terminal);
 }
