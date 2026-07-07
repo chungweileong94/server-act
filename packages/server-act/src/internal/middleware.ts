@@ -54,6 +54,13 @@ type MiddlewareRunner = <TOutput>(
 const runTerminal: MiddlewareStep = async (ctx, terminal) =>
   await terminal(ctx);
 
+/**
+ * Builds a reusable middleware runner for a fixed middleware list.
+ *
+ * The returned runner normalizes the initial context for each invocation, keeps
+ * `.use()` middleware `next()` state isolated per call, and preserves the
+ * registration order while avoiding rebuilding the chain on every action run.
+ */
 export function createMiddlewareRunner(
   middlewares: readonly MiddlewareDef[],
 ): MiddlewareRunner {
