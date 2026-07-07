@@ -1,5 +1,21 @@
 # server-act
 
+## 1.9.2
+
+### Patch Changes
+
+- [#70](https://github.com/chungweileong94/server-act/pull/70) [`bbddbd9`](https://github.com/chungweileong94/server-act/commit/bbddbd9cb8c31825823f14b78d6bc1df0ded7bb6) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Prevent `.use()` middleware from calling `next()` more than once. Repeated calls now throw a clear error instead of re-running downstream middleware or the final action, which helps avoid accidental duplicate side effects.
+
+  The legacy `.middleware()` API is also now marked as deprecated, matching the README guidance to use `.use()`.
+
+- [#68](https://github.com/chungweileong94/server-act/pull/68) [`527f9ca`](https://github.com/chungweileong94/server-act/commit/527f9ca5d6c1a89f25499a8e5e0dc0a9e0bc408d) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Fix a prototype pollution vulnerability in `formDataToObject`. Form data keys such as `__proto__`, `constructor`, and `prototype` are now rejected instead of being written onto the object prototype.
+
+  `formDataToObject` also no longer silently drops values on ambiguous key collisions. Descending into a key that already holds a scalar/`File` value, or overwriting a nested object with a scalar, now throws a descriptive error. Multiple files uploaded under the same key still collapse into an array.
+
+- [#71](https://github.com/chungweileong94/server-act/pull/71) [`5d8cc6c`](https://github.com/chungweileong94/server-act/commit/5d8cc6c120e561124e7b525869a0ff43252f15fb) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Precompile middleware runners when actions are created and skip middleware execution machinery for actions without middleware. This reduces per-call overhead while preserving existing middleware behavior.
+
+- [#72](https://github.com/chungweileong94/server-act/pull/72) [`fa4b76b`](https://github.com/chungweileong94/server-act/commit/fa4b76b0ff03cdfec56d7da4edb2009f39c5425b) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Restore JSDoc for action builder APIs that were removed accidentally.
+
 ## 1.9.1
 
 ### Patch Changes
@@ -109,6 +125,7 @@
   You can now use any validation library that supports Standard Schema.
 
   Breaking changes:
+
   - Minimum required version of Zod is now `^3.24.0`.
   - `formErrors` in `formAction` will now return `{ messages: string[]; fieldErrors: Record<string, string[]> }` instead of `ZodError`.
   - You can no longer use an object as input if you are using `zfd.formData` from `zod-form-data`.
