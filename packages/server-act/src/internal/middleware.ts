@@ -4,6 +4,12 @@ export type LegacyMiddlewareFunction<TContext, TReturn> = (params: {
 
 type MiddlewareContext = Record<string, unknown>;
 type Awaitable<T> = T | Promise<T>;
+type MiddlewareTerminal<TOutput> = (ctx: MiddlewareContext) => Promise<TOutput>;
+type MiddlewareStep = <TOutput>(
+  ctx: MiddlewareContext,
+  terminal: MiddlewareTerminal<TOutput>,
+) => Promise<TOutput>;
+
 declare const middlewareResultBrand: unique symbol;
 
 export type MiddlewareResult<
@@ -40,55 +46,77 @@ function normalizeCtx(ctx?: unknown) {
   return ctx && typeof ctx === "object" ? { ...ctx } : {};
 }
 
-/**
- * Executes an array of middleware functions with the given initial context.
- */
-export async function executeMiddlewares<TOutput>(
-  middlewares: MiddlewareDef[],
+type MiddlewareRunner = <TOutput>(
   initialCtx: unknown,
-  terminal: (ctx: Record<string, unknown>) => Promise<TOutput>,
-) {
-  const executeAt = async (
-    index: number,
-    ctx: Record<string, unknown>,
-  ): Promise<TOutput> => {
-    const entry = middlewares[index];
+  terminal: MiddlewareTerminal<TOutput>,
+) => Promise<TOutput>;
 
-    if (!entry) {
-      return await terminal(ctx);
-    }
+const runTerminal: MiddlewareStep = async (ctx, terminal) =>
+  await terminal(ctx);
+
+/**
+ * Builds a reusable middleware runner for a fixed middleware list.
+ *
+ * The returned runner normalizes the initial context for each invocation, keeps
+ * `.use()` middleware `next()` state isolated per call, and preserves the
+ * registration order while avoiding rebuilding the chain on every action run.
+ */
+export function createMiddlewareRunner(
+  middlewares: readonly MiddlewareDef[],
+): MiddlewareRunner {
+  if (middlewares.length === 0) {
+    return async (initialCtx, terminal) =>
+      await terminal(normalizeCtx(initialCtx));
+  }
+
+  let run = runTerminal;
+
+  for (let index = middlewares.length - 1; index >= 0; index--) {
+    const entry = middlewares[index];
+    if (!entry) continue;
+
+    const nextStep = run;
 
     if (entry.kind === "legacy") {
-      const result = await entry.middleware({ ctx });
-      const nextCtx =
-        result && typeof result === "object" ? { ...ctx, ...result } : ctx;
-      return await executeAt(index + 1, nextCtx);
+      run = async (ctx, terminal) => {
+        const result = await entry.middleware({ ctx });
+        const nextCtx =
+          result && typeof result === "object" ? { ...ctx, ...result } : ctx;
+        return await nextStep(nextCtx, terminal);
+      };
+      continue;
     }
 
-    let nextCalled = false;
-    const result = await entry.middleware({
-      ctx,
-      next: async <TAddedContext extends MiddlewareContext = {}>(opts?: {
-        ctx?: TAddedContext;
-      }) => {
-        if (nextCalled) {
-          throw new Error(".use() middleware must call next() only once");
-        }
-        nextCalled = true;
-        const nextCtx = opts?.ctx ? { ...ctx, ...opts.ctx } : ctx;
-        return (await executeAt(
-          index + 1,
-          nextCtx,
-        )) as MiddlewareResult<TAddedContext>;
-      },
-    });
+    run = async <TOutput>(
+      ctx: MiddlewareContext,
+      terminal: MiddlewareTerminal<TOutput>,
+    ) => {
+      let nextCalled = false;
+      const result = await entry.middleware({
+        ctx,
+        next: async <TAddedContext extends MiddlewareContext = {}>(opts?: {
+          ctx?: TAddedContext;
+        }) => {
+          if (nextCalled) {
+            throw new Error(".use() middleware must call next() only once");
+          }
+          nextCalled = true;
+          const nextCtx = opts?.ctx ? { ...ctx, ...opts.ctx } : ctx;
+          return (await nextStep(
+            nextCtx,
+            terminal,
+          )) as MiddlewareResult<TAddedContext>;
+        },
+      });
 
-    if (!nextCalled) {
-      throw new Error(".use() middleware must call next()");
-    }
+      if (!nextCalled) {
+        throw new Error(".use() middleware must call next()");
+      }
 
-    return result as TOutput;
-  };
+      return result as TOutput;
+    };
+  }
 
-  return await executeAt(0, normalizeCtx(initialCtx));
+  return async (initialCtx, terminal) =>
+    await run(normalizeCtx(initialCtx), terminal);
 }

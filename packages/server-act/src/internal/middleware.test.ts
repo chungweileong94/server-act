@@ -1,21 +1,33 @@
 import { describe, expect, test, vi } from "vite-plus/test";
-import { executeMiddlewares, type MiddlewareResult } from "./middleware";
+import {
+  createMiddlewareRunner,
+  type MiddlewareDef,
+  type MiddlewareResult,
+} from "./middleware";
 
 async function returnContext(ctx: Record<string, unknown>) {
   return ctx;
 }
 
-describe("executeMiddlewares", () => {
+async function runMiddlewares<TOutput>(
+  middlewares: readonly MiddlewareDef[],
+  initialCtx: unknown,
+  terminal: (ctx: Record<string, unknown>) => Promise<TOutput>,
+) {
+  return await createMiddlewareRunner(middlewares)(initialCtx, terminal);
+}
+
+describe("createMiddlewareRunner", () => {
   test("returns empty object with no middlewares and no initial context", async () => {
-    await expect(
-      executeMiddlewares([], undefined, returnContext),
-    ).resolves.toEqual({});
+    await expect(runMiddlewares([], undefined, returnContext)).resolves.toEqual(
+      {},
+    );
   });
 
   test("clones object initial context", async () => {
     const initialCtx = { a: 1 };
 
-    const result = await executeMiddlewares([], initialCtx, returnContext);
+    const result = await runMiddlewares([], initialCtx, returnContext);
 
     expect(result).toEqual({ a: 1 });
     expect(result).not.toBe(initialCtx);
@@ -29,7 +41,7 @@ describe("executeMiddlewares", () => {
         return { ok: true };
       });
 
-      const result = await executeMiddlewares(
+      const result = await runMiddlewares(
         [{ kind: "legacy", middleware }],
         initialCtx,
         returnContext,
@@ -43,7 +55,7 @@ describe("executeMiddlewares", () => {
   test("executes middlewares sequentially and passes merged context", async () => {
     const order: string[] = [];
 
-    const result = await executeMiddlewares(
+    const result = await runMiddlewares(
       [
         {
           kind: "legacy",
@@ -73,7 +85,7 @@ describe("executeMiddlewares", () => {
   test("executes `.use()` middlewares sequentially via next", async () => {
     const order: string[] = [];
 
-    const result = await executeMiddlewares(
+    const result = await runMiddlewares(
       [
         {
           kind: "use",
@@ -104,7 +116,7 @@ describe("executeMiddlewares", () => {
   test("preserves mixed middleware order", async () => {
     const order: string[] = [];
 
-    const result = await executeMiddlewares(
+    const result = await runMiddlewares(
       [
         {
           kind: "legacy",
@@ -137,7 +149,7 @@ describe("executeMiddlewares", () => {
   });
 
   test("merges shallowly and later values override earlier ones", async () => {
-    const result = await executeMiddlewares(
+    const result = await runMiddlewares(
       [
         {
           kind: "legacy",
@@ -156,7 +168,7 @@ describe("executeMiddlewares", () => {
   });
 
   test("ignores non-object and falsy middleware returns", async () => {
-    const result = await executeMiddlewares(
+    const result = await runMiddlewares(
       [
         { kind: "legacy", middleware: () => undefined },
         { kind: "legacy", middleware: () => null },
@@ -173,7 +185,7 @@ describe("executeMiddlewares", () => {
   });
 
   test("returns context from the deepest next() call", async () => {
-    const result = await executeMiddlewares(
+    const result = await runMiddlewares(
       [
         {
           kind: "use",
@@ -192,7 +204,7 @@ describe("executeMiddlewares", () => {
   });
 
   test("allows calling next without params", async () => {
-    const result = await executeMiddlewares(
+    const result = await runMiddlewares(
       [
         {
           kind: "use",
@@ -208,7 +220,7 @@ describe("executeMiddlewares", () => {
 
   test("throws when a `.use()` middleware does not call next()", async () => {
     await expect(
-      executeMiddlewares(
+      runMiddlewares(
         [
           {
             kind: "use",
@@ -225,7 +237,7 @@ describe("executeMiddlewares", () => {
     const terminal = vi.fn(returnContext);
 
     await expect(
-      executeMiddlewares(
+      runMiddlewares(
         [
           {
             kind: "use",
@@ -246,7 +258,7 @@ describe("executeMiddlewares", () => {
     const neverCalled = vi.fn(() => ({ skipped: true }));
 
     await expect(
-      executeMiddlewares(
+      runMiddlewares(
         [
           {
             kind: "legacy",
@@ -273,7 +285,7 @@ describe("executeMiddlewares", () => {
 
   test("propagates rejected promises", async () => {
     await expect(
-      executeMiddlewares(
+      runMiddlewares(
         [
           {
             kind: "legacy",
@@ -284,5 +296,34 @@ describe("executeMiddlewares", () => {
         returnContext,
       ),
     ).rejects.toThrow("reject boom");
+  });
+  test("normalizes context when no middlewares are registered", async () => {
+    const runner = createMiddlewareRunner([]);
+    const initialCtx = { a: 1 };
+
+    const result = await runner(initialCtx, returnContext);
+
+    expect(result).toEqual({ a: 1 });
+    expect(result).not.toBe(initialCtx);
+  });
+
+  test("can be reused across calls with isolated next() state", async () => {
+    const useMiddleware = vi.fn(({ ctx, next }) =>
+      next({ ctx: { count: Number(ctx.count) + 1 } }),
+    );
+    const runner = createMiddlewareRunner([
+      {
+        kind: "use",
+        middleware: useMiddleware,
+      },
+    ]);
+
+    await expect(runner({ count: 1 }, returnContext)).resolves.toEqual({
+      count: 2,
+    });
+    await expect(runner({ count: 10 }, returnContext)).resolves.toEqual({
+      count: 11,
+    });
+    expect(useMiddleware).toHaveBeenCalledTimes(2);
   });
 });
