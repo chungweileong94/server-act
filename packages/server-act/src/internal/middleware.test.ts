@@ -1,5 +1,9 @@
 import { describe, expect, test, vi } from "vite-plus/test";
-import { executeMiddlewares, type MiddlewareResult } from "./middleware";
+import {
+  createMiddlewareRunner,
+  executeMiddlewares,
+  type MiddlewareResult,
+} from "./middleware";
 
 async function returnContext(ctx: Record<string, unknown>) {
   return ctx;
@@ -284,5 +288,37 @@ describe("executeMiddlewares", () => {
         returnContext,
       ),
     ).rejects.toThrow("reject boom");
+  });
+});
+
+describe("createMiddlewareRunner", () => {
+  test("normalizes context when no middlewares are registered", async () => {
+    const runner = createMiddlewareRunner([]);
+    const initialCtx = { a: 1 };
+
+    const result = await runner(initialCtx, returnContext);
+
+    expect(result).toEqual({ a: 1 });
+    expect(result).not.toBe(initialCtx);
+  });
+
+  test("can be reused across calls with isolated next() state", async () => {
+    const useMiddleware = vi.fn(({ ctx, next }) =>
+      next({ ctx: { count: Number(ctx.count) + 1 } }),
+    );
+    const runner = createMiddlewareRunner([
+      {
+        kind: "use",
+        middleware: useMiddleware,
+      },
+    ]);
+
+    await expect(runner({ count: 1 }, returnContext)).resolves.toEqual({
+      count: 2,
+    });
+    await expect(runner({ count: 10 }, returnContext)).resolves.toEqual({
+      count: 11,
+    });
+    expect(useMiddleware).toHaveBeenCalledTimes(2);
   });
 });
