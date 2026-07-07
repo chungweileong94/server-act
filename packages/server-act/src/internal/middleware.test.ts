@@ -221,6 +221,27 @@ describe("executeMiddlewares", () => {
     ).rejects.toThrow(".use() middleware must call next()");
   });
 
+  test("throws when a `.use()` middleware calls next() more than once", async () => {
+    const terminal = vi.fn(returnContext);
+
+    await expect(
+      executeMiddlewares(
+        [
+          {
+            kind: "use",
+            middleware: async ({ next }) => {
+              await next();
+              return await next();
+            },
+          },
+        ],
+        undefined,
+        terminal,
+      ),
+    ).rejects.toThrow(".use() middleware must call next() only once");
+    expect(terminal).toHaveBeenCalledTimes(1);
+  });
+
   test("propagates thrown errors and stops subsequent middleware execution", async () => {
     const neverCalled = vi.fn(() => ({ skipped: true }));
 
