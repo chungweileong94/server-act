@@ -215,6 +215,22 @@ describe("formDataToObject", () => {
     });
   });
 
+  test("should handle paths deeper than the call stack", () => {
+    const depth = 10_000;
+    const parts = Array.from({ length: depth }, (_, index) => `level${index}`);
+    const formData = new FormData();
+    formData.append(parts.join("."), "value");
+
+    const result = formDataToObject(formData);
+    let current: unknown = result;
+
+    for (const part of parts) {
+      current = (current as Record<string, unknown>)[part];
+    }
+
+    expect(current).toBe("value");
+  });
+
   test("should handle multiple values with nested paths", () => {
     const formData = new FormData();
     formData.append("users[0].tags", "frontend");
