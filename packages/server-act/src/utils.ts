@@ -26,43 +26,47 @@ function set(
   path: readonly string[],
   value: unknown,
 ): void {
-  const key = path[0];
-  assert(key != null);
+  assert(path.length > 0);
 
-  if (FORBIDDEN_KEYS.has(key)) {
-    throw new Error(`Unsafe form data key "${key}" is not allowed`);
-  }
+  let current = obj;
 
-  if (path.length > 1) {
-    const newPath = path.slice(1);
-    const nextKey = newPath[0];
-    assert(nextKey != null);
+  for (let index = 0; index < path.length; index++) {
+    const key = path[index];
+    assert(key != null);
 
-    if (obj[key] === undefined) {
-      obj[key] = isNumberString(nextKey) ? [] : {};
-    } else if (Array.isArray(obj[key]) && !isNumberString(nextKey)) {
-      obj[key] = Object.fromEntries(Object.entries(obj[key]));
-    } else if (!Array.isArray(obj[key]) && !isPlainObject(obj[key])) {
-      throw new Error(
-        `Conflicting form data key "${path.join(".")}": "${key}" is already a value`,
-      );
+    if (FORBIDDEN_KEYS.has(key)) {
+      throw new Error(`Unsafe form data key "${key}" is not allowed`);
     }
 
-    set(obj[key], newPath, value);
+    if (index < path.length - 1) {
+      const nextKey = path[index + 1];
+      assert(nextKey != null);
 
-    return;
-  }
+      if (current[key] === undefined) {
+        current[key] = isNumberString(nextKey) ? [] : {};
+      } else if (Array.isArray(current[key]) && !isNumberString(nextKey)) {
+        current[key] = Object.fromEntries(Object.entries(current[key]));
+      } else if (!Array.isArray(current[key]) && !isPlainObject(current[key])) {
+        throw new Error(
+          `Conflicting form data key "${path.slice(index).join(".")}": "${key}" is already a value`,
+        );
+      }
 
-  if (obj[key] === undefined) {
-    obj[key] = value;
-  } else if (Array.isArray(obj[key])) {
-    obj[key].push(value);
-  } else if (isPlainObject(obj[key])) {
-    throw new Error(
-      `Conflicting form data key "${key}": already holds a nested object`,
-    );
-  } else {
-    obj[key] = [obj[key], value];
+      current = current[key];
+      continue;
+    }
+
+    if (current[key] === undefined) {
+      current[key] = value;
+    } else if (Array.isArray(current[key])) {
+      current[key].push(value);
+    } else if (isPlainObject(current[key])) {
+      throw new Error(
+        `Conflicting form data key "${key}": already holds a nested object`,
+      );
+    } else {
+      current[key] = [current[key], value];
+    }
   }
 }
 
