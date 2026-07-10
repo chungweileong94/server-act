@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "valibot": "1.0.0-rc.0",
-    "vite-plus": "0.2.2",
+    "vite-plus": "0.2.4",
     "zod": "^4.0.10"
   },
   "peerDependencies": {
