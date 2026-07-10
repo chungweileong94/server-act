@@ -60,6 +60,8 @@ const runTerminal: MiddlewareStep = async (ctx, terminal) =>
  * The returned runner normalizes the initial context for each invocation, keeps
  * `.use()` middleware `next()` state isolated per call, and preserves the
  * registration order while avoiding rebuilding the chain on every action run.
+ * Context additions mutate that invocation's normalized object so accumulated
+ * properties are not repeatedly copied as the chain advances.
  */
 export function createMiddlewareRunner(
   middlewares: readonly MiddlewareDef[],
@@ -80,9 +82,10 @@ export function createMiddlewareRunner(
     if (entry.kind === "legacy") {
       run = async (ctx, terminal) => {
         const result = await entry.middleware({ ctx });
-        const nextCtx =
-          result && typeof result === "object" ? { ...ctx, ...result } : ctx;
-        return await nextStep(nextCtx, terminal);
+        if (result && typeof result === "object") {
+          Object.assign(ctx, result);
+        }
+        return await nextStep(ctx, terminal);
       };
       continue;
     }
@@ -101,9 +104,11 @@ export function createMiddlewareRunner(
             throw new Error(".use() middleware must call next() only once");
           }
           nextCalled = true;
-          const nextCtx = opts?.ctx ? { ...ctx, ...opts.ctx } : ctx;
+          if (opts?.ctx) {
+            Object.assign(ctx, opts.ctx);
+          }
           return (await nextStep(
-            nextCtx,
+            ctx,
             terminal,
           )) as MiddlewareResult<TAddedContext>;
         },

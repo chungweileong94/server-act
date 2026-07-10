@@ -94,6 +94,8 @@ You can chain multiple middlewares by calling `.use(...)` repeatedly.
 - Each middleware must call `next()` exactly once and return its result.
 - `next()` can be called without params when nothing needs to be added.
 - `next({ ctx })` shallow-merges the provided keys into the current context.
+- Middleware in one action invocation shares the same context object, so
+  downstream additions are visible after `await next()` returns.
 - Later middleware values override earlier values for the same key.
 - Errors thrown in middleware propagate and stop later middleware from running.
 

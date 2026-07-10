@@ -203,6 +203,37 @@ describe("createMiddlewareRunner", () => {
     expect(result).toEqual({ a: 2, b: 3 });
   });
 
+  test("accumulates middleware context on one object per invocation", async () => {
+    const contexts: Array<Record<string, unknown>> = [];
+
+    const result = await runMiddlewares(
+      [
+        {
+          kind: "use",
+          middleware: async ({ ctx, next }) => {
+            contexts.push(ctx);
+            const output = await next({ ctx: { a: 1 } });
+            expect(ctx).toEqual({ a: 1, b: 2 });
+            return output;
+          },
+        },
+        {
+          kind: "use",
+          middleware: ({ ctx, next }) => {
+            contexts.push(ctx);
+            return next({ ctx: { b: 2 } });
+          },
+        },
+      ],
+      undefined,
+      returnContext,
+    );
+
+    expect(result).toEqual({ a: 1, b: 2 });
+    expect(contexts[0]).toBe(contexts[1]);
+    expect(contexts[0]).toBe(result);
+  });
+
   test("allows calling next without params", async () => {
     const result = await runMiddlewares(
       [
