@@ -1,5 +1,11 @@
 # server-act
 
+## 1.9.3
+
+### Patch Changes
+
+- [#73](https://github.com/chungweileong94/server-act/pull/73) [`88e359f`](https://github.com/chungweileong94/server-act/commit/88e359ff6bae958970796b7ef4f5e1cc3fb1e6ba) Thanks [@chungweileong94](https://github.com/chungweileong94)! - Process nested `FormData` field paths iteratively instead of recursively. This avoids allocating a sliced path at every nesting level, improves deeply nested form parsing performance, and prevents call stack overflows for unusually deep field names.
+
 ## 1.9.2
 
 ### Patch Changes
