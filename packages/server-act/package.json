@@ -54,8 +54,7 @@
   "scripts": {
     "build": "vp pack",
     "dev": "vp pack --watch",
-    "test": "vp test",
-    "prepack": "node ../../.github/scripts/cleanup-package-json.mjs"
+    "test": "vp test"
   },
   "dependencies": {
     "@standard-schema/spec": "^1.0.0",
