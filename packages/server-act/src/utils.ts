@@ -33,12 +33,14 @@ function set(
     throw new Error(`Unsafe form data key "${key}" is not allowed`);
   }
 
+  const hasKey = Object.hasOwn(obj, key);
+
   if (path.length > 1) {
     const newPath = path.slice(1);
     const nextKey = newPath[0];
     assert(nextKey != null);
 
-    if (obj[key] === undefined) {
+    if (!hasKey) {
       obj[key] = isNumberString(nextKey) ? [] : {};
     } else if (Array.isArray(obj[key]) && !isNumberString(nextKey)) {
       obj[key] = Object.fromEntries(Object.entries(obj[key]));
@@ -53,7 +55,7 @@ function set(
     return;
   }
 
-  if (obj[key] === undefined) {
+  if (!hasKey) {
     obj[key] = value;
   } else if (Array.isArray(obj[key])) {
     obj[key].push(value);

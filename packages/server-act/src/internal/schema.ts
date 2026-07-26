@@ -16,12 +16,15 @@ export async function standardValidate<T extends StandardSchemaV1>(
 
 export function getInputErrors(issues: ReadonlyArray<StandardSchemaV1.Issue>) {
   const messages: string[] = [];
-  const fieldErrors: Record<string, string[]> = {};
+  const fieldErrors = Object.create(null) as Record<string, string[]>;
   for (const issue of issues) {
     const dotPath = getDotPath(issue);
     if (dotPath) {
-      if (fieldErrors[dotPath]) {
-        fieldErrors[dotPath].push(issue.message);
+      const existingMessages = Object.hasOwn(fieldErrors, dotPath)
+        ? fieldErrors[dotPath]
+        : undefined;
+      if (existingMessages) {
+        existingMessages.push(issue.message);
       } else {
         fieldErrors[dotPath] = [issue.message];
       }
@@ -29,5 +32,8 @@ export function getInputErrors(issues: ReadonlyArray<StandardSchemaV1.Issue>) {
       messages.push(issue.message);
     }
   }
-  return { messages, fieldErrors };
+  return {
+    messages,
+    fieldErrors: Object.fromEntries(Object.entries(fieldErrors)),
+  };
 }

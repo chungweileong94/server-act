@@ -374,6 +374,42 @@ describe("formDataToObject", () => {
     });
   });
 
+  describe("inherited property names", () => {
+    test("should handle a top-level inherited property name", () => {
+      const formData = new FormData();
+      formData.append("toString", "value");
+
+      const result = formDataToObject(formData);
+
+      expect(result).toEqual({ toString: "value" });
+      expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
+    });
+
+    test("should handle a nested inherited property name", () => {
+      const formData = new FormData();
+      formData.append("toString.value", "nested");
+
+      const result = formDataToObject(formData);
+      const path: string = "toString";
+      const nested = result[path] as Record<string, unknown>;
+
+      expect(nested).toEqual({ value: "nested" });
+      expect(Object.getPrototypeOf(nested)).toBe(Object.prototype);
+    });
+
+    test("should collect repeated inherited property names", () => {
+      const formData = new FormData();
+      formData.append("hasOwnProperty", "first");
+      formData.append("hasOwnProperty", "second");
+
+      const result = formDataToObject(formData);
+
+      expect(result).toEqual({
+        hasOwnProperty: ["first", "second"],
+      });
+    });
+  });
+
   describe("prototype pollution", () => {
     test.each(["__proto__", "constructor", "prototype"])(
       "should reject top-level unsafe key `%s`",
