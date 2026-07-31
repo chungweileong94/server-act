@@ -46,7 +46,7 @@ export const sayHelloAction = serverAct
 import { sayHelloAction } from "./action";
 
 export const ClientComponent = () => {
-  const onClick = () => {
+  const onClick = async () => {
     const message = await sayHelloAction({ name: "John" });
     console.log(message); // Hello, John
   };
@@ -57,6 +57,46 @@ export const ClientComponent = () => {
     </div>
   );
 };
+```
+
+### Output Validation
+
+Use `.output()` to validate or transform the value returned by an action. Like
+`.input()`, it accepts any Standard Schema-compatible schema. The action handler
+returns the schema's input type, while callers receive its parsed output type.
+
+```ts
+"use server";
+
+import { serverAct } from "server-act";
+import { z } from "zod";
+
+export const getUserAction = serverAct
+  .input(z.string())
+  .output(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
+  )
+  .action(async ({ input: userId }) => {
+    return db.user.findUniqueOrThrow({ where: { id: userId } });
+  });
+```
+
+Invalid outputs throw a `SchemaError`, matching `.action()` input validation.
+Output validation also applies to values returned by `.stateAction()`. An output
+schema can be created from middleware context by passing a function:
+
+```ts
+const action = serverAct
+  .use(({ next }) => next({ ctx: { prefix: "user" } }))
+  .output(({ ctx }) =>
+    z.string().transform((value) => `${ctx.prefix}:${value}`),
+  )
+  .action(async () => "123");
+
+// Inferred as Promise<string>; resolves to "user:123".
 ```
 
 ### With Middleware

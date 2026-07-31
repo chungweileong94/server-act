@@ -25,13 +25,16 @@ function createServerActionBuilder(
   _input: UnsetMarker;
   _context: UnsetMarker;
   _inputErrorShape: UnsetMarker;
+  _output: UnsetMarker;
 }> {
   const _def: ActionBuilderDef<{
     _input: StandardSchemaV1;
-    _context: undefined;
+    _context: Record<string, unknown>;
     _inputErrorShape: unknown;
+    _output: StandardSchemaV1;
   }> = {
     input: undefined,
+    output: undefined,
     middleware: [],
     ...initDef,
   };
@@ -56,6 +59,8 @@ function createServerActionBuilder(
       })) as AnyActionBuilder["use"],
     input: (input) =>
       createNewServerActionBuilder({ ..._def, input }) as AnyActionBuilder,
+    output: (output) =>
+      createNewServerActionBuilder({ ..._def, output }) as never,
     action: (action) => {
       const middlewareRunner =
         _def.middleware.length > 0
@@ -66,16 +71,18 @@ function createServerActionBuilder(
         if (_def.input) {
           const inputSchema =
             typeof _def.input === "function"
-              ? await _def.input({ ctx: ctx as never })
+              ? await _def.input({ ctx })
               : _def.input;
           const result = await standardValidate(inputSchema, input);
           if (result.issues) {
             throw new SchemaError(result.issues);
           }
           // oxlint-disable-next-line typescript/no-explicit-any
-          return await action({ ctx, input: result.value as any });
+          const output = await action({ ctx, input: result.value as any });
+          return (await validateOutput(_def.output, ctx, output)) as never;
         }
-        return await action({ ctx, input: undefined });
+        const output = await action({ ctx, input: undefined });
+        return (await validateOutput(_def.output, ctx, output)) as never;
       };
 
       // oxlint-disable-next-line typescript/no-explicit-any
@@ -99,31 +106,34 @@ function createServerActionBuilder(
         if (_def.input) {
           const inputSchema =
             typeof _def.input === "function"
-              ? await _def.input({ ctx: ctx as never })
+              ? await _def.input({ ctx })
               : _def.input;
           const result = await standardValidate(inputSchema, rawInput);
           if (result.issues) {
-            return await action({
+            const output = await action({
               ctx,
               prevState: prevState as never,
               rawInput: rawInput as never,
               inputErrors: getInputErrors(result.issues),
             });
+            return (await validateOutput(_def.output, ctx, output)) as never;
           }
-          return await action({
+          const output = await action({
             ctx,
             prevState: prevState as never,
             rawInput: rawInput as never,
             // oxlint-disable-next-line typescript/no-explicit-any
             input: result.value as any,
           });
+          return (await validateOutput(_def.output, ctx, output)) as never;
         }
-        return await action({
+        const output = await action({
           ctx,
           prevState: prevState as never,
           rawInput: rawInput as never,
           input: undefined,
         });
+        return (await validateOutput(_def.output, ctx, output)) as never;
       };
 
       // oxlint-disable-next-line typescript/no-explicit-any
@@ -137,6 +147,27 @@ function createServerActionBuilder(
       };
     },
   };
+}
+
+async function validateOutput(
+  output:
+    | StandardSchemaV1
+    | ((params: {
+        ctx: Record<string, unknown>;
+      }) => Promise<StandardSchemaV1> | StandardSchemaV1)
+    | undefined,
+  ctx: Record<string, unknown>,
+  value: unknown,
+) {
+  if (!output) return value;
+
+  const outputSchema =
+    typeof output === "function" ? await output({ ctx }) : output;
+  const result = await standardValidate(outputSchema, value);
+  if (result.issues) {
+    throw new SchemaError(result.issues);
+  }
+  return result.value;
 }
 
 /**

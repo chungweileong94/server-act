@@ -62,6 +62,20 @@ describe("action", () => {
     await expect(action(1)).rejects.toThrowError();
   });
 
+  test("should validate and transform the output", async () => {
+    const action = serverAct
+      .output(
+        v.pipe(
+          v.string(),
+          v.transform((value) => value.length),
+        ),
+      )
+      .action(async () => Promise.resolve("bar"));
+
+    expectTypeOf(action).toEqualTypeOf<() => Promise<number>>();
+    await expect(action()).resolves.toBe(3);
+  });
+
   describe("middleware should be called once", () => {
     const middlewareSpy = vi.fn(
       createServerActMiddleware(({ next }) =>

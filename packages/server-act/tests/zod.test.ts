@@ -75,6 +75,37 @@ describe("action", () => {
     await expect(action(1)).rejects.toThrowError();
   });
 
+  test("should validate and transform the output", async () => {
+    const action = serverAct
+      .input(z.string())
+      .output(z.string().transform((value) => value.length))
+      .action(async ({ input }) => Promise.resolve(input));
+
+    expectTypeOf(action).toEqualTypeOf<(input: string) => Promise<number>>();
+    await expect(action("bar")).resolves.toBe(3);
+  });
+
+  test("should throw error if the output is invalid", async () => {
+    const runtimeInvalidAction = serverAct
+      .output(z.string())
+      // @ts-expect-error: Verify invalid values are also rejected at runtime.
+      .action(async () => Promise.resolve(123));
+
+    await expect(runtimeInvalidAction()).rejects.toThrowError();
+  });
+
+  test("should access middleware context in the output schema", async () => {
+    const action = serverAct
+      .use(({ next }) => next({ ctx: { prefix: "best" } }))
+      .output(({ ctx }) =>
+        z.string().transform((value) => `${ctx.prefix}-${value}`),
+      )
+      .action(async () => Promise.resolve("bar"));
+
+    expectTypeOf(action).toEqualTypeOf<() => Promise<string>>();
+    await expect(action()).resolves.toBe("best-bar");
+  });
+
   describe("middleware should be called once", () => {
     const middlewareSpy = vi.fn(
       createServerActMiddleware(({ next }) =>
@@ -135,6 +166,35 @@ describe("action", () => {
 });
 
 describe("stateAction", () => {
+  test("should validate and transform the output", async () => {
+    const action = serverAct
+      .output(z.string().transform((value) => value.length))
+      .stateAction(async ({ prevState }) => {
+        expectTypeOf(prevState).toEqualTypeOf<number | undefined>();
+        return Promise.resolve("bar");
+      });
+
+    expectTypeOf(action).toEqualTypeOf<
+      (
+        prevState: number | undefined,
+        input: undefined,
+      ) => Promise<number | undefined>
+    >();
+    await expect(action(undefined, undefined)).resolves.toBe(3);
+  });
+
+  test("should validate output from the input error branch", async () => {
+    const action = serverAct
+      .input(z.string())
+      .output(z.string().transform((value) => `validated:${value}`))
+      .stateAction(async ({ inputErrors }) =>
+        Promise.resolve(inputErrors ? "invalid" : "valid"),
+      );
+
+    // @ts-expect-error: Trigger the input validation branch at runtime.
+    await expect(action(undefined, 123)).resolves.toBe("validated:invalid");
+  });
+
   test("should able to create action without input", async () => {
     const action = serverAct.stateAction(async () => Promise.resolve("bar"));
 

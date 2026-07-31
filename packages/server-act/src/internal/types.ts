@@ -84,11 +84,77 @@ interface ActionParams<
   TInput = unknown,
   TContext = unknown,
   TInputErrorShape = unknown,
+  TOutput = unknown,
 > {
   _input: TInput;
   _context: TContext;
   _inputErrorShape: TInputErrorShape;
+  _output: TOutput;
 }
+
+type ActionOutput<TOutput, TFallback> = TOutput extends UnsetMarker
+  ? TFallback
+  : InferInputType<TOutput, "out">;
+
+type ActionHandlerOutput<TOutput, TFallback> = TOutput extends UnsetMarker
+  ? TFallback
+  : InferInputType<TOutput, "in">;
+
+type StateAction<TParams extends ActionParams> =
+  TParams["_output"] extends UnsetMarker
+    ? <TState, TPrevState = UnsetMarker>(
+        action: (
+          params: Prettify<
+            {
+              ctx: NormalizeContext<TParams["_context"]>;
+              prevState: RemoveUnsetMarker<TPrevState>;
+              rawInput: InferInputType<TParams["_input"], "in">;
+            } & (
+              | {
+                  input: InferInputType<TParams["_input"], "out">;
+                  inputErrors?: undefined;
+                }
+              | {
+                  input?: undefined;
+                  inputErrors: InputErrors<TParams["_inputErrorShape"]>;
+                }
+            )
+          >,
+        ) => Promise<TState>,
+      ) => (
+        prevState: TState | RemoveUnsetMarker<TPrevState>,
+        input: InferInputType<TParams["_input"], "in">,
+      ) => Promise<TState | RemoveUnsetMarker<TPrevState>>
+    : <TPrevState = UnsetMarker>(
+        action: (
+          params: Prettify<
+            {
+              ctx: NormalizeContext<TParams["_context"]>;
+              prevState:
+                | InferInputType<TParams["_output"], "out">
+                | RemoveUnsetMarker<TPrevState>;
+              rawInput: InferInputType<TParams["_input"], "in">;
+            } & (
+              | {
+                  input: InferInputType<TParams["_input"], "out">;
+                  inputErrors?: undefined;
+                }
+              | {
+                  input?: undefined;
+                  inputErrors: InputErrors<TParams["_inputErrorShape"]>;
+                }
+            )
+          >,
+        ) => Promise<InferInputType<TParams["_output"], "in">>,
+      ) => (
+        prevState:
+          | InferInputType<TParams["_output"], "out">
+          | RemoveUnsetMarker<TPrevState>,
+        input: InferInputType<TParams["_input"], "in">,
+      ) => Promise<
+        | InferInputType<TParams["_output"], "out">
+        | RemoveUnsetMarker<TPrevState>
+      >;
 
 export interface ActionBuilder<TParams extends ActionParams> {
   /**
@@ -110,6 +176,7 @@ export interface ActionBuilder<TParams extends ActionParams> {
       ? TNewContext
       : Prettify<TParams["_context"] & TNewContext>;
     _inputErrorShape: TParams["_inputErrorShape"];
+    _output: TParams["_output"];
   }>;
   /**
    * Registers middleware in the action pipeline.
@@ -127,6 +194,7 @@ export interface ActionBuilder<TParams extends ActionParams> {
       ? TNextContext
       : Prettify<NormalizeContext<TParams["_context"]> & TNextContext>;
     _inputErrorShape: TParams["_inputErrorShape"];
+    _output: TParams["_output"];
   }>;
   /**
    * Input validation for the action.
@@ -145,8 +213,27 @@ export interface ActionBuilder<TParams extends ActionParams> {
       _input: TParser;
       _context: TParams["_context"];
       _inputErrorShape: TInputErrorShape;
+      _output: TParams["_output"];
     }>,
     "input"
+  >;
+  /**
+   * Output validation for the action result.
+   */
+  output: <TParser extends StandardSchemaV1>(
+    output:
+      | ((params: {
+          ctx: NormalizeContext<TParams["_context"]>;
+        }) => Promise<TParser> | TParser)
+      | TParser,
+  ) => Omit<
+    ActionBuilder<{
+      _input: TParams["_input"];
+      _context: TParams["_context"];
+      _inputErrorShape: TParams["_inputErrorShape"];
+      _output: TParser;
+    }>,
+    "output"
   >;
   /**
    * Create an action.
@@ -155,48 +242,33 @@ export interface ActionBuilder<TParams extends ActionParams> {
     action: (params: {
       ctx: NormalizeContext<TParams["_context"]>;
       input: InferInputType<TParams["_input"], "out">;
-    }) => Promise<TOutput>,
+    }) => Promise<ActionHandlerOutput<TParams["_output"], TOutput>>,
   ) => SanitizeFunctionParam<
-    (input: InferInputType<TParams["_input"], "in">) => Promise<TOutput>
+    (
+      input: InferInputType<TParams["_input"], "in">,
+    ) => Promise<ActionOutput<TParams["_output"], TOutput>>
   >;
   /**
    * Create an action for React `useActionState`.
    */
-  stateAction: <TState, TPrevState = UnsetMarker>(
-    action: (
-      params: Prettify<
-        {
-          ctx: NormalizeContext<TParams["_context"]>;
-          prevState: RemoveUnsetMarker<TPrevState>;
-          rawInput: InferInputType<TParams["_input"], "in">;
-        } & (
-          | {
-              input: InferInputType<TParams["_input"], "out">;
-              inputErrors?: undefined;
-            }
-          | {
-              input?: undefined;
-              inputErrors: InputErrors<TParams["_inputErrorShape"]>;
-            }
-        )
-      >,
-    ) => Promise<TState>,
-  ) => (
-    prevState: TState | RemoveUnsetMarker<TPrevState>,
-    input: InferInputType<TParams["_input"], "in">,
-  ) => Promise<TState | RemoveUnsetMarker<TPrevState>>;
+  stateAction: StateAction<TParams>;
 }
 
 // oxlint-disable-next-line typescript/no-explicit-any
 export type AnyActionBuilder = ActionBuilder<any>;
 
-// oxlint-disable-next-line typescript/no-explicit-any
-export interface ActionBuilderDef<TParams extends ActionParams<any, any, any>> {
+export interface ActionBuilderDef<TParams extends ActionParams> {
   input:
     | ((params: {
         ctx: TParams["_context"];
       }) => Promise<TParams["_input"]> | TParams["_input"])
     | TParams["_input"]
+    | undefined;
+  output:
+    | ((params: {
+        ctx: TParams["_context"];
+      }) => Promise<TParams["_output"]> | TParams["_output"])
+    | TParams["_output"]
     | undefined;
   middleware: MiddlewareDef[];
 }
