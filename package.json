@@ -16,6 +16,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
+    "@chungwei/oxlint-config": "^0.1.1",
     "sherif": "^1.9.0",
     "turbo": "^2.10.3",
     "typescript": "7.0.2",

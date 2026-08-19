@@ -23,6 +23,9 @@ importers:
       '@changesets/cli':
         specifier: ^2.26.2
         version: 2.26.2
+      '@chungwei/oxlint-config':
+        specifier: ^0.1.1
+        version: 0.1.1(oxlint@1.77.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.2.9(@types/node@24.13.3)(@voidzero-dev/vite-plus-core@0.2.9(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))
       sherif:
         specifier: ^1.9.0
         version: 1.9.0
@@ -182,6 +185,11 @@ packages:
 
   '@changesets/write@0.2.3':
     resolution: {integrity: sha512-Dbamr7AIMvslKnNYsLFafaVORx4H0pvCA2MHqgtNCySMe1blImEyAEOzDmcgKAkgz4+uwoLz7demIrX+JBr/Xw==}
+
+  '@chungwei/oxlint-config@0.1.1':
+    resolution: {integrity: sha512-xYf3/8QKK+6vE1m5+ejpR+hXPq3inkb9RfX8JkWtkpaKo31RcAkLOoBD9t6zyoT+izB7h4kBApfQH9a1ejLaOg==}
+    peerDependencies:
+      oxlint: '>=1.77.0'
 
   '@emnapi/runtime@1.7.1':
     resolution: {integrity: sha512-PVtJr5CmLwYAU9PZDMITZoR5iAOShYREoR45EyyLrbntV50mdePTgUn4AmOw90Ifcj+x2kRjdzr1HP3RrNiHGA==}
@@ -3053,6 +3061,10 @@ snapshots:
       fs-extra: 7.0.1
       human-id: 1.0.2
       prettier: 2.8.8
+
+  '@chungwei/oxlint-config@0.1.1(oxlint@1.77.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.2.9(@types/node@24.13.3)(@voidzero-dev/vite-plus-core@0.2.9(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))':
+    dependencies:
+      oxlint: 1.77.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.2.9(@types/node@24.13.3)(@voidzero-dev/vite-plus-core@0.2.9(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))
 
   '@emnapi/runtime@1.7.1':
     dependencies:

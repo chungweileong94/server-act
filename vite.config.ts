@@ -1,3 +1,4 @@
+import { config } from "@chungwei/oxlint-config";
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
@@ -13,37 +14,11 @@ export default defineConfig({
     experimentalTailwindcss: {},
   },
   lint: {
-    plugins: ["eslint", "unicorn", "typescript", "oxc", "react"],
+    extends: [config],
     options: {
       typeAware: true,
       typeCheck: true,
       reportUnusedDisableDirectives: "error",
-    },
-    categories: {
-      correctness: "error",
-      suspicious: "error",
-    },
-    rules: {
-      "no-var": "error",
-      "no-console": [
-        "error",
-        {
-          allow: ["warn", "error", "info"],
-        },
-      ],
-      "no-underscore-dangle": "off",
-      "typescript/no-require-imports": "error",
-      "typescript/no-explicit-any": "error",
-      "typescript/ban-ts-comment": "error",
-      "typescript/consistent-type-imports": "error",
-      "typescript/no-unnecessary-type-constraint": "error",
-      "typescript/no-non-null-assertion": "error",
-      "typescript/no-unsafe-type-assertion": "off",
-      "typescript/no-unnecessary-type-parameters": "off",
-      "react/rules-of-hooks": "error",
-      "react/self-closing-comp": "error",
-      "react/react-compiler": "error",
-      "react/react-in-jsx-scope": "off",
     },
   },
 });
