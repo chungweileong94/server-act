@@ -246,10 +246,9 @@ const signupSchemaWithTransform = signupSchema.transform(
 );
 
 export const saveProfileAction = serverAct
-  .input<
-    typeof signupSchemaWithTransform,
-    z.output<typeof signupSchema>
-  >(signupSchemaWithTransform)
+  .input<typeof signupSchemaWithTransform, z.output<typeof signupSchema>>(
+    signupSchemaWithTransform,
+  )
   .stateAction(async ({ input, inputErrors }) => {
     if (inputErrors) {
       return {
