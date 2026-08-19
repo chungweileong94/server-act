@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { getFormDataValue } from "../utils";
 import { sayHelloAction } from "./_actions";
 
 export default function Action() {
@@ -12,7 +13,7 @@ export default function Action() {
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
       const msg = await sayHelloAction({
-        name: formData.get("name")?.toString(),
+        name: getFormDataValue(formData, "name"),
       });
       setMessage(msg);
     });

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { getFormDataValue } from "../utils";
 import { sayHelloAction } from "./_actions";
 
 function SubmitButton() {
@@ -31,7 +32,7 @@ export default function StateActionPage() {
           id="name"
           name="name"
           className="rounded-md border-2 border-black px-4 py-2"
-          defaultValue={state?.rawInput?.get("name")?.toString()}
+          defaultValue={getFormDataValue(state?.rawInput, "name")}
         />
         <SubmitButton />
         {state?.message && <p className="text-gray-500">{state.message}</p>}

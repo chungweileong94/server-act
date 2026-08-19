@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { getFormDataValue } from "../utils";
 import { sayHelloOverrideAction } from "./_actions";
 
 function SubmitButton() {
@@ -19,8 +20,8 @@ function SubmitButton() {
 
 export default function StateActionOverridePage() {
   const [state, dispatch] = useActionState(sayHelloOverrideAction, undefined);
-  const firstName = state?.rawInput?.get("firstName")?.toString();
-  const lastName = state?.rawInput?.get("lastName")?.toString();
+  const firstName = getFormDataValue(state?.rawInput, "firstName");
+  const lastName = getFormDataValue(state?.rawInput, "lastName");
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
