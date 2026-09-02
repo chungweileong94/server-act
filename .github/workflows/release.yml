@@ -4,10 +4,6 @@ on:
     branches:
       - main
 
-env:
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-
 jobs:
   release:
     name: Release
@@ -19,17 +15,14 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Vite Plus
-        uses: voidzero-dev/setup-vp@v1
+        uses: voidzero-dev/setup-vp@v1.17.0
         with:
           node-version-file: ".node-version"
           cache: true
 
       - name: Build
         run: |
-          # Have to make sure the pnpm binary is there
-          vp i -g corepack
-          corepack prepare --activate
-          vpx turbo build --filter "./packages/*" build
+          vp run --filter "./packages/*" --cache build
 
       - name: Create Release
         id: changeset
@@ -37,8 +30,8 @@ jobs:
         with:
           commit: "chore(release): 📦 version packages"
           title: "chore(release): 📦  version packages"
-          publish: pnpm changeset:publish
-          version: pnpm changeset:version
+          publish: vp run changeset:publish
+          version: vp run changeset:version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
