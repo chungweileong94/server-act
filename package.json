@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "prepare": "vp config",
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "test": "turbo run test",
-    "check": "turbo run build --filter=./packages/* && vp check",
+    "build": "vp run -r --cache build",
+    "dev": "vp run -r --parallel dev",
+    "test": "vp run -r test",
+    "check": "vp run --filter './packages/*' --cache build && vp check",
     "format": "vp fmt",
     "sherif": "sherif",
     "changeset:add": "changeset add",
@@ -18,7 +18,6 @@
     "@changesets/cli": "^2.26.2",
     "@chungwei/oxlint-config": "^0.2.0",
     "sherif": "^1.9.0",
-    "turbo": "^2.10.3",
     "typescript": "7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"
