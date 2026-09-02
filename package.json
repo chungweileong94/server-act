@@ -17,14 +17,21 @@
     "@changesets/changelog-github": "^0.4.8",
     "@changesets/cli": "^2.26.2",
     "@chungwei/oxlint-config": "^0.2.0",
-    "sherif": "^1.9.0",
+    "sherif": "^1.13.0",
     "typescript": "7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },
-  "engines": {
-    "node": "24.x",
-    "pnpm": "10.32.1"
-  },
-  "packageManager": "pnpm@10.32.1"
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "10.32.1",
+      "onFail": "error"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24.18.0",
+      "onFail": "error"
+    }
+  }
 }

@@ -30,8 +30,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0(oxlint@1.79.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.0(@types/node@24.13.3)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))
       sherif:
-        specifier: ^1.9.0
-        version: 1.9.0
+        specifier: ^1.13.0
+        version: 1.13.0
       typescript:
         specifier: 7.0.2
         version: 7.0.2
@@ -2455,48 +2455,52 @@ packages:
     resolution: {integrity: sha512-wpoSFAxys6b2a2wHZ1XpDSgD7N9iVjg29Ph9uV/uaP9Ex/KXlkTZTeddxDPSYQpgvzKLGJke2UU0AzoGCjNIvQ==}
     engines: {node: '>=0.10.0'}
 
-  sherif-darwin-arm64@1.9.0:
-    resolution: {integrity: sha512-R+RpKSzlqZgBHean04CqHrdlmBBKu6Dhd/9BcdCpjx/KpqsalZsh9LzBVxTWLTtT9IBb/ccr23PNqFzWQTuh6A==}
+  sherif-darwin-arm64@1.13.0:
+    resolution: {integrity: sha512-k38jpGpZIEWS5dpSRLSvVi53LZuGO3hDqB88jgdLMDN11LZM6yTDcP0GytnQ8OpE6Br/Js6bDCLsdWDarZdV9g==}
     cpu: [arm64]
     os: [darwin]
 
-  sherif-darwin-x64@1.9.0:
-    resolution: {integrity: sha512-b/KX9MczzkzmyEjngGxYuBq/rOdM6CbGcDLFdQ0H990Dmn9foj4C/UpLlyqSxXcsJhy586ATMEVN68aM2hFQdQ==}
+  sherif-darwin-x64@1.13.0:
+    resolution: {integrity: sha512-W2bOj0Ya9A0fPSWzbeaaNg2RRRr48l2lArN8sGbfc9SZuJSJWXcdWkTVC3sEUiiXwpxNeLY/CsGNyQz5Izbfig==}
     cpu: [x64]
     os: [darwin]
 
-  sherif-linux-arm64-musl@1.9.0:
-    resolution: {integrity: sha512-OZ4cKcCXTJTl8zaTxKnP8z0wu05nDeGtttxRQjaXHSKK+fjBwGkH/1qqFEVDcRANUxtLRLLdwmDyxvqQrCzhPQ==}
+  sherif-linux-arm64-musl@1.13.0:
+    resolution: {integrity: sha512-9IDAlwYT5Ay2nex9Da3R98cvnPKVveT57i7pJXnnY/DC90qdqqz6Twlp7STRv+7qo4k4ES+2J9zQ0k6SDe888A==}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
-  sherif-linux-arm64@1.9.0:
-    resolution: {integrity: sha512-TyuGhaD/efCxGIk4scx09n6NsTr3qfKvH5qHYdyxtelv1mHRgbzVHwJ+Jj98jVktuzOZoexHpxr/hz7RUjd/nw==}
+  sherif-linux-arm64@1.13.0:
+    resolution: {integrity: sha512-Z94SgKNClWarVJj4LsayOmL7zccCUAvy3ugZnIO860FoJofh812KAyF8CdWrSho8qfmmoAzNcqSSc1OZh7+ckQ==}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
-  sherif-linux-x64-musl@1.9.0:
-    resolution: {integrity: sha512-JSbA6DN0HkWSabYU858BUkS4cMmkTsAamDZEYuUVDW+XvW9IjaI6o0HNatUr7oCjrITIfcjzqlqy7uizmNlr/A==}
+  sherif-linux-x64-musl@1.13.0:
+    resolution: {integrity: sha512-2L+A8jF5ylojFwl7eAePR1h3Bzx24IcMgEoWObXgD70k6xF+GOJaM/n+q4MQ9YDntAKbJfMDr6ETjt6Bt/hosA==}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
-  sherif-linux-x64@1.9.0:
-    resolution: {integrity: sha512-iO+hTxndO36r0hgmipBRjntWFqFHKrrYFRODz0WnmDquVek88LInSzAY1xpS18/Thbff8IVc6ssefYNVFQQPWw==}
+  sherif-linux-x64@1.13.0:
+    resolution: {integrity: sha512-xGB9iiet8l/i8/YLZje8icpZyt4pVgoxB2+SoC6JCB8iDWsCVSuixebwX2t9yeGqXBXO1kphaW0TLf8Tmwy9JQ==}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
-  sherif-windows-arm64@1.9.0:
-    resolution: {integrity: sha512-lPqQXDB/95SJodtIbGAJc90O/KyxcunvKTycZqo+6RGjkOSYZB/XnRzm/tJ7If/6kz0/wcDP4uvkJmJxrxcj3A==}
+  sherif-windows-arm64@1.13.0:
+    resolution: {integrity: sha512-jHzJ/EcG4HuNLf/3AEDzbRkAofLPBHRJKJJMjAosampAe9861atu4q+Z2IZ1/sHg5oVnNgaNg/Xc5DDhGcQ/3w==}
     cpu: [arm64]
     os: [win32]
 
-  sherif-windows-x64@1.9.0:
-    resolution: {integrity: sha512-3cL+XVGLpmyLC3UOZYiPr4vY2OFBQqPZnCoCwoRKN+ONm8VfGMirO9iqI0OckgFBUtJoG4AQY/MWxoPhNmzD8A==}
+  sherif-windows-x64@1.13.0:
+    resolution: {integrity: sha512-KyMqQY62Eb3O+wePlw433mH2XBPVPLXdDjWPneg9pB6jeK0B1sgEzM2yks+aAP5asZ1Y8Q7C7iR7ZtbJKdsAtA==}
     cpu: [x64]
     os: [win32]
 
-  sherif@1.9.0:
-    resolution: {integrity: sha512-5n7zqPAjL+RzR7n09NPKpWBXmDCtuRpQzIL+ycj8pe6MayV7cDuFmceoyPQJ0c95oFj6feY7SZvhX/+S0i1ukg==}
+  sherif@1.13.0:
+    resolution: {integrity: sha512-Ld2nUOlwW1nmYDA2Q/5o7SC8WcCzVS7XjImmzW4a4z1o8DXJnt+2xYLvI42N5UYlNb/EevPahdC/XxIP6C38TQ==}
     hasBin: true
 
   side-channel@1.0.4:
@@ -3632,11 +3636,11 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  '@vitest/browser-preview@4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11)':
+  '@vitest/browser-preview@4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11(@types/node@24.13.3)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))':
     dependencies:
       '@testing-library/dom': 10.4.1
       '@testing-library/user-event': 14.6.1(@testing-library/dom@10.4.1)
-      '@vitest/browser': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11)
+      '@vitest/browser': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11(@types/node@24.13.3)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))
       vitest: 4.1.11(@types/node@24.13.3)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))
     transitivePeerDependencies:
       - bufferutil
@@ -3644,7 +3648,7 @@ snapshots:
       - utf-8-validate
       - vite
 
-  '@vitest/browser@4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11)':
+  '@vitest/browser@4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11(@types/node@24.13.3)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))':
     dependencies:
       '@blazediff/core': 1.9.1
       '@vitest/mocker': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))
@@ -4870,40 +4874,40 @@ snapshots:
 
   shebang-regex@1.0.0: {}
 
-  sherif-darwin-arm64@1.9.0:
+  sherif-darwin-arm64@1.13.0:
     optional: true
 
-  sherif-darwin-x64@1.9.0:
+  sherif-darwin-x64@1.13.0:
     optional: true
 
-  sherif-linux-arm64-musl@1.9.0:
+  sherif-linux-arm64-musl@1.13.0:
     optional: true
 
-  sherif-linux-arm64@1.9.0:
+  sherif-linux-arm64@1.13.0:
     optional: true
 
-  sherif-linux-x64-musl@1.9.0:
+  sherif-linux-x64-musl@1.13.0:
     optional: true
 
-  sherif-linux-x64@1.9.0:
+  sherif-linux-x64@1.13.0:
     optional: true
 
-  sherif-windows-arm64@1.9.0:
+  sherif-windows-arm64@1.13.0:
     optional: true
 
-  sherif-windows-x64@1.9.0:
+  sherif-windows-x64@1.13.0:
     optional: true
 
-  sherif@1.9.0:
+  sherif@1.13.0:
     optionalDependencies:
-      sherif-darwin-arm64: 1.9.0
-      sherif-darwin-x64: 1.9.0
-      sherif-linux-arm64: 1.9.0
-      sherif-linux-arm64-musl: 1.9.0
-      sherif-linux-x64: 1.9.0
-      sherif-linux-x64-musl: 1.9.0
-      sherif-windows-arm64: 1.9.0
-      sherif-windows-x64: 1.9.0
+      sherif-darwin-arm64: 1.13.0
+      sherif-darwin-x64: 1.13.0
+      sherif-linux-arm64: 1.13.0
+      sherif-linux-arm64-musl: 1.13.0
+      sherif-linux-x64: 1.13.0
+      sherif-linux-x64-musl: 1.13.0
+      sherif-windows-arm64: 1.13.0
+      sherif-windows-x64: 1.13.0
 
   side-channel@1.0.4:
     dependencies:
@@ -5137,8 +5141,8 @@ snapshots:
     dependencies:
       '@oxc-project/types': 0.146.0
       '@oxlint/plugins': 1.79.0
-      '@vitest/browser': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11)
-      '@vitest/browser-preview': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11)
+      '@vitest/browser': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11(@types/node@24.13.3)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))
+      '@vitest/browser-preview': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11(@types/node@24.13.3)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))
       '@vitest/expect': 4.1.11
       '@vitest/mocker': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))
       '@vitest/pretty-format': 4.1.11
@@ -5215,7 +5219,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.13.3
-      '@vitest/browser-preview': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11)
+      '@vitest/browser-preview': 4.1.11(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2))(vitest@4.1.11(@types/node@24.13.3)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.6.1)(typescript@7.0.2)))
     transitivePeerDependencies:
       - msw
 

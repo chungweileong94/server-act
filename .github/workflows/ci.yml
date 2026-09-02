@@ -18,7 +18,6 @@ jobs:
       - name: Setup Vite Plus
         uses: voidzero-dev/setup-vp@v1.17.0
         with:
-          node-version-file: ".node-version"
           cache: true
 
       - name: Sherif
