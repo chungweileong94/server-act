@@ -1,0 +1,16 @@
+@import "@fontsource/inter/latin-400.css";
+@import "tailwindcss";
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
