@@ -273,23 +273,32 @@ describe("middleware", () => {
 
   describe("action wrapping", () => {
     test("should measure overall action execution time", async () => {
-      let duration = 0;
+      vi.useFakeTimers();
 
-      const action = serverAct
-        .use(async ({ next }) => {
-          const start = Date.now();
-          const result = await next({ ctx: { timed: true } });
-          duration = Date.now() - start;
-          return result;
-        })
-        .action(async ({ ctx }) => {
-          expect(ctx.timed).toBe(true);
-          await new Promise((resolve) => setTimeout(resolve, 10));
-          return "done";
-        });
+      try {
+        let duration = 0;
 
-      await expect(action()).resolves.toBe("done");
-      expect(duration).toBeGreaterThanOrEqual(10);
+        const action = serverAct
+          .use(async ({ next }) => {
+            const start = Date.now();
+            const result = await next({ ctx: { timed: true } });
+            duration = Date.now() - start;
+            return result;
+          })
+          .action(async ({ ctx }) => {
+            expect(ctx.timed).toBe(true);
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            return "done";
+          });
+
+        const result = action();
+        await vi.advanceTimersByTimeAsync(10);
+
+        await expect(result).resolves.toBe("done");
+        expect(duration).toBe(10);
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     test("should allow middleware to observe action errors", async () => {
