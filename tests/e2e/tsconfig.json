@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "strict": true,
+    "types": ["node"]
+  },
+  "include": ["playwright.config.ts", "specs"]
+}

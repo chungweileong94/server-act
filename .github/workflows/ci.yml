@@ -31,3 +31,31 @@ jobs:
 
       - name: Test
         run: vp run -r test
+
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Vite Plus
+        uses: voidzero-dev/setup-vp@v1.17.0
+        with:
+          cache: true
+
+      - name: Install Playwright Chromium
+        run: vp exec --filter @tests/e2e -- playwright install --with-deps chromium
+
+      - name: Test E2E
+        run: vp run test:e2e
+
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/e2e/playwright-report
+            tests/e2e/test-results
+          if-no-files-found: ignore
