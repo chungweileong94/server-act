@@ -1,0 +1,33 @@
+{
+  "name": "@examples/react-router",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "react-router dev",
+    "build": "react-router build",
+    "start": "react-router-serve build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@react-router/serve": "^8",
+    "@remix-run/node-fetch-server": "0.13.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router": "^8",
+    "server-act": "workspace:*",
+    "zod": "^4.0.10"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^8",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/node": "^24",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@vitejs/plugin-rsc": "~0.5.27",
+    "tailwindcss": "4.1.18",
+    "typescript": "7.0.2",
+    "vite": "catalog:"
+  }
+}
